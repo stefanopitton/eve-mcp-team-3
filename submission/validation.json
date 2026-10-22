@@ -1,7 +1,7 @@
 {
   "schema_version": "0.4.0",
   "official_registry_structural_checks_passed": true,
-  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 77\n  Servers touched: eo-spatial-split-planner\n\n",
+  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 78\n  Servers touched: eo-spatial-split-planner\n\n",
   "stderr": "",
   "recorded_validation": {
     "schema_version": "0.4.0",
@@ -142,7 +142,20 @@
       },
       "selected_seed": 10,
       "minimum_footprint_gap_lower_bound_m": 1508.725813299806,
-      "rare_class_caveat": "Water has only 4 validation and 42 test reference pixels; one split with weak WorldCover labels does not establish an accuracy benefit."
+      "rare_class_caveat": "Water has only 4 validation and 42 test reference pixels; one split with weak WorldCover labels does not establish an accuracy benefit.",
+      "classification_maps": {
+        "status": "rendered_and_embedded_in_both_notebooks",
+        "artifact": "segmentation_benchmark/cnn_classification_maps.png",
+        "conditions": [
+          "without_buffer",
+          "with_buffer",
+          "size_matched_without_buffer"
+        ],
+        "evaluated_pixels": 142675,
+        "support": "Identical held-out test pixels, plotted over the full scene extent; gray is outside this evaluation view.",
+        "verification": "Confusion matrices and mean IoU recomputed from displayed predictions match all three saved test results exactly.",
+        "model_retrained": false
+      }
     },
     "gis_mcp": {
       "status": "contract_reviewed_not_configured_or_live_tested",
@@ -150,10 +163,10 @@
     },
     "notebook_execution": {
       "status": "passed",
-      "START_HERE_added_summary_code_cells": 6,
+      "START_HERE_added_summary_code_cells": 7,
       "START_HERE_original_cells_preserved_exactly": 17,
       "START_HERE_original_tutorial_cells_execution": "not rerun; original cells and outputs preserved",
-      "EO_SPATIAL_SPLIT_PLANNER_code_cells": 13,
+      "EO_SPATIAL_SPLIT_PLANNER_code_cells": 14,
       "protected_template_commit": "f38353aaa6b26e7e7c7f3d576b9917adcc0c2caa",
       "agent_trace": "Current real EVE trace rendered with show_trace in both notebooks; START preserves original Running the agent section unchanged."
     },

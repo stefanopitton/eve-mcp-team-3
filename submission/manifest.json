@@ -181,6 +181,11 @@
       "sha256": "90c8b6d672c1fd5865c6b494bd844ac64ac07bf39e7f2627395cc37cdf0cfd55"
     },
     {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/cnn_classification_maps.png",
+      "bytes": 184342,
+      "sha256": "09ccb380dfa4d2538fc970f95e639b65697c031fb3bea0275ce1035bec6b9ca7"
+    },
+    {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/buffered/normalization_params.json",
       "bytes": 1553,
       "sha256": "070183c90fb264560f60f62a0ef3a35e1cfbd753c1e9b758fa88caebc2776f70"
@@ -302,8 +307,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/validation_summary.json",
-      "bytes": 8122,
-      "sha256": "ba80e532847e160447ce10e7d432f53db0128bb0ec864b9fe053c274575c951a"
+      "bytes": 8737,
+      "sha256": "f07a0f0ea001ba616f9ace01ab6b880a40728c45523b59d714d0d3847bd72c78"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/variogram_report.json",
@@ -407,13 +412,13 @@
     },
     {
       "path": "START_HERE.ipynb",
-      "bytes": 708275,
-      "sha256": "90dcc9406f1af8e379fbb2be64d103a8da81528a11d8df925f6459504d98f3ef"
+      "bytes": 955335,
+      "sha256": "226d92ead11b2405c2590580eb17b25e465e28a29ec1e45ffc93adcdff00ed72"
     },
     {
       "path": "EO_SPATIAL_SPLIT_PLANNER.ipynb",
-      "bytes": 3399917,
-      "sha256": "57e5954a897b281f3061dbd271c7c57f011612f6c370387ebe5b98bf52d0880f"
+      "bytes": 3650571,
+      "sha256": "a634ea9b13349b89a50338aa13d53f34289c86a1c1016a9c3e95e5dc43fe9fce"
     },
     {
       "path": "EVE_PROMPT_AND_OUTPUT.md",
@@ -428,8 +433,8 @@
   ],
   "archive": {
     "path": "EO_Spatial_Split_Planner_submission.zip",
-    "bytes": 27903646,
-    "sha256": "bdde52ff806207431921ecc7c1e4cb553e49e5375695ea5d53869e4e46450a9c"
+    "bytes": 28431821,
+    "sha256": "d0608f06fa83618bc219e403c4dcb9f5f608ef8bec760950f9b7450e25afb62f"
   },
   "group_assignment": "compact_regions",
   "buffer_policy": "one_sided",
