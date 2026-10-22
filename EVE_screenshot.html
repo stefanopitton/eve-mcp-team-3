@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><title>EVE natural-language run</title>
+    <style>
+      *{box-sizing:border-box}html,body{margin:0;width:1600px;height:900px;overflow:hidden}
+      body{background:#f1f5f9;color:#172c42;font-family:Arial,Helvetica,sans-serif}
+      main{width:1600px;height:900px;padding:32px 48px;background:linear-gradient(115deg,#f9fbfd,#edf3f8)}
+      .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+      .brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:25px;letter-spacing:.05em}
+      .mark{display:grid;place-items:center;width:40px;height:40px;border-radius:11px;background:#123e51;color:#fff;font-size:21px}
+      .badge{border:1px solid #becfda;background:#fff;border-radius:20px;padding:9px 15px;font-size:12px;color:#4d6a7b;letter-spacing:.1em}
+      h1{font-size:38px;letter-spacing:-.8px;margin:0 0 8px;line-height:1.1}
+      .subtitle{font-size:17px;color:#526b7f;margin-bottom:18px}
+      .questions{padding:14px 19px;border:1px solid #d1dfe8;border-left:5px solid #246c86;border-radius:12px;background:#fff;margin-bottom:18px}
+      .label{font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.1em;color:#547185;margin-bottom:9px}
+      .question{display:flex;gap:12px;font-size:19px;line-height:1.38;margin-top:10px}.question b{color:#23647c;font-size:14px;padding-top:3px}
+      .grid{display:grid;grid-template-columns:1.02fr 1fr;gap:22px}
+      .section{font-size:12px;color:#547185;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin:0 0 10px 3px}
+      .tool,.answer{background:#fff;border:1px solid #d1dfe8;border-radius:12px;padding:17px 20px;margin-bottom:12px;box-shadow:0 3px 8px #183e5010}
+      .tool-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+      .tool-head b{font-size:18px}.time{font-size:12px;color:#6e8597}.tool-name{font:14px monospace;color:#29637c;display:block;margin:0 0 12px}
+      .result{font-size:23px;letter-spacing:-.3px;color:#193f51;font-weight:700;line-height:1.2}
+      .detail{font-size:14px;color:#617a8f;margin-top:7px;line-height:1.4}
+      .answer p{font-size:19px;line-height:1.4;margin:0;color:#273e53;white-space:pre-line}
+      .edge{background:#eef6f6;border-left:3px solid #407b80;border-radius:0 8px 8px 0;padding:12px 15px;font-size:14px;color:#365c67;line-height:1.4}
+      .edge .label{color:#356671;margin-bottom:6px}.note{font-size:12px;color:#6f8394;line-height:1.4;margin:8px 3px 0}
+      footer{position:absolute;left:48px;right:48px;bottom:22px;border-top:1px solid #d0dce6;padding-top:11px;font-size:12px;color:#637c8e;display:flex;justify-content:space-between;gap:32px;line-height:1.4}
+      .footnote{max-width:1120px}.source{text-align:right;white-space:nowrap}
+    </style></head><body><main>
+    <div class="top"><div class="brand"><span class="mark">E</span>EVE</div>
+    <div class="badge">RECORDED LIVE RUN · 22 OCT 2026</div></div>
+    <h1>Natural questions. EVE chooses the tools.</h1>
+    <div class="subtitle">Berlin · Sentinel-2 imagery from 2021 · Preparing data for land-cover mapping</div>
+    <div class="questions"><div class="label">Actual human-language questions · complete user messages</div><div class="question"><b>Q1</b><span>I&#x27;m using this 2021 Sentinel-2 image of Berlin to map land cover. Are areas 2.56 km apart still similar, or is that enough separation for training and testing?</span></div><div class="question"><b>Q2</b><span>Could you split the image into training, validation and test areas, using roughly 70%, 10% and 20%? Choose a sensible gap between them and keep as much usable data as possible.</span></div></div>
+    <div class="grid"><section><div class="section">Tool calls selected by EVE</div>
+    <article class="tool"><div class="tool-head"><b>Q1 · Check spatial similarity</b><span class="time">0.48 s</span></div>
+    <span class="tool-name">evaluate_spatial_autocorrelation</span>
+    <div class="result">ρ = 0.042 at 2.56 km</div>
+    <div class="detail">Fitted range 521.49 m · lag passes the spectral criteria</div></article>
+    <article class="tool"><div class="tool-head"><b>Q2 · Plan the dataset regions</b><span class="time">0.67 s</span></div>
+    <span class="tool-name">plan_spatial_split</span>
+    <div class="result">1.30 km guard · 78.2% usable pixels retained</div>
+    <div class="detail">Requested 70/10/20 assignment groups · compact regions · selected seed 10</div></article>
+    <div class="edge"><div class="label">Missing-file question · actual EVE response</div>I cannot check missing_berlin_image.tif because it is not available in the workspace.</div>
+    </section><section><div class="section">Recorded answers</div><div class="answer"><div class="label">EVE reply · Q1 · exact excerpt</div><p>The 2.56 km lag is sufficient for separation: ρ = 0.042 at 2560 m, below the 0.1 threshold, and the lag exceeds the practical range of 521 m. The fit is resolved with a sill of 0.00180, nugget 0.00048, and RSS 4.26×10⁻⁷. The recommended guard is 1298 m.</p></div><div class="answer"><div class="label">EVE reply · Q2 · exact excerpt</div><p>The split plan retains 77.2% of valid pixels (415,175 of 537,876) with a 1298 m guard. Realized fractions are 55.8% train, 9.7% validation, and 34.4% test. The minimum footprint gap between splits is 1509 m.</p></div>
+    <div class="note">[…] marks omitted text. Full questions, answers and tool traces are preserved in the notebook.</div>
+    </section></div>
+    <footer><div class="footnote">Recorded notebook evidence, not a capture of the EVE website. Tool results are excerpted.
+    Buffering changes retained-pixel shares; low single-band correlation and geometric separation do not prove independence or improved accuracy.</div>
+    <div class="source">jsc/alias-eve<br>13:36 UTC</div></footer>
+    </main></body></html>
