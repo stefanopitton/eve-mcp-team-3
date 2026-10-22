@@ -92,7 +92,7 @@ def _publish(values: np.ndarray, profile: dict, provenance: dict, report: dict,
         with rasterio.open(candidate_path, "w", **output_profile) as dst:
             dst.write(candidate_split_mask, 1)
             dst.update_tags(labels="0=outside_or_invalid,1=train,2=validation,3=test",
-                            description="Quality-filtered candidates before any symmetric buffer; heldout support differs")
+                            description="Every quality-eligible candidate patch before cross-split buffering")
         artifacts["candidate_split_mask"] = str(candidate_path)
     if "patches" in report:
         patch_path = directory / "patches.json"
@@ -100,7 +100,7 @@ def _publish(values: np.ndarray, profile: dict, provenance: dict, report: dict,
         artifacts["patch_manifest"] = str(patch_path)
     report.update(artifacts=artifacts, run_fingerprint=run_id)
     report_path.write_text(json.dumps(report, indent=2, allow_nan=False))
-    compact = {k: v for k, v in report.items() if k not in {"sq_diff_sum", "patches", "patch_label_grid", "keep_mask", "seed_diagnostics", "buffer_keep_mask", "quality_keep_mask", "candidate_keep_mask", "buffer_removed_mask"}}
+    compact = {k: v for k, v in report.items() if k not in {"sq_diff_sum", "patches", "patch_label_grid", "keep_mask", "seed_diagnostics", "buffer_keep_mask", "quality_keep_mask", "candidate_keep_mask", "buffer_removed_mask", "block_windows"}}
     if "seed_search" in compact:
         compact["seed_search"] = {key: value for key, value in compact["seed_search"].items() if key != "candidates"}
     if "autocorrelation" in compact:
@@ -116,7 +116,8 @@ def _evaluate(values, profile, provenance, lag_m, parameters, band=None):
 
 def _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
           patch_size_pixels=None, n_patches=None, patch_layout="reference_blocks",
-          block_size_pixels=None, seed_candidates=200, max_nan_fraction=0.5, edge_policy="extend"):
+          block_size_pixels=None, seed_candidates=200, max_nan_fraction=0.5, edge_policy="extend",
+          group_assignment="compact_regions", buffer_policy="one_sided"):
     params = parameters.copy()
     params["n_lags"] = params.pop("n_bins")
     params["max_pairs_per_lag"] = params.pop("n_pairs_per_lag")
@@ -126,7 +127,8 @@ def _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, l
                                   lag_m=lag_m, patch_size_pixels=patch_size_pixels,
                                   n_patches=n_patches, patch_layout=patch_layout,
                                   block_size_pixels=block_size_pixels, seed_candidates=seed_candidates,
-                                  max_nan_fraction=max_nan_fraction, edge_policy=edge_policy, **params)
+                                  max_nan_fraction=max_nan_fraction, edge_policy=edge_policy,
+                                  group_assignment=group_assignment, buffer_policy=buffer_policy, **params)
     return _publish(values, profile, provenance, result["report"], result["split_mask"],
                     result["unbuffered_split_mask"], result.get("candidate_split_mask"))
 
@@ -207,6 +209,7 @@ def plan_sentinel2_split(
     patch_size_pixels: int | list[int] | None = None, n_patches: int | None = None,
     patch_layout: str = "reference_blocks", block_size_pixels: int | list[int] | None = None,
     seed_candidates: int = 200, max_nan_fraction: float = 0.5, edge_policy: str = "extend",
+    group_assignment: str = "compact_regions", buffer_policy: str = "one_sided",
 ) -> dict:
     """Plan two-dimensional train/validation/test patches using the checkpoint workflow.
 
@@ -214,24 +217,29 @@ def plan_sentinel2_split(
     [train,validation,test], defaults to [0.7,0.1,0.2], must be positive and sum
     to one. Requested fractions allocate whole blocks; report realized counts
     after rounding, quality filtering and buffers. patch_layout='reference_blocks'
-    follows scripts/04_extract_patches.py: shuffle 2D block labels, tile each
-    block into patch_size_pixels [height,width] rectangles, and erode every
-    split interface symmetrically by ceil(buffer / patch span) patches per axis.
+    adapts scripts/04_extract_patches.py: tile all blocks into small rectangular
+    patches. group_assignment='compact_regions' clusters the randomized groups
+    into contiguous split regions to reduce wasted guard interfaces.
+    buffer_policy='one_sided' retains test, then validation, then training;
+    lower-priority whole patches are excluded only if too close to another split.
+    Candidate seeds maximize retained valid pixels subject to nonempty splits.
+    Explicit random_groups plus symmetric policy reproduces the older reference
+    assignment/buffering; it can discard much more data.
     Only a nearby quality-eligible patch from a DIFFERENT split triggers removal;
     same-split seams, AOI edges, nodata and quality-rejected regions do not.
     block_size_pixels must be a multiple of patch size. edge_policy='extend'
     keeps the full AOI by extending the last blocks and clipping terminal patches.
     There is no exterior buffer or cropped bottom/right strip. 'crop' is an explicit
-    reference-compatibility option only. seed_candidates ranks seeds 0..N-1 by minimum
-    retained split count, without labels or accuracy-based selection. Class
+    reference-compatibility option only. seed_candidates ranks seeds 0..N-1 by
+    total retained valid pixels with all splits nonempty, without accuracy-based selection. Class
     coverage is unverified because this tool receives a continuous raster.
     max_nan_fraction filters patch validity. n_patches must be omitted for this
     dense mode. patch_layout='random_rectangles' retains the sparse jittered
     alternative with n_patches and priority-based whole-patch removal.
     buffer_m=None measures a guard using the variogram; an explicit guard has
-    its own dependence decision. Symmetric erosion can exceed the requested
-    gap. Paired masks restore training patches only and fix buffered heldouts,
-    so the baseline can already have a one-sided guard. candidate_split_mask
+    its own dependence decision. Whole-patch exclusion can exceed the requested
+    gap. Paired masks restore training patches only and fix buffered heldouts.
+    candidate_split_mask
     shows all quality-filtered patches without any buffer, with other heldouts.
     Returns requested/realized fractions, masks, records and measured distances.
     """
@@ -240,7 +248,7 @@ def plan_sentinel2_split(
         values, profile, provenance = read_sentinel2(bbox, start_date, end_date, band, item_id, max_cloud_cover)
         return _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
                      patch_size_pixels, n_patches, patch_layout, block_size_pixels,
-                     seed_candidates, max_nan_fraction, edge_policy)
+                     seed_candidates, max_nan_fraction, edge_policy, group_assignment, buffer_policy)
     except Exception as exc:
         return _error(exc)
 
@@ -255,17 +263,20 @@ def plan_spatial_split(
     patch_size_pixels: int | list[int] | None = None, n_patches: int | None = None,
     patch_layout: str = "reference_blocks", block_size_pixels: int | list[int] | None = None,
     seed_candidates: int = 200, max_nan_fraction: float = 0.5, edge_policy: str = "extend",
+    group_assignment: str = "compact_regions", buffer_policy: str = "one_sided",
 ) -> dict:
     """Plan local EO patches with configurable fractions, default [0.7,0.1,0.2].
 
     Raster requirements match evaluate_spatial_autocorrelation. patch_layout
-    defaults to 'reference_blocks': randomized blocks in both axes, fixed
-    rectangular patch tiles and symmetric whole-patch erosion only near OTHER
-    active splits, following checkpoint script04. Same-split seams, AOI edges,
+    defaults to 'reference_blocks': fixed rectangular patch tiles in randomized
+    compact split regions in both axes. One-sided exact-footprint guards retain
+    test, then validation, then train; only OTHER active splits trigger exclusion.
+    Explicit random_groups/symmetric reproduces checkpoint script04 buffering.
+    Same-split seams, AOI edges,
     nodata and quality-rejected regions do not trigger buffering. block_size_pixels must be divisible by patch_size_pixels.
     edge_policy='extend' keeps full AOI coverage, extends terminal blocks and
     clips terminal patches; it creates no outside buffer. 'crop' is opt-in. seed_candidates ranks
-    seeds0..N-1 by minimum retained patch count, without class labels; report
+    seeds0..N-1 by total retained valid pixels with nonempty splits, without class labels; report
     class coverage remains unverified. max_nan_fraction excludes poor patches.
     See plan_sentinel2_split for full semantics, including rounded block counts,
     requested versus realized fractions, paired fixed heldouts and the raw
@@ -277,7 +288,7 @@ def plan_spatial_split(
         values, profile, provenance = read_local(raster_path, band_index)
         return _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
                      patch_size_pixels, n_patches, patch_layout, block_size_pixels,
-                     seed_candidates, max_nan_fraction, edge_policy)
+                     seed_candidates, max_nan_fraction, edge_policy, group_assignment, buffer_policy)
     except Exception as exc:
         return _error(exc)
 

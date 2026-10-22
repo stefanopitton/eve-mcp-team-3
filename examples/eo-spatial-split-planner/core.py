@@ -472,14 +472,17 @@ def create_spatial_split(
     class_labels=None,
     require_class_coverage: bool = False,
     edge_policy: str = "extend",
+    group_assignment: str = "compact_regions",
+    buffer_policy: str = "one_sided",
 ):
     """Sample random 2-D rectangle patches, buffer them, and verify separation.
 
     Mask codes: 0 = invalid/discarded, 1 = train, 2 = validation, 3 = test.
     The default random_rectangles layout samples sparse jittered rectangles
     with test > validation > train priority. The reference_blocks layout
-    follows the pinned extraction workflow: shuffle whole blocks, tile dense
-    patches inside them, and symmetrically drop patches near unlike boundaries.
+    tiles dense patches inside compact seeded groups, retaining whole patches
+    with an exact one-sided buffer. The upstream random_groups/symmetric
+    settings remain available for reference parity.
     Terminal grid patches clip to the AOI edge when edge_policy='extend'; the
     last existing blocks absorb those edges. Missing pixels remain excluded.
 
@@ -489,7 +492,7 @@ def create_spatial_split(
     geometry and initial assignments depend only on the supplied seed. Reference
     block mode selects a seed using geometric retention and optional categorical
     class coverage; no model score participates in selection. Its paired
-    baseline still inherits the heldout side of the symmetric buffer.
+    baseline shares the same heldout rectangles under the selected policy.
     The legacy random_split_mask is an additional pixel-shuffled diagnostic.
     """
     data, valid = _grid(values, valid_mask, pixel_size_m)
@@ -531,6 +534,7 @@ def create_spatial_split(
             max_nan_fraction=max_nan_fraction, class_labels=class_labels,
             require_class_coverage=require_class_coverage, patch_radius_m=patch_radius_m,
             edge_policy=edge_policy,
+            group_assignment=group_assignment, buffer_policy=buffer_policy,
         )
         patches, dimensions = planned["patches"], planned["patch_size_pixels"]
         valid, layout_metadata = planned["valid_mask"], planned["metadata"]
@@ -615,8 +619,12 @@ def create_spatial_split(
     if buffer_m < (autocorrelation["recommended_buffer_m"] or 0):
         warnings.append("The supplied buffer is smaller than the exploratory data-derived recommendation.")
     if patch_layout == "reference_blocks":
-        warnings.append("Blocks are randomly assigned across a two-dimensional grid; whole patches are removed symmetrically only near a different active split. AOI edges, nodata/quality exclusions, and seams within the same split do not create buffers. Quantization and both-sided removal can produce a gap larger than requested.")
-        warnings.append("The paired training comparison keeps buffered validation/test patches fixed. Its restored-training baseline still inherits the heldout side of the symmetric buffer; inspect its actual separation rather than assuming it fails the requested guard.")
+        if buffer_policy == "one_sided":
+            warnings.append("Whole patches are removed only when their complete footprint is too close to a retained higher-priority split (test, then validation, then train). Compact group selection maximizes retained quality pixels subject to split/class coverage; no model score is used.")
+        else:
+            warnings.append("Whole patches are removed symmetrically only near a different active split; quantization and both-sided removal can produce a gap larger than requested.")
+            warnings.append("The paired restored-training baseline still inherits the heldout side of the symmetric buffer; inspect its actual separation rather than assuming it fails the requested guard.")
+        warnings.append("AOI edges, nodata/quality exclusions, and seams within the same split do not create buffers.")
         if class_labels is not None:
             warnings.append("Optional class labels affect patch quality and seed coverage only; the continuous-field variogram is computed independently before label filtering.")
     else:
@@ -655,11 +663,14 @@ def create_spatial_split(
         name: report["patch_counts"][name]["unbuffered"] / sum(p["unbuffered_retained"] for p in patches)
         for name in SPLIT_NAMES.values()}
     if patch_layout == "reference_blocks":
-        report["method"] = "reference block-assigned rectangular patch grid with symmetric whole-patch buffers"
+        report["method"] = ("compact block-assigned rectangular patch grid with one-sided exact-footprint buffers"
+                            if buffer_policy == "one_sided" else
+                            "reference block-assigned rectangular patch grid with symmetric whole-patch buffers")
         report["seed"] = layout_metadata["selected_seed"]
         report["autocorrelation_seed"] = int(seed)
-        report["buffer_priority"] = []
-        report["paired_comparison"] = "Restore quality-eligible training patches only; share identical symmetrically buffered validation/test patches. The baseline retains the heldout side of the buffer and may already meet the requested gap."
+        report["paired_comparison"] = ("Restore quality-eligible training patches only; share identical retained validation/test patches. Compare the measured training-to-heldout gap under both conditions."
+                                       if buffer_policy == "one_sided" else
+                                       "Restore quality-eligible training patches only; share identical symmetrically buffered validation/test patches. The baseline retains the heldout side of the buffer and may already meet the requested gap.")
         report["candidate_grid"] = _split_stats(candidate_labels, int(valid.sum()))
     return {"split_mask": labels, "unbuffered_split_mask": unbuffered_labels,
             "candidate_split_mask": candidate_labels,

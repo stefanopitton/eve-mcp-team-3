@@ -59,7 +59,8 @@ def validate_patch_reference(reference_root):
         np.ones(labels.shape, dtype=bool), pixel_size_m=10, buffer_m=1,
         split_ratios=(0.7, 0.1, 0.2), patch_size_pixels=10,
         block_size_pixels=60, seed_candidates=200, max_nan_fraction=0.5,
-        class_labels=labels, require_class_coverage=True)
+        class_labels=labels, require_class_coverage=True,
+        group_assignment="random_groups", buffer_policy="symmetric")
     metadata = actual_plan["metadata"]
     assert metadata["selected_seed"] == expected_seed
     np.testing.assert_array_equal(np.asarray(metadata["block_labels"]), expected_blocks + 1)

@@ -20,7 +20,8 @@ SPEC.loader.exec_module(core)
 
 def _plan(valid=None, **overrides):
     arguments = dict(pixel_size_m=10, buffer_m=30, patch_size_pixels=(4, 5),
-                     block_size_pixels=(32, 40), seed_candidates=20, edge_policy="crop")
+                     block_size_pixels=(32, 40), seed_candidates=20, edge_policy="crop",
+                     group_assignment="random_groups", buffer_policy="symmetric")
     arguments.update(overrides)
     return blocks.plan_reference_blocks(np.ones((98, 142), bool) if valid is None else valid,
                                        **arguments)
@@ -140,7 +141,8 @@ def test_rectangular_radii_and_primary_demo_grid_are_feasible():
     planned = blocks.plan_reference_blocks(np.ones((850, 699), bool),
                                            pixel_size_m=20, buffer_m=1298,
                                            patch_size_pixels=(32, 40), block_size_pixels=(256, 320),
-                                           seed_candidates=20, edge_policy="crop")
+                                           seed_candidates=20, edge_policy="crop",
+                                           group_assignment="random_groups", buffer_policy="symmetric")
     meta = planned["metadata"]
     assert meta["buffer_radius_patches"] == [3, 2]
     assert meta["reference_buffer_radius_patches"] == [3, 2]
@@ -222,7 +224,8 @@ def test_core_grid_masks_preserve_whole_patches_and_identical_paired_holdouts():
         field, pixel_size_m=10, buffer_m=30, patch_layout="reference_blocks",
         patch_size_pixels=(4, 5), block_size_pixels=(32, 40), seed_candidates=20,
         class_labels=labels, require_class_coverage=True,
-        max_pairs_per_lag=100, max_lag_m=200, edge_policy="crop")
+        max_pairs_per_lag=100, max_lag_m=200, edge_policy="crop",
+        group_assignment="random_groups", buffer_policy="symmetric")
     actual, paired, candidate = (plan[key] for key in
                                  ("split_mask", "unbuffered_split_mask", "candidate_split_mask"))
     report = plan["report"]
@@ -302,7 +305,8 @@ def test_clipped_terminal_patch_quality_uses_actual_area_and_never_external_padd
 
 def test_divisible_fully_valid_extension_matches_crop_and_upstream_geometry_exactly():
     arguments = dict(pixel_size_m=10, buffer_m=30, patch_size_pixels=(4, 5),
-                     block_size_pixels=(32, 40), seed_candidates=20)
+                     block_size_pixels=(32, 40), seed_candidates=20,
+                     group_assignment="random_groups", buffer_policy="symmetric")
     valid = np.ones((96, 120), bool)
     extended = blocks.plan_reference_blocks(valid, **arguments)
     cropped = blocks.plan_reference_blocks(valid, edge_policy="crop", **arguments)
@@ -327,6 +331,8 @@ def test_divisible_fully_valid_extension_matches_crop_and_upstream_geometry_exac
     ({"split_ratios": (0.8, 0.2, 0)}, "split_ratios"),
     ({"buffer_m": 1e9}, "too small"),
     ({"edge_policy": "pad"}, "edge_policy"),
+    ({"group_assignment": "stripe"}, "group_assignment"),
+    ({"buffer_policy": "all_edges"}, "buffer_policy"),
 ])
 def test_invalid_block_grid_configuration_has_actionable_errors(overrides, match):
     with pytest.raises(ValueError, match=match):
@@ -353,6 +359,51 @@ def test_patch_radius_extra_footprints_still_pass_exact_global_geometry_check():
     plan = core.create_spatial_split(field, pixel_size_m=10, buffer_m=1,
                                      patch_radius_m=45, patch_layout="reference_blocks",
                                      patch_size_pixels=(4, 5), block_size_pixels=(32, 40),
-                                     seed_candidates=20, max_pairs_per_lag=50, max_lag_m=100)
+                                     seed_candidates=20, max_pairs_per_lag=50, max_lag_m=100,
+                                     group_assignment="random_groups", buffer_policy="symmetric")
     assert plan["report"]["spatial_diagnostics"]["requested_buffer_met"] is True
     assert plan["report"]["buffer_radius_patches"] == [2, 2]
+
+
+def test_compact_groups_preserve_exact_counts_and_connected_two_dimensional_holdouts():
+    from scipy.ndimage import label
+    groups = blocks.assign_compact_blocks(10, (8, 5))
+    assert {code: int(np.count_nonzero(groups == code)) for code in (1, 2, 3)} == {1: 28, 2: 4, 3: 8}
+    for code in (2, 3):
+        assert label(groups == code)[1] == 1
+        coordinates = np.argwhere(groups == code)
+        assert len(np.unique(coordinates[:, 0])) > 1
+        assert len(np.unique(coordinates[:, 1])) > 1
+    np.testing.assert_array_equal(groups, blocks.assign_compact_blocks(10, (8, 5)))
+
+
+def test_compact_seed_search_maximizes_retained_pixels_subject_to_coverage():
+    labels = (np.indices((98, 142)).sum(0) % 3).astype(np.int16)
+    planned = _plan(group_assignment="compact_regions", buffer_policy="one_sided",
+                    class_labels=labels, require_class_coverage=True)
+    metadata = planned["metadata"]
+    eligible = [candidate for candidate in metadata["seed_search"]["candidates"] if candidate["eligible"]]
+    expected = max(candidate["retained_quality_pixel_count"] for candidate in eligible)
+    assert metadata["retention_budget"]["retained_quality_pixel_count"] == expected
+    assert metadata["class_coverage_complete"] is True
+    assert metadata["seed_search"]["score"] == "retained_quality_pixel_count"
+
+
+def test_one_sided_default_retains_test_and_verifies_complete_footprint_guard():
+    field = np.random.default_rng(3).normal(size=(192, 240))
+    labels = (np.indices(field.shape).sum(0) % 3).astype(np.int16)
+    plan = core.create_spatial_split(field, pixel_size_m=10, buffer_m=130,
+                                     patch_layout="reference_blocks", patch_size_pixels=(8, 10),
+                                     block_size_pixels=(24, 30), seed_candidates=20,
+                                     class_labels=labels, require_class_coverage=True,
+                                     max_pairs_per_lag=50, max_lag_m=300)
+    report = plan["report"]
+    assert report["group_assignment"] == "compact_regions"
+    assert report["buffer_policy"] == "one_sided"
+    assert report["buffer_priority"] == ["test", "validation", "train"]
+    assert report["spatial_diagnostics"]["requested_buffer_met"] is True
+    np.testing.assert_array_equal(plan["candidate_split_mask"] == 3, plan["split_mask"] == 3)
+    for code in (2, 3):
+        np.testing.assert_array_equal(plan["unbuffered_split_mask"] == code, plan["split_mask"] == code)
+    assert report["retention_budget"]["retained_fraction_of_quality_candidates"] > 0.65
+    assert report["retention_budget"]["retained_quality_pixel_count"] + report["retention_budget"]["buffer_removed_quality_pixel_count"] == field.size

@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/eo-spatial-split-planner.yml
       - scripts/validate_demo_notebooks.py
+      - scripts/start_here_template.json
       - START_HERE.ipynb
       - EO_SPATIAL_SPLIT_PLANNER.ipynb
       - examples/eo-spatial-split-planner/**
@@ -13,6 +14,7 @@ on:
     paths:
       - .github/workflows/eo-spatial-split-planner.yml
       - scripts/validate_demo_notebooks.py
+      - scripts/start_here_template.json
       - START_HERE.ipynb
       - EO_SPATIAL_SPLIT_PLANNER.ipynb
       - examples/eo-spatial-split-planner/**

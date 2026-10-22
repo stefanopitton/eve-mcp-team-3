@@ -180,17 +180,18 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
         "Then call plan_spatial_split with raster_path equal to the evaluator's "
         "artifacts.analysis_band path, band_index=1, buffer_m=null (or omit buffer_m for automatic guard), lag_m=2560, "
         "seed=3, patch_layout='reference_blocks', patch_size_pixels=[32,40], "
-        "block_size_pixels=[96,120], edge_policy='extend', seed_candidates=200, and "
-        "split_ratios=[0.7,0.1,0.2]. Omit n_patches. Randomize whole blocks "
-        "in both spatial directions and extract fixed rectangular patches, "
-        "following the checkpoint scripts/04_extract_patches.py workflow. "
+        "block_size_pixels=[96,120], edge_policy='extend', seed_candidates=200, "
+        "group_assignment='compact_regions', buffer_policy='one_sided', and "
+        "split_ratios=[0.7,0.1,0.2]. Omit n_patches. Use seeded compact split "
+        "regions in both spatial directions and extract fixed rectangular patches, "
+        "adapting the checkpoint scripts/04_extract_patches.py workflow. "
         "Report requested versus realized fractions and the ranked seed selection. "
         "Class coverage remains unverified because no categorical labels are "
         "provided to this MCP call; never claim all classes occur in every split. "
         "Report the paired "
         "unbuffered mask with exactly the same validation/test rectangles and "
-        "restored training rectangles; the heldout side of the symmetric "
-        "buffer remains and this baseline may already meet the requested gap. "
+        "restored training rectangles. Guards retain test, then validation, "
+        "then training, and exclude only conflicting lower-priority patches. "
         "The candidate mask has every quality-eligible patch before buffering "
         "and different heldout support. This is a geometric demonstration of the requested gap, "
         "including when the scientific lag decision rejects it. Report an "
@@ -306,12 +307,15 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
     assert planner_report["seed_search"]["stop_exclusive"] == 200
     assert planner_report["requested_buffer_m"] == planner_report["recommended_buffer_m"]
     assert planner_report["edge_policy"] == "extend"
+    assert planner_report["group_assignment"] == "compact_regions"
+    assert planner_report["buffer_policy"] == "one_sided"
     assert planner_report["edge_discarded_pixel_count"] == 0
     assert planner_report["class_labels_provided"] is False
     assert planner_report["class_coverage_complete"] is None
     evidence["verification"].update({
         "planner_schema_0_4_0": True, "reference_block_geometry": True,
         "requested_70_10_20_fractions": True, "full_aoi_no_edge_cropping": True,
+        "compact_region_assignment": True, "one_sided_cross_split_buffer": True,
         "class_coverage_unverified_without_categorical_labels": True,
     })
     write_evidence(output_dir / "eve_demo.json", evidence)

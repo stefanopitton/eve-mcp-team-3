@@ -1,7 +1,7 @@
 {
   "schema_version": "0.4.0",
   "official_registry_structural_checks_passed": true,
-  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 63\n  Servers touched: eo-spatial-split-planner\n\n",
+  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 65\n  Servers touched: eo-spatial-split-planner\n\n",
   "stderr": "",
   "recorded_validation": {
     "schema_version": "0.4.0",
@@ -15,7 +15,7 @@
     },
     "unit_tests": {
       "status": "passed",
-      "count": 140
+      "count": 147
     },
     "lint": {
       "status": "passed"
@@ -24,13 +24,16 @@
       "status": "passed",
       "evidence": "mcp_smoke_test.json",
       "reference_block_default_and_custom_fractions": true,
-      "legacy_random_rectangles_explicitly_tested": true
+      "legacy_random_rectangles_explicitly_tested": true,
+      "group_assignment": "compact_regions",
+      "buffer_policy": "one_sided"
     },
     "mcp_streamable_http": {
-      "status": "passed",
+      "status": "historical_prior_policy_passed",
       "schema_version": "0.4.0",
       "evidence": "mcp_http_test.json",
-      "patch_layout": "reference_blocks"
+      "patch_layout": "reference_blocks",
+      "note": "Prior reference-block policy; current policy verified over stdio and direct notebook MCP invocation."
     },
     "reference_parity": {
       "status": "passed",
@@ -38,7 +41,7 @@
       "note": "Variogram estimator unchanged; exact counts/sums/rho/fit parity is recorded separately from patch geometry."
     },
     "live_eve": {
-      "status": "passed",
+      "status": "historical_prior_policy_passed",
       "configuration_source": "repository .env",
       "schema_version": "0.4.0",
       "verification": {
@@ -58,7 +61,10 @@
       },
       "evidence": "eve_demo.json",
       "acquisition": "cached actual2021 Sentinel-2 imagery; no new remote acquisition in this trace",
-      "review_notes": "Four scope/interpretation notes; raw EVE output is preserved."
+      "review_notes": "Four scope/interpretation notes; raw EVE output is preserved.",
+      "group_assignment": "random_groups",
+      "buffer_policy": "symmetric",
+      "scope": "Exact saved .env-backed EVE trace predates compact_regions/one_sided. It does not validate current retention policy."
     },
     "segmentation_benchmark": {
       "status": "trained_and_evaluated",
@@ -86,30 +92,41 @@
       "candidate_patches": 486,
       "edge_policy": "extend",
       "edge_discarded_pixel_count": 0,
-      "retained_training_fraction": 0.3916009685775425,
+      "retained_training_fraction": 0.6665418536461724,
       "conditions": {
         "without_buffer": {
-          "training_patches": 306,
-          "validation_patches": 14,
-          "test_patches": 10,
-          "test_mean_iou": 0.3527204111172011,
-          "minimum_train_test_patch_edge_distance_m": 1600.0
+          "training_patches": 297,
+          "validation_patches": 35,
+          "test_patches": 127,
+          "test_mean_iou": 0.525156565091489,
+          "minimum_train_test_patch_edge_distance_m": 0.0
         },
         "with_buffer": {
-          "training_patches": 124,
-          "validation_patches": 14,
-          "test_patches": 10,
-          "test_mean_iou": 0.30548723546084394,
-          "minimum_train_test_patch_edge_distance_m": 3200.0
+          "training_patches": 200,
+          "validation_patches": 35,
+          "test_patches": 127,
+          "test_mean_iou": 0.5203354363105653,
+          "minimum_train_test_patch_edge_distance_m": 1509.4369811290564
         },
         "size_matched_without_buffer": {
-          "training_patches": 124,
-          "validation_patches": 14,
-          "test_patches": 10,
-          "test_mean_iou": 0.3258765609629884,
-          "minimum_train_test_patch_edge_distance_m": 1600.0
+          "training_patches": 200,
+          "validation_patches": 35,
+          "test_patches": 127,
+          "test_mean_iou": 0.5228557894831506,
+          "minimum_train_test_patch_edge_distance_m": 0.0
         }
-      }
+      },
+      "group_assignment": "compact_regions",
+      "buffer_policy": "one_sided",
+      "retention_budget": {
+        "quality_candidate_pixel_count": 530246,
+        "retained_quality_pixel_count": 414474,
+        "buffer_removed_quality_pixel_count": 115772,
+        "retained_fraction_of_quality_candidates": 0.7816636051945701
+      },
+      "selected_seed": 10,
+      "minimum_footprint_gap_lower_bound_m": 1508.725813299806,
+      "rare_class_caveat": "Water has only 4 validation and 42 test reference pixels; one split with weak WorldCover labels does not establish an accuracy benefit."
     },
     "gis_mcp": {
       "status": "contract_reviewed_not_configured_or_live_tested",
@@ -117,8 +134,11 @@
     },
     "notebook_execution": {
       "status": "passed",
-      "START_HERE_code_cells": 14,
-      "EO_SPATIAL_SPLIT_PLANNER_code_cells": 13
+      "START_HERE_added_summary_code_cells": 5,
+      "START_HERE_original_cells_preserved_exactly": 17,
+      "START_HERE_original_tutorial_cells_execution": "not rerun; original cells and outputs preserved",
+      "EO_SPATIAL_SPLIT_PLANNER_code_cells": 13,
+      "protected_template_commit": "f38353aaa6b26e7e7c7f3d576b9917adcc0c2caa"
     },
     "docker_build": {
       "status": "not_run",
@@ -134,7 +154,19 @@
       "evidence": "segmentation_benchmark/patch_exports/patch_export_manifest.json",
       "paired_heldout_identical": true,
       "training_only_statistics": "seed3 Bernoulli25% samples; 1st/99th percentiles, median, mean, std",
-      "archives_below_5_mib": true
+      "archives_below_5_mib": true,
+      "lossless_sharding": true,
+      "all_arrays_retained": true,
+      "shard_bytes": {
+        "buffered": [
+          4703605,
+          621812
+        ],
+        "unbuffered": [
+          4708457,
+          2071846
+        ]
+      }
     },
     "buffer_scope": {
       "rule": "Only nearby quality-eligible patches from different splits trigger buffers.",
@@ -154,7 +186,8 @@
         "pytest with CPU CNN tests",
         "Ruff",
         "notebook format and compilation",
-        "registry structure and secret checks"
+        "registry structure and secret checks",
+        "original START_HERE template preservation outside Your turn"
       ]
     }
   },

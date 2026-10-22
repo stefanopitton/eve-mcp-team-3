@@ -23,6 +23,8 @@ def test_agent_discovers_four_tools_and_full_aoi_planner_defaults():
         properties = tool.inputSchema["properties"]
         assert properties["patch_layout"]["default"] == "reference_blocks"
         assert properties["edge_policy"]["default"] == "extend"
+        assert properties["group_assignment"]["default"] == "compact_regions"
+        assert properties["buffer_policy"]["default"] == "one_sided"
         assert properties["seed_candidates"]["default"] == 200
         assert "0.7" in tool.description and "0.1" in tool.description and "0.2" in tool.description
     for name in ("evaluate_spatial_autocorrelation", "evaluate_sentinel2_autocorrelation"):
@@ -44,6 +46,29 @@ def test_invalid_sampling_returns_an_actionable_error_before_opening_a_raster(mo
     assert result["error"]["code"] == "invalid_input_or_unresolved_analysis"
     assert "seed" in result["error"]["message"]
     assert "nonnegative" in result["error"]["message"]
+
+
+def test_planner_forwards_default_and_explicit_geometry_policies(monkeypatch):
+    values = np.ones((32, 40), dtype="float32")
+    profile = {"transform": from_origin(400000, 5800000, 20, 20)}
+    forwarded = []
+
+    def plan(_values, **options):
+        forwarded.append(options)
+        mask = np.ones(values.shape, dtype="uint8")
+        return {"report": {}, "split_mask": mask, "unbuffered_split_mask": mask,
+                "candidate_split_mask": mask}
+
+    monkeypatch.setattr(server, "read_local", lambda *_args: (values, profile, {}))
+    monkeypatch.setattr(server, "create_spatial_split", plan)
+    monkeypatch.setattr(server, "_publish", lambda *_args, **_kwargs: {"status": "ok"})
+    assert server.plan_spatial_split("input.tif")["status"] == "ok"
+    assert forwarded[-1]["group_assignment"] == "compact_regions"
+    assert forwarded[-1]["buffer_policy"] == "one_sided"
+    assert server.plan_spatial_split("input.tif", group_assignment="random_groups",
+                                     buffer_policy="symmetric")["status"] == "ok"
+    assert forwarded[-1]["group_assignment"] == "random_groups"
+    assert forwarded[-1]["buffer_policy"] == "symmetric"
 
 
 def test_remote_failure_omits_signed_asset_url_details(monkeypatch):

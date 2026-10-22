@@ -7,7 +7,7 @@
   "source_file": "src/lulc/data/patches.py",
   "source_sha256": "b1205318171665986ecaa03441e8ad4368b2de0e583e84a16df0627bdabd220f",
   "local_source_file": "block_patches.py",
-  "local_source_sha256": "691264a07047f316fe3211b3ddfc8cd361a29df9a23cc49995476f6b488591d5",
+  "local_source_sha256": "53894e0e9da683590d32eea3796594d548602bedef38a3b64ee105d6934d7b47",
   "extraction": "AST extraction of five numerical functions only; upstream package and entrypoints not imported",
   "functions_compared": [
     "assign_blocks",

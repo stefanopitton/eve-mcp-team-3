@@ -106,6 +106,48 @@ def _patch_totals(array, patch_shape, grid_shape):
     return values.reshape(rows, height, columns, width).sum(axis=(1, 3), dtype=np.int64)
 
 
+def assign_compact_blocks(seed, grid_shape, split_ratios=(0.7, 0.1, 0.2)):
+    """Grow two compact corner holdouts; keep the remaining groups for train."""
+    counts = np.bincount(assign_blocks(seed, grid_shape, split_ratios).ravel(), minlength=4)
+    rows, columns = grid_shape
+    rng = np.random.default_rng(seed)
+    corner = int(rng.integers(4))
+    corners = ((0, 0), (0, columns - 1), (rows - 1, 0), (rows - 1, columns - 1))
+    iy, ix = np.indices(grid_shape)
+    labels = np.ones(grid_shape, dtype=np.uint8)
+    for code, location in ((3, corners[corner]), (2, corners[3 - corner])):
+        aspect = float(rng.uniform(0.8, 1.25))
+        score = np.abs(iy - location[0]) * aspect + np.abs(ix - location[1]) / aspect
+        score = score + rng.uniform(0, 0.25, size=grid_shape)
+        score[labels != 1] = np.inf
+        selected = np.argsort(score, axis=None, kind="stable")[:counts[code]]
+        labels.ravel()[selected] = code
+    return labels
+
+
+def _nearby_patch_footprints(grid_shape, patch_shape, supported_shape, pixel_size_m, required_center):
+    iy, ix = np.indices(grid_shape)
+    y0, x0 = (iy * patch_shape[0]).ravel(), (ix * patch_shape[1]).ravel()
+    y1 = np.minimum(y0 + patch_shape[0], supported_shape[0]) - 1
+    x1 = np.minimum(x0 + patch_shape[1], supported_shape[1]) - 1
+    dy = np.maximum(np.maximum(y0[:, None] - y1[None, :], y0[None, :] - y1[:, None]), 0)
+    dx = np.maximum(np.maximum(x0[:, None] - x1[None, :], x0[None, :] - x1[:, None]), 0)
+    return np.hypot(dy, dx) * pixel_size_m + 1e-7 < required_center
+
+
+def _priority_keep(patch_grid, quality, nearby):
+    labels, active = patch_grid.ravel(), quality.ravel()
+    keep = np.ones(labels.shape, bool)
+    higher = np.zeros(labels.shape, bool)
+    for code in (3, 2, 1):
+        current = np.flatnonzero(active & (labels == code))
+        opponents = np.flatnonzero(higher)
+        if current.size and opponents.size:
+            keep[current] = ~np.any(nearby[np.ix_(current, opponents)], axis=1)
+        higher |= active & keep & (labels == code)
+    return keep.reshape(patch_grid.shape)
+
+
 def plan_reference_blocks(
     valid_mask,
     *,
@@ -120,6 +162,8 @@ def plan_reference_blocks(
     require_class_coverage=False,
     patch_radius_m=0.0,
     edge_policy="extend",
+    group_assignment="compact_regions",
+    buffer_policy="one_sided",
 ):
     """Return complete patch records plus transparent block/seed metadata.
 
@@ -145,6 +189,10 @@ def plan_reference_blocks(
         raise ValueError("require_class_coverage must be a boolean")
     if edge_policy not in ("extend", "crop"):
         raise ValueError("edge_policy must be extend or crop")
+    if group_assignment not in ("compact_regions", "random_groups"):
+        raise ValueError("group_assignment must be compact_regions or random_groups")
+    if buffer_policy not in ("one_sided", "symmetric"):
+        raise ValueError("buffer_policy must be one_sided or symmetric")
     seed_candidates = _integer(seed_candidates, "seed_candidates", 2000)
     patch_shape = _pair(patch_size_pixels, "patch_size_pixels", valid.shape)
     if block_size_pixels is None:
@@ -204,10 +252,15 @@ def plan_reference_blocks(
     diagnostics, plans = [], []
     row_blocks = np.minimum(np.arange(grid_shape[0]) // per_block[0], block_grid[0] - 1)
     column_blocks = np.minimum(np.arange(grid_shape[1]) // per_block[1], block_grid[1] - 1)
+    nearby = (_nearby_patch_footprints(grid_shape, patch_shape, supported_shape, pixel_size_m,
+                                     required_center if buffer_m > 0 or patch_radius_m > 0 else 0)
+              if buffer_policy == "one_sided" else None)
     for candidate_seed in range(seed_candidates):
-        blocks = assign_blocks(candidate_seed, block_grid, split_ratios)
+        blocks = (assign_compact_blocks(candidate_seed, block_grid, split_ratios)
+                  if group_assignment == "compact_regions" else assign_blocks(candidate_seed, block_grid, split_ratios))
         patch_grid = blocks[row_blocks[:, None], column_blocks[None, :]]
-        buffer_keep = create_buffer_mask(patch_grid, radii, active_mask=quality)
+        buffer_keep = (_priority_keep(patch_grid, quality, nearby) if buffer_policy == "one_sided"
+                       else create_buffer_mask(patch_grid, radii, active_mask=quality))
         keep = buffer_keep & quality
         counts = {name: int(np.count_nonzero(keep & (patch_grid == code)))
                   for code, name in SPLITS.items()}
@@ -221,12 +274,15 @@ def plan_reference_blocks(
         minimum = min(counts.values())
         eligible = minimum > 0 and (not require_class_coverage or coverage_complete is True)
         diagnostics.append({"seed": candidate_seed, "minimum_retained_patch_count": minimum,
+                            "retained_quality_pixel_count": int(valid_counts[keep].sum()),
                             "retained_patch_counts": counts, "class_pixel_counts": split_classes,
                             "missing_classes": missing, "class_coverage_complete": coverage_complete,
                             "eligible": bool(eligible)})
         plans.append((blocks, patch_grid, buffer_keep, keep))
     # Python's stable sort preserves ascending seed order on equal scores.
-    ranked = sorted(range(seed_candidates), key=lambda index: diagnostics[index]["minimum_retained_patch_count"], reverse=True)
+    score_key = ("retained_quality_pixel_count" if group_assignment == "compact_regions"
+                 else "minimum_retained_patch_count")
+    ranked = sorted(range(seed_candidates), key=lambda index: diagnostics[index][score_key], reverse=True)
     selected = next((index for index in ranked if diagnostics[index]["eligible"]), None)
     if selected is None:
         reason = " with every present class in every split" if require_class_coverage else ""
@@ -254,6 +310,7 @@ def plan_reference_blocks(
                             "retained": retained, "keep": retained,
                             "buffered_retained": retained, "unbuffered_retained": unbuffered,
                             "drop_reason": (None if retained else "quality_threshold" if not good
+                                            else "one_sided_buffer_at_unlike_split_boundary" if buffer_policy == "one_sided"
                                             else "symmetric_buffer_at_unlike_split_boundary"),
                             "buffered_pixel_count": count if retained else 0,
                             "unbuffered_pixel_count": count if unbuffered else 0})
@@ -275,6 +332,7 @@ def plan_reference_blocks(
     metadata = {
         "patch_layout": "reference_blocks", "selected_seed": int(selected),
         "edge_policy": edge_policy,
+        "group_assignment": group_assignment, "buffer_policy": buffer_policy,
         "block_size_pixels": list(block_shape), "block_grid_shape": list(block_grid),
         "block_windows": block_windows,
         "patch_grid_shape": list(grid_shape), "patches_per_block": list(per_block),
@@ -301,7 +359,16 @@ def plan_reference_blocks(
         "class_pixel_counts": diagnostics[selected]["class_pixel_counts"],
         "reference_buffer_radius_patches": list(reference_radii),
         "buffer_radius_patches": list(radii),
-        "buffer_dilation_side": "symmetric: only interfaces between distinct active train/validation/test splits discard patches from both sides",
+        "buffer_dilation_side": ("one-sided exact rectangle exclusion: test > validation > train" if buffer_policy == "one_sided"
+                                 else "symmetric: only interfaces between distinct active train/validation/test splits discard patches from both sides"),
+        "buffer_priority": ["test", "validation", "train"] if buffer_policy == "one_sided" else [],
+        "buffer_geometry_method": ("exact complete-rectangle nearest pixel-center distance, including pixel-diagonal and extra patch-radius footprint allowance"
+                                   if buffer_policy == "one_sided" else "symmetric Chebyshev patch-grid neighbourhood"),
+        "stencil_radius_used": buffer_policy == "symmetric",
+        "retention_budget": {"quality_candidate_pixel_count": int(valid_counts[quality].sum()),
+                             "retained_quality_pixel_count": int(valid_counts[keep].sum()),
+                             "buffer_removed_quality_pixel_count": int(valid_counts[quality & ~keep].sum()),
+                             "retained_fraction_of_quality_candidates": float(valid_counts[keep].sum() / valid_counts[quality].sum())},
         "buffer_interface_policy": "Ignore AOI edges, quality-ineligible/nodata patches, and seams between blocks assigned to the same split",
         "buffer_scope": "only nearby quality-eligible patches assigned to different splits",
         "buffer_not_applied_to": ["same-split patch/block seams", "AOI exterior", "nodata or quality-rejected patches"],
@@ -316,9 +383,13 @@ def plan_reference_blocks(
         "realized_candidate_patch_split_ratios": {name: float(np.count_nonzero(quality & (patch_grid == code)) / max(1, np.count_nonzero(quality)))
                                                   for code, name in SPLITS.items()},
         "seed_search": {"start_inclusive": 0, "stop_exclusive": seed_candidates,
-                        "selection": "maximize smallest quality-filtered buffered split, stable ascending-seed ties, then require requested class coverage",
+                        "selection": ("maximize total retained quality pixels, subject to nonempty splits and requested class coverage; stable ascending-seed ties"
+                                      if group_assignment == "compact_regions" else
+                                      "maximize smallest quality-filtered buffered split, stable ascending-seed ties, then require requested class coverage"),
                         "selected_seed": int(selected),
+                        "score": score_key,
                         "eligible_candidate_count": sum(item["eligible"] for item in diagnostics),
+                        "selected_retained_quality_pixel_count": diagnostics[selected]["retained_quality_pixel_count"],
                         "selected_minimum_retained_patch_count": diagnostics[selected]["minimum_retained_patch_count"],
                         "candidates": diagnostics},
         "reference_patch_procedure": {"source": "scripts/04_extract_patches.py and src/lulc/data/patches.py",
@@ -328,6 +399,7 @@ def plan_reference_blocks(
                                                        else "explicit complete-block edge cropping"),
                                                       "quality and ignored-label filtering before seed selection",
                                                       "buffer interfaces only between differently assigned quality-eligible patches",
+                                                      f"group_assignment={group_assignment}, buffer_policy={buffer_policy}",
                                                       "MCP split codes 1/2/3"]},
     }
     return {"patches": patches, "patch_size_pixels": patch_shape,

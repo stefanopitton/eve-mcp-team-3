@@ -1,4 +1,6 @@
-# EVE Prompt and Output Report
+# EVE Prompt and Output Report — Historical Run
+
+**Historical EVE evidence:** this recorded run used `group_assignment='random_groups'` and `buffer_policy='symmetric'`. It does **not** validate the newer `compact_regions` / `one_sided` defaults. Those defaults have separate local numerical and integration checks recorded in the [current benchmark plan](artifacts/segmentation_benchmark/benchmark_plan.json). No new live EVE call was made for this change. The prompts, replies and numerical results below are preserved as evidence of the earlier configuration.
 
 The recorded live EVE tool chain passed its checks. This report preserves the exact prompts and assistant replies, then lists verified numerical results and the corrections to the model’s wording. Tool success does not make every statement in the raw answer correct.
 
@@ -10,13 +12,13 @@ The recorded live EVE tool chain passed its checks. This report preserves the ex
 - Conversation: 1 agent turn(s).
 - Tool report schema: `0.4.0`.
 
-This final replay called hosted `reverse_geocode_place`, local `evaluate_spatial_autocorrelation`, and local `plan_spatial_split`. It used actual cached **2021 Sentinel-2 B05 reflectance**. Public Planetary Computer acquisition occurred before this conversation; this trace did **not** perform a new remote imagery acquisition or invoke a GIS viewer. Earlier remote 2024 demonstrations are historical evidence, not the source of this final replay.
+This historical replay called hosted `reverse_geocode_place`, local `evaluate_spatial_autocorrelation`, and local `plan_spatial_split`. It used actual cached **2021 Sentinel-2 B05 reflectance**. Public Planetary Computer acquisition occurred before this conversation; this trace did **not** perform a new remote imagery acquisition or invoke a GIS viewer. Earlier remote 2024 demonstrations are separate historical evidence, not the source of this replay.
 
 The source scene is `S2B_MSIL2A_20210617T100559_R022_T33UUU_20210624T052802`, acquired `2021-06-17T10:05:59.026000Z`. The recorded input GeoTIFF SHA-256 is `9dbb6619067faf0b3e5b674b82c894157bdbda91c1843478dca66dcb5235fc95`. The source is documented in the [2021 imagery manifest](artifacts/segmentation_data/manifest.json). The neutral temporary raster path in the verbatim prompt below identifies the cached input; it does not imply a remote download.
 
 The CNN comparison is a separate **local CPU training run** on the same 2021 imagery with WorldCover weak labels. This EVE conversation measures continuous-band dependence and plans geometry; it neither trains a CNN nor establishes model accuracy. No categorical labels were supplied to the MCP planner, so its class coverage remains unverified.
 
-Evidence: [complete EVE record](artifacts/eve_demo.json), [variogram report](artifacts/eve_variogram_report.json), [planner report](artifacts/eve_planner_report.json), development runner `test_eve.py`, [submission notebook](START_HERE.ipynb), [worked notebook](EO_SPATIAL_SPLIT_PLANNER.ipynb), and [separate CNN report](artifacts/segmentation_benchmark/segmentation_report.json).
+Evidence: [complete EVE record](artifacts/eve_demo.json), [variogram report](artifacts/eve_variogram_report.json), [planner report](artifacts/eve_planner_report.json), [runner source](test_eve.py), [submission notebook](START_HERE.ipynb), [worked notebook](EO_SPATIAL_SPLIT_PLANNER.ipynb), and [separate CNN report](artifacts/segmentation_benchmark/segmentation_report.json).
 
 ## Exact prompt and response chain
 
@@ -44,7 +46,7 @@ The study area is Berlin, Germany. The variogram analysis of the raster band at 
 
 No follow-up user prompt was needed in this recorded run.
 
-## Verified tool results
+## Verified tool results for the historical configuration
 
 Recorded verification confirms successful hosted geocoding, evaluation and planning, reference-block geometry, schema 0.4.0, requested 70%/10%/20% assignment fractions, and the absence of a categorical class-coverage claim. Scientific and rectangle checks are preserved in the EVE record.
 
