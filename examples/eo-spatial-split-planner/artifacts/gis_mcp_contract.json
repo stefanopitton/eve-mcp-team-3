@@ -1,0 +1,49 @@
+{
+  "project": "GIS MCP",
+  "source_revision": "be8a33d25aefccf256136f3de0f18124f6efa16f",
+  "reviewed_on": "2026-10-22",
+  "documentation_url": "https://gis-mcp.com/data-gathering/satellite_imagery/",
+  "source_url": "https://github.com/mahdin75/gis-mcp/blob/be8a33d25aefccf256136f3de0f18124f6efa16f/src/gis_mcp/data/satellite_imagery.py",
+  "tool": "download_satellite_imagery",
+  "parameters": {
+    "collection": "sentinel-2-l2a",
+    "assets": [
+      "B05",
+      "SCL"
+    ],
+    "datetime": "2021-06-01/2021-08-31",
+    "cloud_cover_lt": 10,
+    "bbox": "13.30,52.35,13.50,52.50",
+    "out_crs": null
+  },
+  "success_fields": [
+    "status",
+    "file_path",
+    "item_id",
+    "collection",
+    "assets",
+    "missing_assets",
+    "properties"
+  ],
+  "returns_numeric_geotiff": true,
+  "constraints": [
+    "EVE must register a deployed GIS MCP server; the documentation site itself is not an MCP endpoint.",
+    "file_path is local to the GIS server: share storage or transfer through /storage/download before using another server.",
+    "No reflectance calibration is applied and the GeoTIFF writer does not copy scale/offset metadata: calibrate from source item metadata/baseline before radiometric analysis.",
+    "Cloud percentage only filters scenes: apply SCL per-pixel nodata/cloud/shadow/snow mask before spatial statistics/model fitting.",
+    "B05 and SCL share 20 m resolution; B03/B04/B08 are 10 m and must be aligned separately to the native B05 grid. Current stack writer rejects differing band shapes.",
+    "No item_id parameter exists; returned item_id must be checked to keep downloads from the same acquisition.",
+    "Search fallback can relax cloud and date constraints; verify actual scene datetime and cloud cover in returned properties.",
+    "Retain a projected metre CRS; geographic output grids cannot supply metre buffer distances directly."
+  ],
+  "transport": {
+    "install": "pip install gis-mcp[satellite-imagery]",
+    "environment": {
+      "GIS_MCP_TRANSPORT": "http",
+      "GIS_MCP_PORT": "8080"
+    },
+    "mcp_endpoint": "http://host:8080/mcp",
+    "file_download": "GET http://host:8080/storage/download?path=<server-storage-relative-path>"
+  },
+  "integration_status": "Source contract reviewed; no GIS MCP server installed, registered, or invoked through EVE during this review."
+}

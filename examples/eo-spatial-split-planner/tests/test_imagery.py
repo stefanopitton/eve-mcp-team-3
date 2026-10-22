@@ -9,7 +9,7 @@ import rasterio
 from rasterio.transform import from_origin
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from imagery import read_local, validate_bbox  # noqa: E402
+from imagery import read_local, resolve_band, validate_bbox  # noqa: E402
 
 
 def write_raster(path, crs="EPSG:32633", transform=None):
@@ -47,3 +47,13 @@ def test_rejects_angular_feet_and_nonsquare_grids(tmp_path, crs, transform):
 def test_rejects_invalid_aoi(bbox):
     with pytest.raises(ValueError):
         validate_bbox(bbox)
+
+
+@pytest.mark.parametrize("name,expected", [("nir", "B08"), ("red_edge1", "B05"), ("B05", "B05"), ("b8a", "B8A")])
+def test_checkpoint_band_names(name, expected):
+    assert resolve_band(name) == expected
+
+
+def test_remote_index_requires_a_derived_local_field():
+    with pytest.raises(ValueError, match="local raster"):
+        resolve_band("ndvi")

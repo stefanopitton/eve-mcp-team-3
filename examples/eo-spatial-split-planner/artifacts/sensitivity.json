@@ -1,21 +1,44 @@
 [
   {
-    "buffer_m": 0,
+    "buffer_m": 0.0,
     "status": "ok",
     "splits": {
       "valid_pixel_count": 562947,
-      "retained_pixel_count": 562947,
-      "discarded_valid_pixel_count": 0,
-      "retention_fraction": 1.0,
+      "retained_pixel_count": 34885,
+      "discarded_valid_pixel_count": 528062,
+      "retention_fraction": 0.06196853344986295,
       "counts": {
-        "train": 337522,
-        "validation": 112561,
-        "test": 112864
+        "train": 20800,
+        "validation": 7941,
+        "test": 6144
       },
       "fractions_of_retained": {
-        "train": 0.5995626586517026,
-        "validation": 0.19994955120108998,
-        "test": 0.20048779014720747
+        "train": 0.5962448043571735,
+        "validation": 0.22763365343270747,
+        "test": 0.17612154221011897
+      },
+      "candidate_pixel_count": 34885,
+      "unbuffered_retained_pixel_count": 34885,
+      "buffer_discarded_candidate_pixel_count": 0,
+      "buffer_discarded_training_pixel_count": 0,
+      "unselected_valid_pixel_count": 528062,
+      "retention_fraction_of_candidates": 1.0
+    },
+    "patch_counts": {
+      "train": {
+        "candidate": 7,
+        "buffered": 7,
+        "unbuffered": 7
+      },
+      "validation": {
+        "candidate": 3,
+        "buffered": 3,
+        "unbuffered": 3
+      },
+      "test": {
+        "candidate": 2,
+        "buffered": 2,
+        "unbuffered": 2
       }
     },
     "spatial_diagnostics": {
@@ -25,45 +48,70 @@
         {
           "first_split": "train",
           "second_split": "validation",
-          "minimum_center_distance_m": 20.0,
-          "minimum_footprint_gap_lower_bound_m": 0.0
+          "minimum_center_distance_m": 1334.1664064126335,
+          "minimum_footprint_gap_lower_bound_m": 1305.8821351651716
         },
         {
           "first_split": "train",
           "second_split": "test",
-          "minimum_center_distance_m": 3360.0,
-          "minimum_footprint_gap_lower_bound_m": 3331.715728752538
+          "minimum_center_distance_m": 120.0,
+          "minimum_footprint_gap_lower_bound_m": 91.7157287525381
         },
         {
           "first_split": "validation",
           "second_split": "test",
-          "minimum_center_distance_m": 20.0,
-          "minimum_footprint_gap_lower_bound_m": 0.0
+          "minimum_center_distance_m": 1980.0,
+          "minimum_footprint_gap_lower_bound_m": 1951.715728752538
         }
       ],
-      "minimum_center_distance_m": 20.0,
-      "minimum_footprint_gap_lower_bound_m": 0.0,
+      "minimum_center_distance_m": 120.0,
+      "minimum_footprint_gap_lower_bound_m": 91.7157287525381,
       "requested_buffer_met": true
     },
-    "retention_fraction": 1.0
+    "candidate_coverage_fraction": 0.06196853344986295,
+    "retention_fraction_of_candidates": 1.0,
+    "buffer_discarded_training_pixel_count": 0
   },
   {
-    "buffer_m": 961.6652224137046,
+    "buffer_m": 1280.0,
     "status": "ok",
     "splits": {
       "valid_pixel_count": 562947,
-      "retained_pixel_count": 496713,
-      "discarded_valid_pixel_count": 66234,
-      "retention_fraction": 0.8823441638378036,
+      "retained_pixel_count": 28755,
+      "discarded_valid_pixel_count": 534192,
+      "retention_fraction": 0.051079408896397,
       "counts": {
-        "train": 298102,
-        "validation": 99198,
-        "test": 99413
+        "train": 14670,
+        "validation": 7941,
+        "test": 6144
       },
       "fractions_of_retained": {
-        "train": 0.6001493820375147,
-        "validation": 0.19970888621799712,
-        "test": 0.20014173174448827
+        "train": 0.5101721439749609,
+        "validation": 0.2761606677099635,
+        "test": 0.21366718831507564
+      },
+      "candidate_pixel_count": 34885,
+      "unbuffered_retained_pixel_count": 34885,
+      "buffer_discarded_candidate_pixel_count": 6130,
+      "buffer_discarded_training_pixel_count": 6130,
+      "unselected_valid_pixel_count": 528062,
+      "retention_fraction_of_candidates": 0.8242797764081984
+    },
+    "patch_counts": {
+      "train": {
+        "candidate": 7,
+        "buffered": 5,
+        "unbuffered": 7
+      },
+      "validation": {
+        "candidate": 3,
+        "buffered": 3,
+        "unbuffered": 3
+      },
+      "test": {
+        "candidate": 2,
+        "buffered": 2,
+        "unbuffered": 2
       }
     },
     "spatial_diagnostics": {
@@ -73,45 +121,70 @@
         {
           "first_split": "train",
           "second_split": "validation",
-          "minimum_center_distance_m": 1000.0,
-          "minimum_footprint_gap_lower_bound_m": 971.7157287525381
+          "minimum_center_distance_m": 1334.1664064126335,
+          "minimum_footprint_gap_lower_bound_m": 1305.8821351651716
         },
         {
           "first_split": "train",
           "second_split": "test",
-          "minimum_center_distance_m": 4920.0,
-          "minimum_footprint_gap_lower_bound_m": 4891.715728752538
+          "minimum_center_distance_m": 3185.215848258953,
+          "minimum_footprint_gap_lower_bound_m": 3156.931577011491
         },
         {
           "first_split": "validation",
           "second_split": "test",
-          "minimum_center_distance_m": 1000.0,
-          "minimum_footprint_gap_lower_bound_m": 971.7157287525381
+          "minimum_center_distance_m": 1980.0,
+          "minimum_footprint_gap_lower_bound_m": 1951.715728752538
         }
       ],
-      "minimum_center_distance_m": 1000.0,
-      "minimum_footprint_gap_lower_bound_m": 971.7157287525381,
+      "minimum_center_distance_m": 1334.1664064126335,
+      "minimum_footprint_gap_lower_bound_m": 1305.8821351651716,
       "requested_buffer_met": true
     },
-    "retention_fraction": 0.8823441638378036
+    "candidate_coverage_fraction": 0.06196853344986295,
+    "retention_fraction_of_candidates": 0.8242797764081984,
+    "buffer_discarded_training_pixel_count": 6130
   },
   {
-    "buffer_m": 1923.330444827409,
+    "buffer_m": 2560.0,
     "status": "ok",
     "splits": {
       "valid_pixel_count": 562947,
-      "retained_pixel_count": 431857,
-      "discarded_valid_pixel_count": 131090,
-      "retention_fraction": 0.7671361602424385,
+      "retained_pixel_count": 22611,
+      "discarded_valid_pixel_count": 540336,
+      "retention_fraction": 0.04016541521670779,
       "counts": {
-        "train": 258623,
-        "validation": 86580,
-        "test": 86654
+        "train": 11598,
+        "validation": 4869,
+        "test": 6144
       },
       "fractions_of_retained": {
-        "train": 0.5988625864580174,
-        "validation": 0.20048303026233222,
-        "test": 0.20065438327965043
+        "train": 0.5129361815045774,
+        "validation": 0.21533766750696565,
+        "test": 0.2717261509884569
+      },
+      "candidate_pixel_count": 34885,
+      "unbuffered_retained_pixel_count": 31813,
+      "buffer_discarded_candidate_pixel_count": 12274,
+      "buffer_discarded_training_pixel_count": 9202,
+      "unselected_valid_pixel_count": 528062,
+      "retention_fraction_of_candidates": 0.6481582341980794
+    },
+    "patch_counts": {
+      "train": {
+        "candidate": 7,
+        "buffered": 4,
+        "unbuffered": 7
+      },
+      "validation": {
+        "candidate": 3,
+        "buffered": 2,
+        "unbuffered": 2
+      },
+      "test": {
+        "candidate": 2,
+        "buffered": 2,
+        "unbuffered": 2
       }
     },
     "spatial_diagnostics": {
@@ -121,45 +194,70 @@
         {
           "first_split": "train",
           "second_split": "validation",
-          "minimum_center_distance_m": 1960.0,
-          "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+          "minimum_center_distance_m": 6773.03477032268,
+          "minimum_footprint_gap_lower_bound_m": 6744.750499075218
         },
         {
           "first_split": "train",
           "second_split": "test",
-          "minimum_center_distance_m": 6460.0,
-          "minimum_footprint_gap_lower_bound_m": 6431.715728752538
+          "minimum_center_distance_m": 3185.215848258953,
+          "minimum_footprint_gap_lower_bound_m": 3156.931577011491
         },
         {
           "first_split": "validation",
           "second_split": "test",
-          "minimum_center_distance_m": 1960.0,
-          "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+          "minimum_center_distance_m": 3864.349880639692,
+          "minimum_footprint_gap_lower_bound_m": 3836.06560939223
         }
       ],
-      "minimum_center_distance_m": 1960.0,
-      "minimum_footprint_gap_lower_bound_m": 1931.715728752538,
+      "minimum_center_distance_m": 3185.215848258953,
+      "minimum_footprint_gap_lower_bound_m": 3156.931577011491,
       "requested_buffer_met": true
     },
-    "retention_fraction": 0.7671361602424385
+    "candidate_coverage_fraction": 0.06196853344986295,
+    "retention_fraction_of_candidates": 0.6481582341980794,
+    "buffer_discarded_training_pixel_count": 9202
   },
   {
-    "buffer_m": 3846.660889654818,
+    "buffer_m": 5120.0,
     "status": "ok",
     "splits": {
       "valid_pixel_count": 562947,
-      "retained_pixel_count": 302149,
-      "discarded_valid_pixel_count": 260798,
-      "retention_fraction": 0.5367272585163435,
+      "retained_pixel_count": 10380,
+      "discarded_valid_pixel_count": 552567,
+      "retention_fraction": 0.01843868072838118,
       "counts": {
-        "train": 180908,
-        "validation": 60518,
-        "test": 60723
+        "train": 2433,
+        "validation": 1803,
+        "test": 6144
       },
       "fractions_of_retained": {
-        "train": 0.598737708878732,
-        "validation": 0.20029190895882495,
-        "test": 0.20097038216244303
+        "train": 0.23439306358381504,
+        "validation": 0.17369942196531793,
+        "test": 0.5919075144508671
+      },
+      "candidate_pixel_count": 34885,
+      "unbuffered_retained_pixel_count": 28747,
+      "buffer_discarded_candidate_pixel_count": 24505,
+      "buffer_discarded_training_pixel_count": 18367,
+      "unselected_valid_pixel_count": 528062,
+      "retention_fraction_of_candidates": 0.29754908986670486
+    },
+    "patch_counts": {
+      "train": {
+        "candidate": 7,
+        "buffered": 1,
+        "unbuffered": 7
+      },
+      "validation": {
+        "candidate": 3,
+        "buffered": 1,
+        "unbuffered": 1
+      },
+      "test": {
+        "candidate": 2,
+        "buffered": 2,
+        "unbuffered": 2
       }
     },
     "spatial_diagnostics": {
@@ -169,26 +267,28 @@
         {
           "first_split": "train",
           "second_split": "validation",
-          "minimum_center_distance_m": 3880.0,
-          "minimum_footprint_gap_lower_bound_m": 3851.715728752538
+          "minimum_center_distance_m": 11970.246446919962,
+          "minimum_footprint_gap_lower_bound_m": 11941.962175672501
         },
         {
           "first_split": "train",
           "second_split": "test",
-          "minimum_center_distance_m": 9520.0,
-          "minimum_footprint_gap_lower_bound_m": 9491.715728752539
+          "minimum_center_distance_m": 5180.0,
+          "minimum_footprint_gap_lower_bound_m": 5151.715728752538
         },
         {
           "first_split": "validation",
           "second_split": "test",
-          "minimum_center_distance_m": 3880.0,
-          "minimum_footprint_gap_lower_bound_m": 3851.715728752538
+          "minimum_center_distance_m": 5867.469642017758,
+          "minimum_footprint_gap_lower_bound_m": 5839.185370770296
         }
       ],
-      "minimum_center_distance_m": 3880.0,
-      "minimum_footprint_gap_lower_bound_m": 3851.715728752538,
+      "minimum_center_distance_m": 5180.0,
+      "minimum_footprint_gap_lower_bound_m": 5151.715728752538,
       "requested_buffer_met": true
     },
-    "retention_fraction": 0.5367272585163435
+    "candidate_coverage_fraction": 0.06196853344986295,
+    "retention_fraction_of_candidates": 0.29754908986670486,
+    "buffer_discarded_training_pixel_count": 18367
   }
 ]

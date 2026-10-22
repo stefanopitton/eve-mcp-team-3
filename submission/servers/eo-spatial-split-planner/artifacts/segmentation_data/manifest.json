@@ -1,0 +1,138 @@
+{
+  "features_path": "./examples/eo-spatial-split-planner/artifacts/segmentation_data/sentinel2_reflectance_20m.tif",
+  "labels_path": "./examples/eo-spatial-split-planner/artifacts/segmentation_data/worldcover_2021_20m.tif",
+  "manifest_path": "./examples/eo-spatial-split-planner/artifacts/segmentation_data/manifest.json",
+  "request": {
+    "bbox_wgs84": [
+      13.3,
+      52.35,
+      13.5,
+      52.5
+    ],
+    "start_date": "2021-06-01",
+    "end_date": "2021-08-31",
+    "requested_item_id": null,
+    "max_cloud_cover": 10,
+    "band_names": [
+      "B05",
+      "B03",
+      "B04",
+      "B08"
+    ],
+    "schema_version": 1
+  },
+  "shape": [
+    850,
+    699
+  ],
+  "pixel_size_m": 20.0,
+  "crs": "EPSG:32633",
+  "transform": [
+    20.0,
+    0.0,
+    384200.0,
+    0.0,
+    -20.0,
+    5818020.0
+  ],
+  "band_names": [
+    "B05",
+    "B03",
+    "B04",
+    "B08"
+  ],
+  "valid_pixels": 537876,
+  "total_pixels": 594150,
+  "sentinel2": {
+    "source": "Microsoft Planetary Computer STAC + native Sentinel-2 L2A COG windows",
+    "catalog_url": "https://planetarycomputer.microsoft.com/api/stac/v1",
+    "collection": "sentinel-2-l2a",
+    "item_id": "S2B_MSIL2A_20210617T100559_R022_T33UUU_20210624T052802",
+    "item_url": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-2-l2a/items/S2B_MSIL2A_20210617T100559_R022_T33UUU_20210624T052802",
+    "datetime": "2021-06-17T10:05:59.026000Z",
+    "band": "B05",
+    "bbox_wgs84": [
+      13.3,
+      52.35,
+      13.5,
+      52.5
+    ],
+    "scene_cloud_cover_percent": 0.387105,
+    "processing_baseline": 3.0,
+    "reflectance_scale": 0.0001,
+    "reflectance_offset": 0.0,
+    "calibration_source": "Sentinel-2 L2A processing baseline convention",
+    "pixel_size_m": 20.0,
+    "crs": "EPSG:32633",
+    "shape": [
+      850,
+      699
+    ],
+    "valid_pixels": 537876,
+    "cloud_mask": "SCL classes 4 vegetation, 5 nonvegetated, 6 water; all other classes and nodata excluded",
+    "acquisition_path": "Public Planetary Computer STAC directly; not through EVE",
+    "selection": "Least scene cloud cover among first 100 covering catalog items, then item ID; pin item_id for replay",
+    "calibrations": {
+      "B05": {
+        "scale": 0.0001,
+        "offset": 0.0,
+        "calibration_source": "Sentinel-2 L2A processing baseline convention",
+        "resampling": "none (native 20 m)"
+      },
+      "B03": {
+        "scale": 0.0001,
+        "offset": 0.0,
+        "calibration_source": "Sentinel-2 L2A processing baseline convention",
+        "resampling": "area average from native 10 m to B05 20 m grid"
+      },
+      "B04": {
+        "scale": 0.0001,
+        "offset": 0.0,
+        "calibration_source": "Sentinel-2 L2A processing baseline convention",
+        "resampling": "area average from native 10 m to B05 20 m grid"
+      },
+      "B08": {
+        "scale": 0.0001,
+        "offset": 0.0,
+        "calibration_source": "Sentinel-2 L2A processing baseline convention",
+        "resampling": "area average from native 10 m to B05 20 m grid"
+      }
+    }
+  },
+  "worldcover": {
+    "collection": "esa-worldcover",
+    "item_id": "ESA_WorldCover_10m_2021_v200_N51E012",
+    "item_url": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/esa-worldcover/items/ESA_WorldCover_10m_2021_v200_N51E012",
+    "year": 2021,
+    "product_version": "2.0.0",
+    "native_resolution_m": 10,
+    "resampling": "nearest neighbour onto native B05 20 m grid",
+    "nodata": 0,
+    "class_names": {
+      "10": "Tree cover",
+      "20": "Shrubland",
+      "30": "Grassland",
+      "40": "Cropland",
+      "50": "Built-up",
+      "60": "Bare / sparse vegetation",
+      "70": "Snow and ice",
+      "80": "Permanent water bodies",
+      "90": "Herbaceous wetland",
+      "95": "Mangroves",
+      "100": "Moss and lichen"
+    },
+    "class_pixels": {
+      "10": 225476,
+      "30": 61872,
+      "40": 71987,
+      "50": 174049,
+      "60": 761,
+      "80": 3711,
+      "90": 20
+    },
+    "license": "CC-BY-4.0",
+    "attribution": "ESA WorldCover 2021",
+    "doi": "https://doi.org/10.5281/zenodo.7254221"
+  },
+  "label_caveat": "ESA WorldCover 2021 is a weak, machine-generated annual reference rather than independent field ground truth. Its classifier uses Sentinel-1 and Sentinel-2, so this demonstration measures agreement with WorldCover; it cannot establish true segmentation accuracy or prove that a buffer improves accuracy. Annual labels may differ from land cover visible on the single acquisition date."
+}

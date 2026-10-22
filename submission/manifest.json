@@ -1,31 +1,45 @@
 {
   "server": "eo-spatial-split-planner",
-  "schema_version": "0.1.0",
+  "schema_version": "0.3.0",
+  "reference_implementation": {
+    "repository": "https://github.com/stefanopitton/lulc-classification",
+    "branch": "stepit/eve-hackathon-checkpoint",
+    "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
+    "source": "src/lulc/validation/autocorrelation.py",
+    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)"
+  },
+  "geometry": "random rectangular patches in both spatial axes",
+  "optional_demo": "three-arm real Sentinel-2/WorldCover tiny CNN segmentation benchmark",
   "files": [
     {
+      "path": "servers/eo-spatial-split-planner/PROCEDURE.md",
+      "bytes": 7802,
+      "sha256": "92c26b8c106df74709bb321ce300b21959424225364b44bfa559104ce65e924a"
+    },
+    {
       "path": "servers/eo-spatial-split-planner/PR_DESCRIPTION.md",
-      "bytes": 3080,
-      "sha256": "947c092126ceb30fa531232899ec229a94441e3020a2fea06f822e1c2e38b31e"
+      "bytes": 3713,
+      "sha256": "36c373f6cdb4c43d7dcf30587ded2e81f5565dfea0925d39f9c74b81f884db2b"
     },
     {
       "path": "servers/eo-spatial-split-planner/README.md",
-      "bytes": 6491,
-      "sha256": "ce15272168f0b5dd03db82a391eb4fa2cf7e1f2a52f2149c918114c6d463482c"
+      "bytes": 15390,
+      "sha256": "38c3e55715771d1cceea351e1dbe2a295e3e4a44b48f6e598f1105da22816fa6"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/analysis_band.tif",
-      "bytes": 1673636,
-      "sha256": "9256c379952cb2bed125bf46398a3b66155708bd057597e9f798bcd6ac4811ff"
+      "bytes": 1673600,
+      "sha256": "84fb668c6a6aff37c2d69ffdc1e685ba4ad6b13a3eafc66805708caf214604c5"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/diagnostic.png",
-      "bytes": 1665320,
-      "sha256": "bd63fb5335adee2f48e77a4913dfda4e584dc93b73b21f5c1dc775b026b571d7"
+      "bytes": 1033564,
+      "sha256": "7d5fe1a197b2b8a9e9a59f0ed427daa6bb0d062105898e28258d835509097fb3"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/eve_demo.json",
-      "bytes": 15200,
-      "sha256": "69d41b683f9650e67722a2669eec1e1b873202d53ddc68eb0de71d7043de761c"
+      "bytes": 33474,
+      "sha256": "ad8a14b1b19a6765da6dee5a23428dabb031a5e98b51c575bff4bce18130b67c"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/eve_gateway_discovery.json",
@@ -33,39 +47,149 @@
       "sha256": "aab8338205bb6ead7e91bf775e2f2b1a11462ddcf5b1010bbc11c3c40c87330b"
     },
     {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_planner_report.json",
+      "bytes": 18149,
+      "sha256": "83fceb9e82e650d5b3283807c903d0756d701018d06316e09f5cc07fe79f3c63"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_variogram_report.json",
+      "bytes": 6567,
+      "sha256": "82c73f435bd45a7e9124a35ba274674d04770ae08e0efc12b74840b6d6982f78"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/gis_mcp_contract.json",
+      "bytes": 2335,
+      "sha256": "84a161c267937704b5595c0905a6fac19e764125873b9af24b423aac0a6de6f5"
+    },
+    {
       "path": "servers/eo-spatial-split-planner/artifacts/mcp_http_test.json",
-      "bytes": 245,
-      "sha256": "977df23672613bef9a64ce29391c12cd41c23eecc0b8c21e35c2317bea4d9614"
+      "bytes": 974,
+      "sha256": "e1aa56f905a3ab3c811d489757ffc9c89d6a0ca6304aff43c4fdf09b2022825d"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/mcp_smoke_test.json",
-      "bytes": 155,
-      "sha256": "66a32a2b1b44927e070980aaaf1fb6e9f9357823e040ac04d03725d6c2a70698"
+      "bytes": 836,
+      "sha256": "9f965f629cb46e0e1e2044726500ad7f277fa8b8811a88c7ed1405abc9849c26"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/patches.json",
+      "bytes": 4786,
+      "sha256": "8176507f2f589d75b881660134a3230a9618c291349ce1ec852b3987e946033d"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/real_demo_report.json",
-      "bytes": 37901,
-      "sha256": "c54a769ae3628da0771d41046fd277ee8e80c1a9efa87500d12214c3a916a4bf"
+      "bytes": 29416,
+      "sha256": "7604db742c707bbc662b7300ef27a65a07cf79d836f8d742d898eff1da8e7c31"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/reference_validation.json",
+      "bytes": 1587,
+      "sha256": "da54ee205b2adfaea464d9c5e75a2fd0819ea69234b5c2592f7352ff93f9d155"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/benchmark_plan.json",
+      "bytes": 28354,
+      "sha256": "9d340ca77f02b4b1cb6ae66e8f9839ba372cd27bfdb99f082cfd3649841708ee"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/buffered_patch_split.tif",
+      "bytes": 5559,
+      "sha256": "62c469d236f90bf0e39e685e4918b5b3a21aa1522839b94e2205e84e0673daac"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/segmentation_comparison.png",
+      "bytes": 874207,
+      "sha256": "30f36fa34d093e10451832cf055753806347fc00676a476bfca82017ca76e517"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/segmentation_predictions.npz",
+      "bytes": 150493,
+      "sha256": "30aac5117273551e34bd7abea46d218721e91327c66dbd4698265d030d554185"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/segmentation_report.json",
+      "bytes": 15029,
+      "sha256": "a967a15c57f2acd18c887d24fee9180e811a40af59c519330591b67959a7df96"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/size_matched_without_buffer_model.pt",
+      "bytes": 25273,
+      "sha256": "450003d81cc8fdc0770c41fff1443909b7a3258444f49260593ff907439ba480"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/test_patch_montage.png",
+      "bytes": 272139,
+      "sha256": "bc0e271bbc56c2a9d2ce70d6312f84bd2ee90ea7ebdb790769009040a69ddebc"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/unbuffered_patch_split.tif",
+      "bytes": 8906,
+      "sha256": "bade51a91de5bfeeb439a15ac4cb52d8235692d3258945f2a2b073e6c014a404"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/with_buffer_model.pt",
+      "bytes": 24921,
+      "sha256": "d2e287ab7119c52ba0c5adf32e9591102a985f1d87a45fcdeb78dfeed8fc9bab"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/without_buffer_model.pt",
+      "bytes": 24963,
+      "sha256": "20f2f04e46f2a072b1259609fc76c8b805d97e7f0193f5f2424e1550d8419609"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_data/manifest.json",
+      "bytes": 4514,
+      "sha256": "c66b6e4b4031403a95341a58fa09413dfcd8eaea3d7c1b96e119579b8b12d3ce"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_data/sentinel2_reflectance_20m.tif",
+      "bytes": 4768871,
+      "sha256": "9dbb6619067faf0b3e5b674b82c894157bdbda91c1843478dca66dcb5235fc95"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_data/worldcover_2021_20m.tif",
+      "bytes": 95232,
+      "sha256": "101e1c4263fc1354a5081bd749ff0540a6f5fec96e32a60ad78e1f652ef15c92"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/sensitivity.json",
-      "bytes": 6131,
-      "sha256": "b0203e176ab25f918f3a5ae6b9ce22a73a8b96f8ace856a44671d9dacc31e981"
+      "bytes": 9226,
+      "sha256": "75a72c14fb5ae61b99eb0bc08c8db41488890ceb597622b0eac4c40f04c58557"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/split_mask.tif",
-      "bytes": 9898,
-      "sha256": "f8180e5bc824ca667a8905692fca61c8191a9863eacec3fcf11ee9b2310563ba"
+      "bytes": 5821,
+      "sha256": "bd78be72fb1f928b40f83078efedcf4927e52ad2365814433e268fff716c14f6"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/unbuffered_split_mask.tif",
+      "bytes": 6164,
+      "sha256": "7efa47699683cc872ce95b6a8442268678c1d9918effee0866c019f9fde33484"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/validation_summary.json",
+      "bytes": 2850,
+      "sha256": "10e8a2c6b30946d934bc5da6d601bc2e0ca5d17b8accd4dc78b07348d05aca75"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/variogram_report.json",
+      "bytes": 7012,
+      "sha256": "f923e9ada11b1e1a4da3afa85af96bf982fa9f800c200aef2d42af7a6cfc9606"
     },
     {
       "path": "servers/eo-spatial-split-planner/core.py",
-      "bytes": 18081,
-      "sha256": "e2e6726de27313ea07151998867a37863905688c327317d6be85821feb818209"
+      "bytes": 32783,
+      "sha256": "e6ca3f14a976ece4f327255d324d25c355d445a5a5e46d47b3f07d27a048a912"
     },
     {
       "path": "servers/eo-spatial-split-planner/imagery.py",
-      "bytes": 9610,
-      "sha256": "6e9e30782eae5d3f7af2c53c8fbe81aad4d3f90a43a9360a5e50de773867329d"
+      "bytes": 10182,
+      "sha256": "d3602612b5bfc9afb40a4ef4fe0875b96a1be28ecccd8f60ae67555767d7d3ec"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/requirements-demo.txt",
+      "bytes": 40,
+      "sha256": "60f50d43e9c79ae7f9f1db30f92eb04851aa5eec17bb439ffaa37c686856f889"
     },
     {
       "path": "servers/eo-spatial-split-planner/requirements.txt",
@@ -73,24 +197,55 @@
       "sha256": "cd394b2256fc36607fc25b6d64afdf686c8797fa9096a14f16a976eb13477757"
     },
     {
+      "path": "servers/eo-spatial-split-planner/run_segmentation.py",
+      "bytes": 5341,
+      "sha256": "8958da61c69ad71c292dfafa06bbea26ccb6fdf4e754dde2eb155a2b3584dc60"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/segmentation.py",
+      "bytes": 28421,
+      "sha256": "56c019fabd878435374bf40ae571ced42a5709e21e69e63b92238e41d5d54319"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/segmentation_data.py",
+      "bytes": 10482,
+      "sha256": "1b66305d6e1060da91d871b0c25742bffff947d7a532d5c9e91fc4f6a80faac1"
+    },
+    {
       "path": "servers/eo-spatial-split-planner/server.py",
-      "bytes": 6884,
-      "sha256": "d58a695000600488477a0de1b1ea5fd03910924ea0c4643227bd88061ba7070b"
+      "bytes": 14458,
+      "sha256": "3e423175464209f1e0f669651ec8dc06764e88c55902c78e23a5039ed2a0b61b"
     },
     {
       "path": "servers/eo-spatial-split-planner/test.py",
-      "bytes": 8307,
-      "sha256": "96331ef84530ce90b7963a77353003d2c8001a04d159466a68fb7c664fb35f72"
+      "bytes": 22619,
+      "sha256": "1f822e727f5a3c8c63d22133280642caec9550dd3d05d984daa3e071096844ae"
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_core.py",
-      "bytes": 7212,
-      "sha256": "e3eaf4d5a967a91617263da020fede08f034350f6fe2bb44b3a043ac3fdf2bce"
+      "bytes": 25503,
+      "sha256": "30a667f4b43cb3fdd5905895816ca231ac67c48aa6c4278b6108066429e6fa5d"
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_imagery.py",
-      "bytes": 1723,
-      "sha256": "d70ca0300d0b6f31f5e3e4896977ffc840510c0d767a417ab160e6447996c00b"
+      "bytes": 2088,
+      "sha256": "56f34b3852e605484380531bfc724f621eda014aa23ff479fe2fb52e75a718c4"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/tests/test_segmentation.py",
+      "bytes": 5851,
+      "sha256": "c366b0095d40e3f807b5139769f3a0dc1b888ecb431b146cc94696f40a39679e"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/validate_reference.py",
+      "bytes": 4410,
+      "sha256": "d1b82eab891c8f04339d9d9a063bf9f32afc4c4e804e4b04090aaf8aff354033"
     }
-  ]
+  ],
+  "archive": {
+    "path": "EO_Spatial_Split_Planner_submission.zip",
+    "bytes": 8955119,
+    "sha256": "80d65f7bb0d24946a86a6fe6a2b97c00dce24a90a17841bbb59a11d462b953ad",
+    "includes_shared_dockerfile": true
+  }
 }

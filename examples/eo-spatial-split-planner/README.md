@@ -1,106 +1,125 @@
-# EO Spatial Split Planner
+# EO Spatial Split Planner — draft patch demo
 
-A draft MCP server for EVE that turns a numeric Earth Observation raster into a reproducible train/validation/test partition informed by measured spatial dependence. It implements the [EO Spatial Split Planner concept note](https://docs.google.com/document/d/12IIlu0eEh_bVcY3pnii98iE5CrnEY80DatgcOOmFLEM/edit): expose the tradeoff between spatial separation and retained training data, with evidence an analyst can inspect.
+An MCP server for EVE that measures spatial autocorrelation in continuous Earth Observation data and samples **random rectangular train/validation/test patches in both spatial axes**. It removes whole patches to create a measured guard, exports paired buffered/unbuffered masks, and reports retained support and actual separation. The notebook now trains a small semantic-segmentation CNN on real imagery to compare prediction behavior with and without excluding nearby training patches.
 
-The server reads actual native-resolution Sentinel-2 L2A pixels or a local GeoTIFF. It returns empirical directional dependence, a buffered stripe partition, a matched random split comparison, retention and separation checks, provenance, and artifact paths. The prototype uses contiguous stripes, rather than a checkerboard or a fitted variogram model.
+The implementation is aligned with the variogram subset of the reference repository's frozen checkpoint [`ac7dfc6`](https://github.com/stefanopitton/lulc-classification/tree/ac7dfc6578c2c408c87398e15073354752bbd32b): [scientific functions](https://github.com/stefanopitton/lulc-classification/blob/ac7dfc6578c2c408c87398e15073354752bbd32b/src/lulc/validation/autocorrelation.py), [configuration](https://github.com/stefanopitton/lulc-classification/blob/ac7dfc6578c2c408c87398e15073354752bbd32b/config/analysis.toml), and [worked example](https://github.com/stefanopitton/lulc-classification/blob/ac7dfc6578c2c408c87398e15073354752bbd32b/notebooks/autocorrelation.py). That checkpoint also contains additional estimators; `PROCEDURE.md` selects only its variogram and spherical model for this POC. Here `partial_sill` is the spherical model's second coefficient, and output `sill` means the total `nugget + partial_sill`.
 
-## Tools
+## Random rectangles and paired masks
+
+Seeded selection and row/column jitter place nonoverlapping rectangles in two dimensions. The primary demo requests 40 rectangles of 48 × 64 pixels (960 × 1,280 m at 20 m resolution), with seed 3 and initial split ratios 0.6/0.2/0.2. Patch placement and split assignment use the supplied finite-pixel mask without class stratification. The cache already applies imagery/reference-availability exclusions; vegetation/built-up/water identities and model scores do not select patch geometry.
+
+The buffer applies to whole rectangle footprints. Test has priority, then validation, then training; a conflicting lower-priority rectangle is removed rather than cropped. The paired condition without a training buffer restores candidate training rectangles while retaining **identical validation and test patches**. In the recorded experiment, 24 training candidates become 8 buffered training patches, with 6 validation and 8 test patches fixed in both conditions. Two candidate validation patches are excluded to keep the held-out geometry compatible.
+
+`patches.json` records coordinates, assigned split and keep flags. The masks use `0=excluded`, `1=train`, `2=validation`, `3=test`. Unselected valid AOI pixels, invalid pixels and buffer-discarded candidate patches are reported separately: the whole-scene exclusion count must not be described as pixels lost to the guard. Requested ratios describe the initial candidate assignment; retained ratios change after exclusions.
+
+`buffer_autocorrelation` evaluates the actual guard separately from any query `lag_m`. A passing result at a larger query lag cannot endorse a smaller guard. Too few retained patches produces an actionable error. Exact retained-pixel center distances and conservative footprint-gap bounds are reported alongside rectangle coordinates.
+
+## MCP tools
 
 | Tool | Input | Result |
 | --- | --- | --- |
-| `plan_sentinel2_split` | WGS84 bbox, dates, band; optional scene ID, buffer, seed, ratios and patch radius | A real scene's measured dependence, spatial partition and evidence |
-| `plan_spatial_split` | Path to a numeric, cloud-masked raster on the server; 1-based band index | The same analysis for imagery provided by another workflow or MCP tool |
+| `evaluate_sentinel2_autocorrelation` | WGS84 bbox, continuous band, lag in metres; optional dates/scene | Variogram estimate and accept/increase-lag decision on real Sentinel-2 |
+| `evaluate_spatial_autocorrelation` | Local numeric GeoTIFF, lag, 1-based band index | The same evaluation for an imagery-tool handoff |
+| `plan_sentinel2_split` | Sentinel-2 search, `patch_size_pixels`, `n_patches`, optional guard | Random rectangular patches, paired masks and separation evidence |
+| `plan_spatial_split` | Local raster, rectangle settings, optional guard | The same patch planning for an existing raster |
 
-Common options are `buffer_m=None` for a measured heuristic, `seed=42`, `split_ratios=[0.6, 0.2, 0.2]`, and `patch_radius_m=0`. A patch radius reserves additional space around sample centers. The buffer is a distance in metres; inspect the returned separation checks when using nonzero patch footprints.
+Planning accepts `patch_size_pixels=[48,64]` (or an integer for a square) and `n_patches=40`. Band aliases such as `red_edge1`/`nir` resolve to `B05`/`B08`. The evaluator reports `rho_at_lag`, `practical_range_m`, nugget, partial/total sill, fit RSS, variance, missing fraction and per-bin accepted counts. Complete reports, numeric imagery, buffered and paired unbuffered masks, and patch records are files on the MCP server. Another machine needs shared storage or artifact transfer to read them.
 
-The compact JSON response includes server-local paths for `split_mask.tif`, `analysis_band.tif`, and `report.json`. Mask labels are `0=nodata_or_buffer`, `1=train`, `2=validation`, and `3=test`. A client on another machine needs a separate artifact transfer mechanism to retrieve these files. Every successful run has a deterministic content/parameter fingerprint; paths are unique per invocation.
+The optional segmentation experiment is a separate CPU runner; PyTorch is not required by the four MCP tools.
 
-## Method and limits
+## Real 2021 segmentation comparison
 
-1. Read one spectral band and its valid-pixel mask on a projected grid in metres.
-2. Measure paired Pearson correlation and empirical semivariance in east/west, north/south, and both diagonal directions. Derive a heuristic range only after three consecutive lag bins have absolute correlation at most 0.1 in all four directions. Report unresolved estimates and sampled pair counts; paired pixels are not independent observations.
-3. Construct reproducible contiguous train/validation/test stripes, excluding guard regions between partitions and allowing for sample-patch footprints. Preserve nodata exclusions.
-4. Check the actual minimum cross-partition distances, retained pixel counts and achieved proportions. Compare with a seeded random shuffle on exactly the same retained pixels and split counts.
-5. Export the masks and full diagnostics so that the planning decision is reviewable.
+The primary notebook uses Berlin `[13.30,52.35,13.50,52.50]`, with Sentinel-2 scene `S2B_MSIL2A_20210617T100559_R022_T33UUU_20210624T052802` acquired on 2021-06-17. Features are B05/B03/B04/B08 surface reflectance on B05's native 20 m grid (850 × 699 pixels, EPSG:32633). The 10 m bands are area-averaged to that grid. Per-pixel SCL classes 4/5/6 are retained, and processing-baseline calibration is recorded. Acquisition is through public Planetary Computer STAC.
 
-The requested split ratios are targets; buffer exclusions, nodata and stripe geometry affect achieved proportions. Increasing a buffer can leave too little area for all three splits. Such cases return an actionable error rather than a usable-looking empty split.
+ESA WorldCover 2021 v200 is nearest-neighbor aligned to the same grid, mapped to vegetation, built-up and water, with other labels ignored. Matching imagery and label years avoids using a 2021 reference for a 2024 scene. WorldCover is a **weak annual, machine-generated reference using Sentinel-1/Sentinel-2**, so the scores measure reference-map agreement rather than independent field accuracy. Annual labels can differ from land cover visible on the single acquisition date. Labels are distributed under CC BY 4.0; see the [WorldCover 2021 record](https://doi.org/10.5281/zenodo.7254221) and saved attribution.
 
-The default analysis samples up to 20,000 pairs per direction and lag over up to 20 lag bins, extending to approximately one quarter of the shorter image dimension. If no range is observed, the largest tested distance becomes an explicitly provisional buffer; it is not evidence of sufficient decorrelation. Constant imagery requires an explicit buffer.
+The B05 variogram selects a **1,298.24 m** guard. The experiment trains a 5,283-parameter CNN from scratch: three 3 × 3 convolutional layers with 16 channels and ReLU, followed by a 1 × 1 class head. All conditions start from seed-42 weights and use AdamW (learning rate 0.003, weight decay 0.0001), 150 optimizer steps, batch size 8 and 32 × 32 training crops on CPU. Normalization is fitted on each condition's labelled training pixels only. Validation every 25 steps selects the highest-mIoU checkpoint; the common test support is scored once per selected model.
 
-The measured range is empirical and band-specific. It is not a guarantee of statistical independence. A single AOI can be nonstationary or anisotropic, and a range can remain unresolved over the available distances. Validate the target labels, other predictive bands, land-cover balance, overlapping scenes, repeated sites and acquisition times for the intended ML task. No prediction model is fitted, and the separation comparison does not measure downstream model accuracy. A temporal or region holdout may still be necessary.
+| Condition | Train patches | Labelled train pixels | Test mIoU | Test pixel accuracy | Minimum train–test rectangle-edge gap |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Without training buffer | 24 | 70,237 | 0.5307 | 0.9016 | 100 m |
+| With measured buffer | 8 | 23,845 | 0.4790 | 0.8519 | 1,700 m |
+| Size-matched, without distance filter | 8 | 23,326 | 0.4785 | 0.8515 | 220 m |
 
-For local input, the grid must be north-up, square, projected in metres, and contain at most 1 million pixels. Dataset masks and nodata are honored; the server does not invent a cloud mask for arbitrary local files. Raster previews and rendered PNGs are unsuitable input.
+All models use the same 6 validation/8 test patches and 23,240 labelled test pixels. The buffered condition retains 33.95% of the unbuffered labelled training pixels. The size-matched control samples 8 training rectangles using seed 43; it matches patch count, while pixel counts and class composition can differ. Water has only 229 test pixels, and every model has water IoU 0 in this run.
 
-## Real Sentinel-2 acquisition
+The buffer increases separation and reduces the training pool. The larger unbuffered training set scores higher; the size-matched control is close to the buffered result. **This does not isolate leakage as the cause of the score difference or establish that a buffer improves accuracy.** A lower buffered score is a valid observed result. Repeat across seeds, independent labels, regions and seasons before making model claims.
 
-The default demo analyzes `[13.30,52.35,13.50,52.50]` around southern Berlin over `2024-06-01` to `2024-08-31`, using B05 at its native 20 m resolution. Scene search uses the public Microsoft Planetary Computer STAC collection `sentinel-2-l2a`. It selects the least cloudy covering scene among the first 100 returned items, breaking ties by item ID. Supply `item_id` to pin a scene for replay.
+See the executed [notebook](../../EO_SPATIAL_SPLIT_PLANNER.ipynb), [data manifest](artifacts/segmentation_data/manifest.json), [patch plan](artifacts/segmentation_benchmark/benchmark_plan.json), and [trained results](artifacts/segmentation_benchmark/segmentation_report.json). Saved masks, predictions, checkpoints and figures make the comparison inspectable.
 
-The server reads windowed numeric cloud-optimized GeoTIFF pixels and uses nearest-neighbor SCL alignment. It retains SCL classes 4 (vegetation), 5 (nonvegetated) and 6 (water), excludes all other classes and nodata, and applies the asset's reflectance scale/offset or the recorded Sentinel-2 processing-baseline convention. The report records the scene ID, acquisition date, CRS, native pixel spacing, mask, calibration, AOI and source URL. The AOI must be within Sentinel-2 coverage, span at most one degree in either direction, and read no more than 1 million native pixels.
+![Real imagery, weak labels, random rectangular patches, model predictions and validation curves](artifacts/segmentation_benchmark/segmentation_comparison.png)
 
-A catalogue cloud percentage is a scene-level filter; it does not establish that every AOI pixel is clear. The retained SCL classes are an explicit masking choice, with their usual classification uncertainty. Network access is necessary for this path. No Planetary Computer account or API key is required; transient signed archive URLs are not persisted.
+## Variogram procedure
 
-## Recorded real-data result
+1. Read the selected band without normalizing it. Calculate population variance over finite pixels in float64; reject zero or non-finite variance.
+2. Create 24 logarithmic bins between the native pixel size and 12,800 m, with geometric bin centers. For each source bin, draw 200,000 radii uniformly in that bin and angles uniformly over `[0, 2π)`, using `np.random.default_rng(3)`.
+3. Round offsets to integer pixels, remove zero offsets, and recompute each pair's destination bin from its actual rounded distance. Draw anchors uniformly over the raster. Discard out-of-bounds partners and pairs touching non-finite values. Sampling is isotropic, and edge rejection is accepted.
+4. Accumulate squared differences and counts by destination bin. Empty bins remain missing. Calculate `gamma = sum_squared_differences / (2 * counts)` and `rho = 1 - gamma / variance`.
+5. Fit `gamma(h) = c0 + c1 * (1.5*t - 0.5*t**3)`, where `t = min(h/a, 1)`, using at least four populated bins. The nonnegative parameters are nugget `c0`, partial sill `c1`, and practical range `a`; total sill is `c0 + c1`. `scipy.optimize.curve_fit` uses `sigma = 1/sqrt(counts)` and the procedure's initial guess. Report fit RSS so the fit can be inspected.
+6. Interpolate empirical `rho` linearly in `log(lag)` after dropping missing bins. Reject requests outside the populated bin-center range or with fewer than two populated bins.
+7. Accept a requested separation only when **`rho_at_lag < 0.1` and `lag_m >= practical_range_m`**. Otherwise increase the lag and evaluate again. A failed or unresolved fit cannot establish acceptance.
 
-The saved experiment used scene `S2A_MSIL2A_20240828T102021_R065_T32UQD_20240828T150452`, acquired on 2024-08-28. The native B05 window has 876 × 731 pixels in EPSG:32632, with 562,947 valid pixels after masking.
+Counts are accepted pairs after all exclusions, and can differ from 200,000 because rounded offsets move across source-bin boundaries. This POC uses only the variogram; it does not calculate directional Pearson curves, Moran's I, Geary's C, or an exponential fit.
 
-| Measurement | Result |
-| --- | ---: |
-| Heuristic directional range | 1,923.33 m, observed by the stated rule |
-| Retained valid pixels | 431,857 / 562,947 (76.71%) |
-| Train / validation / test counts | 258,623 / 86,580 / 86,654 |
-| Minimum spatial center separation | 1,960 m |
-| Conservative minimum footprint gap | 1,931.72 m |
-| Matched random minimum footprint gap | 0 m |
 
-The 131,090 discarded valid pixels are guard-gap exclusions. Cloud/nodata exclusions are already absent from the 562,947 valid-pixel denominator. These results quantify one scene and partition; they do not measure model accuracy. See the [full report](artifacts/real_demo_report.json), [buffer sensitivity](artifacts/sensitivity.json), and diagnostic below.
+## Assumptions
 
-![Actual B05 imagery, spatial and random partitions, directional dependence, semivariance, and buffer sensitivity](artifacts/diagnostic.png)
+The AOI is one realization of a random field. Approximate stationarity and isotropy are assumed; uniform angles average directional structure away. Differencing removes dependence on an arbitrary constant mean, but **does not remove spatial trend**. Trend affects gamma and global variance, and can affect rho. Inspect the fit, accepted counts, cloud exclusions and directional structure before relying on the range. Negative rho values are retained.
 
-## Run and test
+The range and decision are continuous-band-specific point estimates without a significance test. Arbitrary categorical class codes have no meaningful numeric variance; use per-class indicator fields for a separate analysis. A B05-derived buffer does not prove independence in labels, other bands or repeated acquisitions. The model comparison also changes training volume, spatial support, normalization and class mix. The size-matched control reduces one confound but cannot establish a causal benefit.
 
-Run these commands from the `agentic-eo` directory. A Python virtual environment with the server dependencies is sufficient for the planner:
+## Can EVE use GIS MCP imagery?
+
+**Yes, with a prepared numeric-raster handoff.** GIS MCP documents [`download_satellite_imagery`](https://gis-mcp.com/data-gathering/satellite_imagery/), returning a GeoTIFF `file_path` and scene metadata. A deployed GIS MCP server must be registered with EVE first; the documentation URL is not an MCP endpoint. The inspected account has no GIS MCP server enabled. **GIS acquisition was not invoked or integration-tested here**; actual pixels in the demo use this project's Planetary Computer reader. The source-audited [contract](artifacts/gis_mcp_contract.json) records this limitation and the requirements below.
+
+Request B05 and SCL together on their common 20 m grid. Verify the returned scene ID, acquisition date, assets and AOI crop; search fallbacks can relax date/cloud constraints. Apply reflectance scale/offset from source metadata or processing baseline, plus the SCL per-pixel cloud/shadow/nodata mask. The audited GIS writer does not calibrate values or preserve scale/offset metadata. Retain a projected metre grid. Its stack writer cannot mix 10 m B03/B04/B08 with 20 m B05/SCL directly; obtain and align additional bands separately for the four-band model.
+
+`file_path` is local to the GIS server. Share storage or transfer it using that server's documented `/storage/download` route before passing the prepared path to `evaluate_spatial_autocorrelation` and `plan_spatial_split`. Scene cloud percentage alone is not a pixel mask, and rendered previews are unsuitable scientific input.
+
+## Reproduce
+
+From the `agentic-eo` directory:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r examples/eo-spatial-split-planner/requirements.txt pytest
-.venv/bin/python examples/eo-spatial-split-planner/test.py
+.venv/bin/python -m pip install -r examples/eo-spatial-split-planner/requirements-demo.txt
+.venv/bin/python examples/eo-spatial-split-planner/segmentation_data.py
+.venv/bin/python examples/eo-spatial-split-planner/run_segmentation.py --steps 150
 .venv/bin/python -m pytest examples/eo-spatial-split-planner/tests -q
-.venv/bin/python examples/eo-spatial-split-planner/test.py --real
+.venv/bin/python examples/eo-spatial-split-planner/test.py
 ```
 
-Validation completed with 29 unit tests passing, the offline stdio MCP checks passing, and the real Sentinel-2 experiment passing. The offline checks exercise synthetic cases and geometry; `--real` acquires actual satellite pixels and writes `artifacts/real_demo_report.json`, `diagnostic.png`, `analysis_band.tif`, `split_mask.tif`, and `sensitivity.json`. The diagnostic contains measured dependence and the resulting partition. The sensitivity output exposes retention and separation for alternative buffer choices.
+Data acquisition reuses matching cached inputs unless `--force` is passed. The model runner retrains from those real rasters; it uses the full procedure defaults of 24 bins, 200,000 attempted pairs per source bin and split seed 3. The notebook also retrains by default with `TRAIN_MODELS=True`; `RECOMPUTE_IMAGES=True` refreshes imagery. The saved [reference-validation artifact](artifacts/reference_validation.json) records parity with the frozen variogram checkpoint.
 
-[`EO_SPATIAL_SPLIT_PLANNER.ipynb`](../../EO_SPATIAL_SPLIT_PLANNER.ipynb) displays the saved real-data report, figure, MCP schema and EVE evidence. Its default uses cached results; `RECOMPUTE=True` requests another real acquisition. [`START_HERE_no_instructions.ipynb`](../../START_HERE_no_instructions.ipynb) preserves all seven original code cells, removes the original notebook's Markdown cells, and clears saved outputs and execution counts. The original notebook is preserved.
-
-Start the MCP server over stdio or streamable HTTP:
+Start the MCP server with:
 
 ```bash
 .venv/bin/python examples/eo-spatial-split-planner/server.py --transport stdio
 .venv/bin/python examples/eo-spatial-split-planner/server.py --transport http
 ```
 
-HTTP uses port 8000 and `/mcp`; artifact storage defaults to a server temporary directory. Set `EO_SPLIT_OUTPUT_DIR` to choose a persistent output directory.
+HTTP uses port 8000 and `/mcp`. `EO_SPLIT_OUTPUT_DIR` selects persistent artifact storage; otherwise a server temporary directory is used. Local rasters must be square, north-up and projected in metres, with at most 32 million pixels. Remote Sentinel-2 acquisition is capped at one million pixels and a one-degree AOI span per axis.
 
-Example tool arguments:
+Example `plan_spatial_split` arguments:
 
 ```json
 {
-  "bbox": [13.30, 52.35, 13.50, 52.50],
-  "start_date": "2024-06-01",
-  "end_date": "2024-08-31",
-  "band": "B05",
-  "max_cloud_cover": 10,
-  "seed": 42
+  "raster_path": "/shared/sentinel2_reflectance_20m.tif",
+  "band_index": 1,
+  "seed": 3,
+  "patch_size_pixels": [48, 64],
+  "n_patches": 40
 }
 ```
 
-The local-raster handoff accepts, for example, `{"raster_path":"/shared/cloud_masked_b05.tif","band_index":1,"seed":42}`. That path must be visible to the planner's server process. A scene ID from an imagery discovery tool can instead be supplied as `item_id` to `plan_sentinel2_split`.
+Omitting `buffer_m` measures a sufficient guard from the variogram. An explicit guard is reported with its own decision and can be rejected scientifically even if a geometric split is feasible. An imagery-discovery scene ID can be passed as `item_id` to a Sentinel-2 tool.
 
-## EVE integration
+## EVE and draft submission
 
-The live account's gateway discovery is saved in `artifacts/eve_gateway_discovery.json`. At testing, the account exposed no dedicated Sentinel-2/CDSE imagery server, and both Sentinel-2 searches through the enabled `eodashboard.search_collections` tool returned no matching collections. This draft therefore acquires Sentinel-2 through public STAC within the planner and demonstrates the separate EVE model plus hosted geocoder plus local MCP planner chain. The acquisition route is explicit in the output provenance.
+Gateway discovery and live EVE traces are saved under `artifacts/`. The recorded account did not expose a dedicated Sentinel-2 downloader; public STAC acquisition is explicit in the tool provenance. Inspect trace verification, schema/geometry version and `review_notes` before treating model prose as evidence. Older successful traces do not validate revised rectangle behavior. The live MCP imagery replay can use the separate 2024 B05 scene recorded in its provenance; the primary matched-year 2021 segmentation experiment is a distinct local CPU run.
 
-EVE testing uses the existing `agentic_eo` helpers and reads credentials from the repository `.env` without putting them in the notebook or evidence files. Install the repository dependencies for that optional path:
+Optional EVE testing uses repository helpers and credentials from `.env` without saving secrets:
 
 ```bash
 .venv/bin/python -m pip install -r requirements.txt
@@ -108,18 +127,4 @@ EVE testing uses the existing `agentic_eo` helpers and reads credentials from th
 .venv/bin/python examples/eo-spatial-split-planner/test_eve.py
 ```
 
-The live EVE run completed both the hosted geocoder call and local Sentinel-2 planner call successfully; the saved verification flags and full trace record this. The raw model answer is preserved in the trace. Its prose needs four corrections: discarded valid pixels are guard-gap exclusions; the 1,931.72 m footprint gap is a conservative lower bound while the 1,960 m center distance is exact; the very low cloud percentage is scene-level catalogue metadata; and verified geometry alone does not establish label independence or prevent every form of leakage.
-
-The second command records the currently accessible catalogue. The final command asks the actual EVE model to call the hosted `reverse_geocode_place` tool and the local `plan_sentinel2_split` tool, and saves a sanitized answer/trace in `artifacts/eve_demo.json`. Use `--skip-discovery` to reuse catalogue evidence, or `--raster /path/to/analysis_band.tif` to exercise the local-raster tool through the same agent. A returned tool message may contain an error; inspect the saved trace and verification fields before claiming success.
-
-## Registry submission
-
-The self-contained draft entry is staged at [`submission/servers/eo-spatial-split-planner/`](../../submission/servers/eo-spatial-split-planner/) for the [EVE MCP tool registry](https://github.com/eve-esa/mcp-tool-registry). It includes the server, dependencies, tests and recorded evidence. The optional EVE script stays in this development repository because it imports the hackathon helpers. The proposed PR description is in [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md).
-
-From `agentic-eo`, validate the staged entry with:
-
-```bash
-.venv/bin/python submission/validate_submission.py
-```
-
-The validator writes [`submission/validation.json`](../../submission/validation.json). To prepare the registry PR, place only `submission/servers/eo-spatial-split-planner/` at `servers/eo-spatial-split-planner/` in a registry checkout. `submission/shared/Dockerfile` supplies the shared base for the staged build layout and is not an additional proposed registry change. The container build was not executed because a Docker daemon was unavailable. The draft has not been published or submitted.
+The registry draft is staged under [`submission/servers/eo-spatial-split-planner/`](../../submission/servers/eo-spatial-split-planner/), with proposed wording in [`PR_DESCRIPTION.md`](PR_DESCRIPTION.md). Refresh the staged copy and run `.venv/bin/python submission/validate_submission.py` after changes. The optional PyTorch demo is separate from the base server; Docker build and publishing status are separate from numerical, geospatial and MCP validation. This remains a draft demo.

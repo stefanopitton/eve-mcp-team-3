@@ -1,0 +1,564 @@
+{
+  "experiment": "paired tiny CNN semantic segmentation on fixed held-out rectangle patches",
+  "primary_conditions": [
+    "without_buffer",
+    "with_buffer"
+  ],
+  "class_names": [
+    "vegetation",
+    "built-up",
+    "water"
+  ],
+  "label_provenance": {
+    "source": "ESA WorldCover 2021 v200, nearest-neighbour aligned to Sentinel-2 B05 native 20 m grid",
+    "source_item": "ESA_WorldCover_10m_2021_v200_N51E012",
+    "sentinel2_item": "S2B_MSIL2A_20210617T100559_R022_T33UUU_20210624T052802",
+    "source_year": 2021,
+    "source_date": "2021-06-17T10:05:59.026000Z",
+    "class_mapping": {
+      "0_vegetation": [
+        10,
+        20,
+        30,
+        40,
+        90,
+        95,
+        100
+      ],
+      "1_built_up": [
+        50
+      ],
+      "2_water": [
+        80
+      ],
+      "ignored": "nodata 0, bare/sparse 60, snow/ice 70, unknown codes"
+    },
+    "license": "CC-BY-4.0",
+    "attribution": "ESA WorldCover 2021",
+    "caveat": "ESA WorldCover 2021 is a weak, machine-generated annual reference rather than independent field ground truth. Its classifier uses Sentinel-1 and Sentinel-2, so this demonstration measures agreement with WorldCover; it cannot establish true segmentation accuracy or prove that a buffer improves accuracy. Annual labels may differ from land cover visible on the single acquisition date."
+  },
+  "model": {
+    "architecture": "3 x Conv2d(3x3, 16 channels) + ReLU, then Conv2d(1x1, K classes)",
+    "trainable_parameters": 5283,
+    "pretrained_weights": false,
+    "device": "cpu",
+    "torch_version": "2.14.1"
+  },
+  "controls": {
+    "same_model_initialization_seed": 42,
+    "same_optimizer_steps": 150,
+    "optimizer": "AdamW",
+    "learning_rate": 0.003,
+    "weight_decay": 0.0001,
+    "batch_size": 8,
+    "maximum_crop_size_px": 32,
+    "validation_interval": 25,
+    "checkpoint_selection": "maximum validation mean IoU; earliest tie",
+    "test_evaluations_per_condition": 1,
+    "held_out_pixel_locations_identical": true,
+    "cpu_threads": 2,
+    "training_class_weighting": "none",
+    "size_matched_control": {
+      "enabled": true,
+      "subsampling_seed": 43,
+      "description": "Randomly retain the same number of training rectangles as the buffered condition, without a distance filter. Labelled pixel counts can still differ."
+    }
+  },
+  "buffer_m": 1298.2387330451975,
+  "resolution_m": 20.0,
+  "retained_training_labelled_fraction": 0.33949342938906846,
+  "conditions": {
+    "without_buffer": {
+      "selected_step": 125,
+      "selected_validation_mean_iou": 0.5047592067988669,
+      "training_steps": 150,
+      "training_patch_count": 24,
+      "validation_patch_count": 6,
+      "test_patch_count": 8,
+      "training_patch_ids": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        13,
+        14,
+        18,
+        19,
+        21,
+        23,
+        24,
+        26,
+        27,
+        32,
+        34,
+        35,
+        37,
+        38
+      ],
+      "validation_patch_ids": [
+        15,
+        22,
+        30,
+        31,
+        33,
+        36
+      ],
+      "test_patch_ids": [
+        2,
+        11,
+        16,
+        17,
+        20,
+        25,
+        29,
+        39
+      ],
+      "labelled_class_counts": {
+        "train": [
+          43163,
+          26936,
+          138
+        ],
+        "validation": [
+          11921,
+          6095,
+          15
+        ],
+        "test": [
+          16424,
+          6587,
+          229
+        ]
+      },
+      "training_labelled_pixel_count": 70237,
+      "training_labelled_area_m2": 28094800.0,
+      "minimum_train_validation_patch_edge_distance_m": 72.11102550927978,
+      "minimum_train_test_patch_edge_distance_m": 100.0,
+      "normalization": {
+        "fitted_on": "this condition's finite, labelled training pixels only",
+        "channel_mean": [
+          0.12638351321220398,
+          0.08810798078775406,
+          0.08501718938350677,
+          0.27974236011505127
+        ],
+        "channel_std": [
+          0.03746676817536354,
+          0.02838115207850933,
+          0.03912460803985596,
+          0.08409392088651657
+        ]
+      },
+      "learning_curve": [
+        {
+          "step": 1,
+          "training_cross_entropy": 1.1600747108459473,
+          "validation_cross_entropy": 1.1879641122623883,
+          "validation_mean_iou": 0.11659286306594917
+        },
+        {
+          "step": 25,
+          "training_cross_entropy": 0.27148404717445374,
+          "validation_cross_entropy": 0.3898234714069909,
+          "validation_mean_iou": 0.44270032974392876
+        },
+        {
+          "step": 50,
+          "training_cross_entropy": 0.2154386043548584,
+          "validation_cross_entropy": 0.3720001784307668,
+          "validation_mean_iou": 0.46263939118338854
+        },
+        {
+          "step": 75,
+          "training_cross_entropy": 0.19410794973373413,
+          "validation_cross_entropy": 0.31101356579548545,
+          "validation_mean_iou": 0.4881439672930448
+        },
+        {
+          "step": 100,
+          "training_cross_entropy": 0.20004935562610626,
+          "validation_cross_entropy": 0.2884729501841555,
+          "validation_mean_iou": 0.500742797438217
+        },
+        {
+          "step": 125,
+          "training_cross_entropy": 0.30031365156173706,
+          "validation_cross_entropy": 0.2813099578760949,
+          "validation_mean_iou": 0.5047592067988669
+        },
+        {
+          "step": 150,
+          "training_cross_entropy": 0.22957023978233337,
+          "validation_cross_entropy": 0.3030500849394359,
+          "validation_mean_iou": 0.49544613036996665
+        }
+      ],
+      "test": {
+        "pixel_count": 23240,
+        "pixel_accuracy": 0.901592082616179,
+        "mean_iou": 0.5306811236981029,
+        "per_class_iou": [
+          0.8809605685465383,
+          0.7110828025477707,
+          0.0
+        ],
+        "reference_class_counts": [
+          16424,
+          6587,
+          229
+        ],
+        "predicted_class_counts": [
+          16395,
+          6845,
+          0
+        ],
+        "confusion_matrix": [
+          [
+            15371,
+            1053,
+            0
+          ],
+          [
+            1005,
+            5582,
+            0
+          ],
+          [
+            19,
+            210,
+            0
+          ]
+        ],
+        "confusion_matrix_axes": "rows = reference, columns = prediction",
+        "cross_entropy": 0.3385134614888649
+      },
+      "checkpoint_file": "without_buffer_model.pt"
+    },
+    "with_buffer": {
+      "selected_step": 125,
+      "selected_validation_mean_iou": 0.4973620776256589,
+      "training_steps": 150,
+      "training_patch_count": 8,
+      "validation_patch_count": 6,
+      "test_patch_count": 8,
+      "training_patch_ids": [
+        0,
+        1,
+        4,
+        6,
+        8,
+        21,
+        34,
+        38
+      ],
+      "validation_patch_ids": [
+        15,
+        22,
+        30,
+        31,
+        33,
+        36
+      ],
+      "test_patch_ids": [
+        2,
+        11,
+        16,
+        17,
+        20,
+        25,
+        29,
+        39
+      ],
+      "labelled_class_counts": {
+        "train": [
+          15717,
+          8013,
+          115
+        ],
+        "validation": [
+          11921,
+          6095,
+          15
+        ],
+        "test": [
+          16424,
+          6587,
+          229
+        ]
+      },
+      "training_labelled_pixel_count": 23845,
+      "training_labelled_area_m2": 9538000.0,
+      "minimum_train_validation_patch_edge_distance_m": 1445.5448799674123,
+      "minimum_train_test_patch_edge_distance_m": 1700.0,
+      "normalization": {
+        "fitted_on": "this condition's finite, labelled training pixels only",
+        "channel_mean": [
+          0.12117369472980499,
+          0.08492301404476166,
+          0.07987569272518158,
+          0.2856826186180115
+        ],
+        "channel_std": [
+          0.03214595839381218,
+          0.02607627771794796,
+          0.03620022535324097,
+          0.08159453421831131
+        ]
+      },
+      "learning_curve": [
+        {
+          "step": 1,
+          "training_cross_entropy": 1.2482733726501465,
+          "validation_cross_entropy": 1.182752357809987,
+          "validation_mean_iou": 0.13944654702628057
+        },
+        {
+          "step": 25,
+          "training_cross_entropy": 0.3560622036457062,
+          "validation_cross_entropy": 0.3961961750552867,
+          "validation_mean_iou": 0.45110025570667034
+        },
+        {
+          "step": 50,
+          "training_cross_entropy": 0.22625228762626648,
+          "validation_cross_entropy": 0.34153833453280114,
+          "validation_mean_iou": 0.4773636953868185
+        },
+        {
+          "step": 75,
+          "training_cross_entropy": 0.2828379273414612,
+          "validation_cross_entropy": 0.31762422142009766,
+          "validation_mean_iou": 0.48849089811910895
+        },
+        {
+          "step": 100,
+          "training_cross_entropy": 0.25045058131217957,
+          "validation_cross_entropy": 0.3676413607527271,
+          "validation_mean_iou": 0.4657725722352968
+        },
+        {
+          "step": 125,
+          "training_cross_entropy": 0.22565282881259918,
+          "validation_cross_entropy": 0.2980558082166326,
+          "validation_mean_iou": 0.4973620776256589
+        },
+        {
+          "step": 150,
+          "training_cross_entropy": 0.22876715660095215,
+          "validation_cross_entropy": 0.29959456370955967,
+          "validation_mean_iou": 0.4970274615631835
+        }
+      ],
+      "test": {
+        "pixel_count": 23240,
+        "pixel_accuracy": 0.8518932874354561,
+        "mean_iou": 0.47898616791963833,
+        "per_class_iou": [
+          0.8134628650264428,
+          0.6234956387324722,
+          0.0
+        ],
+        "reference_class_counts": [
+          16424,
+          6587,
+          229
+        ],
+        "predicted_class_counts": [
+          15123,
+          8117,
+          0
+        ],
+        "confusion_matrix": [
+          [
+            14151,
+            2273,
+            0
+          ],
+          [
+            940,
+            5647,
+            0
+          ],
+          [
+            32,
+            197,
+            0
+          ]
+        ],
+        "confusion_matrix_axes": "rows = reference, columns = prediction",
+        "cross_entropy": 0.3280883638050388
+      },
+      "checkpoint_file": "with_buffer_model.pt"
+    },
+    "size_matched_without_buffer": {
+      "selected_step": 150,
+      "selected_validation_mean_iou": 0.5023198629048921,
+      "training_steps": 150,
+      "training_patch_count": 8,
+      "validation_patch_count": 6,
+      "test_patch_count": 8,
+      "training_patch_ids": [
+        0,
+        8,
+        9,
+        10,
+        14,
+        18,
+        34,
+        35
+      ],
+      "validation_patch_ids": [
+        15,
+        22,
+        30,
+        31,
+        33,
+        36
+      ],
+      "test_patch_ids": [
+        2,
+        11,
+        16,
+        17,
+        20,
+        25,
+        29,
+        39
+      ],
+      "labelled_class_counts": {
+        "train": [
+          14649,
+          8659,
+          18
+        ],
+        "validation": [
+          11921,
+          6095,
+          15
+        ],
+        "test": [
+          16424,
+          6587,
+          229
+        ]
+      },
+      "training_labelled_pixel_count": 23326,
+      "training_labelled_area_m2": 9330400.0,
+      "minimum_train_validation_patch_edge_distance_m": 72.11102550927978,
+      "minimum_train_test_patch_edge_distance_m": 220.0,
+      "normalization": {
+        "fitted_on": "this condition's finite, labelled training pixels only",
+        "channel_mean": [
+          0.12907440960407257,
+          0.08854147791862488,
+          0.08540776371955872,
+          0.2869962453842163
+        ],
+        "channel_std": [
+          0.03675033152103424,
+          0.028291692957282066,
+          0.038453955203294754,
+          0.08733159303665161
+        ]
+      },
+      "learning_curve": [
+        {
+          "step": 1,
+          "training_cross_entropy": 1.2322748899459839,
+          "validation_cross_entropy": 1.1818537995327492,
+          "validation_mean_iou": 0.13638391233992223
+        },
+        {
+          "step": 25,
+          "training_cross_entropy": 0.2695873975753784,
+          "validation_cross_entropy": 0.387853705686669,
+          "validation_mean_iou": 0.4541977911205281
+        },
+        {
+          "step": 50,
+          "training_cross_entropy": 0.15864266455173492,
+          "validation_cross_entropy": 0.3437215438943478,
+          "validation_mean_iou": 0.4739046822121184
+        },
+        {
+          "step": 75,
+          "training_cross_entropy": 0.2299116551876068,
+          "validation_cross_entropy": 0.3207101856278445,
+          "validation_mean_iou": 0.4857829511661628
+        },
+        {
+          "step": 100,
+          "training_cross_entropy": 0.19044660031795502,
+          "validation_cross_entropy": 0.31784022751561114,
+          "validation_mean_iou": 0.48972194232576105
+        },
+        {
+          "step": 125,
+          "training_cross_entropy": 0.1897381693124771,
+          "validation_cross_entropy": 0.3046010628654188,
+          "validation_mean_iou": 0.4952568369028761
+        },
+        {
+          "step": 150,
+          "training_cross_entropy": 0.17898988723754883,
+          "validation_cross_entropy": 0.2897924787423937,
+          "validation_mean_iou": 0.5023198629048921
+        }
+      ],
+      "test": {
+        "pixel_count": 23240,
+        "pixel_accuracy": 0.8514629948364888,
+        "mean_iou": 0.4785191618818076,
+        "per_class_iou": [
+          0.8134062140391254,
+          0.6221512716062975,
+          0.0
+        ],
+        "reference_class_counts": [
+          16424,
+          6587,
+          229
+        ],
+        "predicted_class_counts": [
+          15093,
+          8147,
+          0
+        ],
+        "confusion_matrix": [
+          [
+            14137,
+            2287,
+            0
+          ],
+          [
+            936,
+            5651,
+            0
+          ],
+          [
+            20,
+            209,
+            0
+          ]
+        ],
+        "confusion_matrix_axes": "rows = reference, columns = prediction",
+        "cross_entropy": 0.3505183544913996
+      },
+      "checkpoint_file": "size_matched_without_buffer_model.pt"
+    }
+  },
+  "test_mean_iou_difference_without_minus_with_buffer": 0.05169495577846461,
+  "interpretation": "A buffer increases geometric separation while reducing the training pool. Either model can score higher. This single-scene, single-seed comparison cannot establish a causal accuracy benefit or prove independence. Reference-map agreement is not field-validated accuracy.",
+  "elapsed_seconds": 1.818372834000911,
+  "artifacts": {
+    "predictions": "segmentation_predictions.npz",
+    "comparison": "segmentation_comparison.png",
+    "test_patch_montage": "test_patch_montage.png"
+  }
+}
