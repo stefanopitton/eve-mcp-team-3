@@ -21,7 +21,21 @@ from rasterio.windows import Window, from_bounds
 STAC = "https://planetarycomputer.microsoft.com/api/stac/v1"
 COLLECTION = "sentinel-2-l2a"
 MAX_PIXELS = 1_000_000
+MAX_LOCAL_PIXELS = 32_000_000
 BANDS = {"B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"}
+BAND_ALIASES = {
+    "blue": "B02", "green": "B03", "red": "B04", "red_edge1": "B05",
+    "red_edge2": "B06", "red_edge3": "B07", "nir": "B08",
+    "narrow_nir": "B8A", "swir1": "B11", "swir2": "B12",
+}
+
+
+def resolve_band(band: str) -> str:
+    """Accept Sentinel-2 asset codes and canonical checkpoint-repository names."""
+    native = BAND_ALIASES.get(band.lower(), band.upper())
+    if native not in BANDS:
+        raise ValueError(f"band must be an asset code {sorted(BANDS)} or a name {sorted(BAND_ALIASES)}; derived indices require a local raster.")
+    return native
 
 
 def validate_grid(src) -> float:
@@ -45,11 +59,11 @@ def read_local(path: str, band_index: int = 1) -> tuple[np.ndarray, dict, dict]:
         raise ValueError("raster_path must identify a local GeoTIFF visible to this server.")
     with rasterio.open(p) as src:
         pixel_size = validate_grid(src)
-        if src.width * src.height > MAX_PIXELS:
-            raise ValueError(f"Raster exceeds {MAX_PIXELS:,} pixels; crop it first at native resolution.")
+        if src.width * src.height > MAX_LOCAL_PIXELS:
+            raise ValueError(f"Raster exceeds {MAX_LOCAL_PIXELS:,} pixels; crop it first at native resolution.")
         if not 1 <= band_index <= src.count:
             raise ValueError("band_index is outside the raster band count.")
-        arr = src.read(band_index, masked=True).astype("float64").filled(np.nan)
+        arr = src.read(band_index, masked=True).astype("float32").filled(np.nan)
         arr = arr * src.scales[band_index - 1] + src.offsets[band_index - 1]
         profile = src.profile.copy()
     return arr, profile, {"source": "local_raster", "filename": p.name,
@@ -120,8 +134,7 @@ def read_sentinel2(bbox: list[float], start_date: str, end_date: str,
                    max_cloud_cover: float = 10) -> tuple[np.ndarray, dict, dict]:
     """Read an AOI in one native-resolution scene; SCL uses nearest neighbour."""
     bbox = validate_bbox(bbox)
-    if band not in BANDS:
-        raise ValueError(f"band must be one of {sorted(BANDS)}.")
+    band = resolve_band(band)
     scene = find_scene(bbox, start_date, end_date, item_id, max_cloud_cover)
     asset = scene["assets"][band]
     sas = _get_json(f"https://planetarycomputer.microsoft.com/api/sas/v1/token/{COLLECTION}")["token"]
@@ -155,7 +168,7 @@ def read_sentinel2(bbox: list[float], start_date: str, end_date: str,
     baseline = float(scene["properties"].get("s2:processing_baseline", "0"))
     scale = float(rb.get("scale", 0.0001))
     offset = float(rb.get("offset", -0.1 if baseline >= 4 else 0))
-    values = np.where(valid, raw.data.astype("float64") * scale + offset, np.nan)
+    values = np.where(valid, raw.data.astype("float64") * scale + offset, np.nan).astype("float32")
     provenance = {
         "source": "Microsoft Planetary Computer STAC + native Sentinel-2 L2A COG windows",
         "catalog_url": STAC, "collection": COLLECTION, "item_id": scene["id"],

@@ -1,31 +1,31 @@
-## EO Spatial Split Planner
+## Draft demo: EO Spatial Split Planner with random patches
 
-Nearby Earth Observation pixels can leak spatial information across random train/validation/test partitions. This MCP server measures directional dependence in a native-resolution Sentinel-2 band or a local numeric GeoTIFF, constructs buffered contiguous spatial partitions, and returns retention, distance checks, a matched random split comparison, provenance, and GeoTIFF/JSON artifacts.
+Nearby EO training and evaluation patches can share spatial information. This draft MCP server measures a continuous band's variogram and samples random rectangular patches in both spatial axes, then removes whole rectangles to satisfy a measured guard. It exports paired buffered/unbuffered masks, patch coordinates and keep flags, retention and cross-split distances. Validation and test locations remain fixed when nearby training patches are restored for the unbuffered condition.
 
-The two tools are `plan_sentinel2_split` and `plan_spatial_split`. The Sentinel-2 path reads real Planetary Computer L2A COG windows, applies the recorded reflectance calibration and SCL mask, and records the exact scene and processing choices. The local-raster path supports handoff from an imagery tool sharing the server filesystem. The prototype uses stripes and empirical range estimates; it does not fit a prediction model or promise statistical independence of labels, other bands, or repeated acquisitions.
+Four MCP tools evaluate a local or Sentinel-2 raster at a requested lag and plan its patch split. Planning exposes `patch_size_pixels` and `n_patches`. The variogram follows `PROCEDURE.md` and frozen checkpoint `ac7dfc6`: 24 logarithmic bins, 200,000 offset draws per source bin, rounded-distance reassignment, finite-pair exclusion, seed 3, count-weighted spherical fit and log-lag interpolation. Acceptance requires `rho_at_lag < 0.1` and `lag_m >= practical_range_m`; the actual guard has a separate `buffer_autocorrelation` decision.
 
-Validation completed: 29 unit tests passed, stdio and streamable HTTP MCP initialization/tool discovery/tool calls passed, the real Sentinel-2 experiment passed, and the EVE agent completed both hosted geocoding and the local planner call. The executed notebook and official registry structural validator also passed. Docker build remains unverified because the local daemon was unavailable.
+The executed notebook trains a 5,283-parameter CPU CNN on real 2021 Sentinel-2 B05/B03/B04/B08 reflectance with aligned ESA WorldCover 2021 weak labels. Forty 48 × 64-pixel rectangle candidates and a measured 1,298.24 m guard yield 24 training patches without the training filter versus 8 buffered, with identical 6 validation/8 test patches. All models start from the same weights and use 150 optimizer steps, training-only normalization and validation-selected checkpoints. Test evaluation occurs once per selected model.
 
-The 2024-08-28 B05 demo retained 431,857 of 562,947 valid pixels (76.71%), with train/validation/test counts 258,623/86,580/86,654. Its observed heuristic range was 1,923.33 m; the conservative minimum footprint-gap lower bound was 1,931.72 m, compared with 0 m for a random shuffle of the same retained pixels and split counts. Guard exclusions account for the 131,090 discarded valid pixels.
+| Condition | Train patches | Test mIoU | Minimum train–test patch-edge gap |
+| --- | ---: | ---: | ---: |
+| Without training buffer | 24 | 0.5307 | 100 m |
+| With measured buffer | 8 | 0.4790 | 1,700 m |
+| Size-matched, without distance filter | 8 | 0.4785 | 220 m |
 
-Reproduction commands, run from the development repository's `agentic-eo` directory:
+The buffered condition retains 33.95% of labelled training pixels. It scores below the full unbuffered training pool, while the size-matched control is close. This demonstrates the separation/data-volume tradeoff; it does not attribute the score gap to leakage or show an accuracy benefit from buffering. Water is rare and all conditions score water IoU 0. WorldCover itself uses Sentinel imagery, so these scores measure agreement with a weak annual reference, not independent field accuracy.
+
+The notebook includes before/after rectangular patch maps, imagery/reference/prediction views, per-class metrics, class counts, confusion matrices and validation curves. Optional PyTorch training remains separate from the four-tool MCP server. Reports, masks, prediction arrays, model checkpoints and attribution are included in the demo artifacts.
+
+GIS MCP can provide a conditional numeric-raster handoff through its documented `download_satellite_imagery` tool, after EVE registers a deployed server and calibration, SCL masking, scene verification, grid alignment and shared storage/transfer are handled. The GIS source contract was reviewed; no GIS server was invoked or tested through this account. Actual demo imagery is acquired from public Planetary Computer STAC.
+
+Reproduce from this server directory:
 
 ```bash
-.venv/bin/python examples/eo-spatial-split-planner/test.py
-.venv/bin/python -m pytest examples/eo-spatial-split-planner/tests -q
-.venv/bin/python examples/eo-spatial-split-planner/test.py --real
-.venv/bin/python examples/eo-spatial-split-planner/test_eve.py
+.venv/bin/python -m pip install -r requirements-demo.txt
+.venv/bin/python segmentation_data.py
+.venv/bin/python run_segmentation.py --steps 150
+.venv/bin/python -m pytest tests -q
+.venv/bin/python test.py
 ```
 
-The real-data evidence, diagnostic figure, buffer sensitivity results and sanitized EVE trace are included under `artifacts/`. The tested EVE account did not expose a Sentinel-2 imagery downloader, so imagery acquisition uses public STAC inside the planner; the live integration combines the actual EVE model, hosted geocoding and the local planner. Artifact paths returned by the tool refer to the MCP server filesystem.
-
-### Checklist
-
-- [x] Proposed changes are confined to one `servers/eo-spatial-split-planner/` folder.
-- [x] `server.py` follows the FastMCP container and streamable HTTP entrypoint contract.
-- [x] Every dependency has a version constraint.
-- [x] No credentials, `.env` files, or signed archive tokens are included; no server secrets are required.
-- [x] No file exceeds 5 MB.
-- [x] Local numerical, geospatial, protocol and actual-imagery tests pass.
-- [x] Official registry structural validation passes.
-- [ ] Docker build succeeds (not run: local Docker daemon unavailable).
+Stationarity and isotropy remain assumptions; pair differencing is not trend removal. One AOI/acquisition/seed and weak labels do not establish true accuracy, independence in all bands, or temporal transferability. This is a draft demo for review; Docker verification and publishing are separate steps.

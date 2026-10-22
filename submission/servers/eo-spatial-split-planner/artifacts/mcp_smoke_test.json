@@ -1,6 +1,22 @@
 {
   "stdio_tools_list": "passed",
-  "raster_tool_call": "passed",
+  "variogram_tool_call": "passed",
+  "split_tool_call": "passed",
   "georeferenced_split_artifact": "passed",
-  "actionable_invalid_path_error": "passed"
+  "exact_split_and_random_counts": "passed",
+  "seeded_estimator_replay": "passed",
+  "nan_exclusion_and_float64_variance": "passed",
+  "actionable_invalid_path_error": "passed",
+  "out_of_sampled_range_lag_error": "passed",
+  "logarithmic_bins": "passed",
+  "semivariance_from_pair_sums": "passed",
+  "rho_from_variance": "passed",
+  "log_lag_interpolation": "passed",
+  "two_condition_decision": "passed",
+  "spherical_fit_rss": "resolved",
+  "two_axis_rectangle_placements": "passed",
+  "whole_patch_exclusions": "passed",
+  "identical_paired_validation_test_pixels": "passed",
+  "candidate_coverage_and_buffer_loss_accounting": "passed",
+  "patch_manifest_reconstructs_masks": "passed"
 }

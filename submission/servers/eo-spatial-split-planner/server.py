@@ -1,96 +1,216 @@
-"""EO Spatial Split Planner: native EO imagery to measured, reproducible spatial partitions."""
+"""Variogram-only lag evaluation and spatial partition planning for continuous EO bands."""
 
 from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import tempfile
 from pathlib import Path
 
 import numpy as np
 import rasterio
-from core import create_spatial_split
+from core import create_spatial_split, evaluate_autocorrelation
 from imagery import read_local, read_sentinel2
 from mcp.server.fastmcp import FastMCP
 
+SCHEMA_VERSION = "0.3.0"
+REFERENCE_COMMIT_URL = "https://github.com/stefanopitton/lulc-classification/commit/ac7dfc6578c2c408c87398e15073354752bbd32b"
+REFERENCE_IMPLEMENTATION = {
+    "repository": "https://github.com/stefanopitton/lulc-classification",
+    "branch": "stepit/eve-hackathon-checkpoint",
+    "commit": REFERENCE_COMMIT_URL.rsplit("/", 1)[-1],
+    "source": "src/lulc/validation/autocorrelation.py",
+    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)",
+}
 mcp = FastMCP("EO Spatial Split Planner", host="0.0.0.0", port=8000, stateless_http=True)
 
 
-def _export(values: np.ndarray, profile: dict, provenance: dict,
-            buffer_m: float | None, seed: int, split_ratios: list[float] | None,
-            patch_radius_m: float = 0) -> dict:
-    result = create_spatial_split(values, pixel_size_m=abs(profile["transform"].a),
-                                  split_ratios=[0.6, 0.2, 0.2] if split_ratios is None else split_ratios,
-                                  buffer_m=buffer_m, seed=seed, patch_radius_m=patch_radius_m)
-    report = result["report"]
-    report.update(schema_version="0.1.0", provenance=provenance)
-    fingerprint = hashlib.sha256()
-    fingerprint.update(np.nan_to_num(values, nan=-9999).astype("<f8").tobytes())
-    fingerprint.update(json.dumps({"provenance": provenance, "buffer_m": buffer_m,
-                                   "seed": seed, "ratios": split_ratios,
-                                   "patch_radius_m": patch_radius_m}, sort_keys=True).encode())
+def _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold):
+    if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
+        raise ValueError("seed must be a nonnegative integer.")
+    if not isinstance(n_bins, int) or not 4 <= n_bins <= 64:
+        raise ValueError("n_bins must be an integer between 4 and 64.")
+    if not isinstance(n_pairs_per_lag, int) or n_pairs_per_lag < 1 or n_pairs_per_lag * n_bins > 8_000_000:
+        raise ValueError("Use positive n_pairs_per_lag and at most 8 million total offset draws (n_bins * n_pairs_per_lag).")
+    if not math.isfinite(max_lag_m) or max_lag_m <= 0:
+        raise ValueError("max_lag_m must be finite and positive.")
+    if min_lag_m is not None and (not math.isfinite(min_lag_m) or not 0 < min_lag_m < max_lag_m):
+        raise ValueError("min_lag_m must be finite, positive and smaller than max_lag_m.")
+    if not math.isfinite(correlation_threshold) or not 0 < correlation_threshold < 1:
+        raise ValueError("correlation_threshold must be finite and between zero and one.")
+    return {"seed": seed, "n_bins": n_bins, "n_pairs_per_lag": n_pairs_per_lag,
+            "min_lag_m": min_lag_m, "max_lag_m": max_lag_m,
+            "correlation_threshold": correlation_threshold}
+
+
+def _publish(values: np.ndarray, profile: dict, provenance: dict, report: dict,
+             split_mask: np.ndarray | None = None,
+             unbuffered_split_mask: np.ndarray | None = None) -> dict:
+    """Persist the complete analysis; retain required per-bin counts in responses."""
+    report.update(schema_version=SCHEMA_VERSION, provenance=provenance,
+                  reference_implementation=REFERENCE_IMPLEMENTATION)
+    fingerprint = hashlib.sha256(json.dumps(report, sort_keys=True, allow_nan=False).encode())
+    fingerprint.update(str(profile["crs"]).encode())
+    fingerprint.update(str(profile["transform"]).encode())
+    for start in range(0, values.shape[0], 256):
+        fingerprint.update(np.asarray(values[start:start + 256], dtype="<f4").tobytes())
     run_id = fingerprint.hexdigest()[:16]
     root = Path(os.getenv("EO_SPLIT_OUTPUT_DIR", str(Path(tempfile.gettempdir()) / "eo-spatial-split-planner")))
     root.mkdir(parents=True, exist_ok=True)
     directory = Path(tempfile.mkdtemp(prefix=f"{run_id}-", dir=root))
-    mask_path, report_path, source_path = directory / "split_mask.tif", directory / "report.json", directory / "analysis_band.tif"
     output_profile = profile.copy()
     for key in ("blockxsize", "blockysize", "tiled", "photometric", "interleave"):
         output_profile.pop(key, None)
-    output_profile.update(driver="GTiff", count=1, dtype="uint8", nodata=0, compress="deflate")
-    with rasterio.open(mask_path, "w", **output_profile) as dst:
-        dst.write(result["split_mask"], 1)
-        dst.update_tags(labels="0=nodata_or_buffer,1=train,2=validation,3=test", seed=seed)
-    output_profile.update(dtype="float32", nodata=-9999)
+    output_profile.update(driver="GTiff", count=1, compress="deflate", dtype="float32", nodata=np.nan)
+    source_path, report_path = directory / "analysis_band.tif", directory / "report.json"
     with rasterio.open(source_path, "w", **output_profile) as dst:
-        dst.write(np.nan_to_num(values, nan=-9999).astype("float32"), 1)
-    report["artifacts"] = {"split_mask": str(mask_path), "analysis_band": str(source_path),
-                           "report_json": str(report_path), "scope": "Paths on the MCP server filesystem"}
-    report["run_fingerprint"] = run_id
+        dst.write(np.where(np.isfinite(values), values, np.nan).astype("float32"), 1)
+    artifacts = {"analysis_band": str(source_path), "report_json": str(report_path),
+                 "scope": "Paths on the MCP server filesystem"}
+    if split_mask is not None:
+        mask_path = directory / "split_mask.tif"
+        output_profile.update(dtype="uint8", nodata=0)
+        with rasterio.open(mask_path, "w", **output_profile) as dst:
+            dst.write(split_mask, 1)
+            dst.update_tags(labels="0=nodata_or_buffer,1=train,2=validation,3=test", seed=report["seed"])
+        artifacts["split_mask"] = str(mask_path)
+    if unbuffered_split_mask is not None:
+        unbuffered_path = directory / "unbuffered_split_mask.tif"
+        output_profile.update(dtype="uint8", nodata=0)
+        with rasterio.open(unbuffered_path, "w", **output_profile) as dst:
+            dst.write(unbuffered_split_mask, 1)
+            dst.update_tags(labels="0=outside_or_nodata,1=train,2=validation,3=test",
+                            pairing="Same validation/test rectangles as buffered mask")
+        artifacts["unbuffered_split_mask"] = str(unbuffered_path)
+    if "patches" in report:
+        patch_path = directory / "patches.json"
+        patch_path.write_text(json.dumps(report["patches"], indent=2))
+        artifacts["patch_manifest"] = str(patch_path)
+    report.update(artifacts=artifacts, run_fingerprint=run_id)
     report_path.write_text(json.dumps(report, indent=2, allow_nan=False))
-    # Keep LLM responses compact. Full pair-level lag tables remain in report.json.
-    compact = {k: v for k, v in report.items() if k != "autocorrelation"}
-    compact["autocorrelation"] = {k: v for k, v in report["autocorrelation"].items()
-                                  if k not in {"correlogram", "lags", "directional", "directions", "empirical"}}
-    # Later core versions may name the lag table differently; omit nested large lists generically.
-    compact["autocorrelation"] = {k: v for k, v in compact["autocorrelation"].items()
-                                  if not isinstance(v, list) or len(v) <= 8}
+    compact = {k: v for k, v in report.items() if k not in {"sq_diff_sum", "patches"}}
+    if "autocorrelation" in compact:
+        compact["autocorrelation"] = {k: v for k, v in compact["autocorrelation"].items() if k != "sq_diff_sum"}
     return {"status": "ok", **compact}
+
+
+def _evaluate(values, profile, provenance, lag_m, parameters, band=None):
+    report = evaluate_autocorrelation(values, resolution_m=abs(profile["transform"].a),
+                                     lag_m=lag_m, band=band, **parameters)
+    return _publish(values, profile, provenance, report)
+
+
+def _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
+          patch_size_pixels=None, n_patches=None):
+    params = parameters.copy()
+    params["n_lags"] = params.pop("n_bins")
+    params["max_pairs_per_lag"] = params.pop("n_pairs_per_lag")
+    result = create_spatial_split(values, pixel_size_m=abs(profile["transform"].a),
+                                  split_ratios=[0.6, 0.2, 0.2] if split_ratios is None else split_ratios,
+                                  buffer_m=buffer_m, patch_radius_m=patch_radius_m,
+                                  lag_m=lag_m, patch_size_pixels=patch_size_pixels,
+                                  n_patches=n_patches, **params)
+    return _publish(values, profile, provenance, result["report"], result["split_mask"],
+                    result["unbuffered_split_mask"])
 
 
 def _error(exc: Exception) -> dict:
     if isinstance(exc, (ValueError, FileNotFoundError)):
-        return {"status": "error", "error": {"code": "invalid_input_or_infeasible_split", "message": str(exc)}}
-    # GDAL/http exception messages can include transient signed asset URLs.
+        return {"status": "error", "error": {"code": "invalid_input_or_unresolved_analysis", "message": str(exc)}}
+    # Remote-reader exceptions can contain signed URLs; omit their text.
     return {"status": "error", "error": {"code": "imagery_or_processing_failed",
-            "message": f"{type(exc).__name__}: imagery retrieval or processing failed. Check connectivity, scene coverage and the pixel limit; retry or use a local raster."}}
+            "message": f"{type(exc).__name__}: retrieval or processing failed. Check connectivity, native pixel limits and lag support; retry or use a local raster."}}
+
+
+@mcp.tool()
+def evaluate_spatial_autocorrelation(
+    raster_path: str, lag_m: float = 2560, band_index: int = 1, band: str | None = None,
+    seed: int = 3, n_bins: int = 24, n_pairs_per_lag: int = 200_000,
+    min_lag_m: float | None = None, max_lag_m: float = 12_800,
+    correlation_threshold: float = 0.1,
+) -> dict:
+    """Evaluate a continuous raster band's dependence at a specified lag in metres.
+
+    raster_path is a local cloud-masked GeoTIFF on this server (up to 32 million
+    square, north-up pixels in a projected metre CRS). band_index selects a
+    1-based band; band optionally labels it. Input values are not normalized.
+    Monte Carlo sampling uses isotropic offsets, actual rounded-distance bins,
+    finite pairs, 24 logarithmic bins and seed 3. min_lag_m defaults to one pixel.
+    Returns rho_at_lag = 1 - gamma/variance, practical_range_m from a weighted
+    spherical fit, nugget, total sill, fit_rss, per-bin counts, variance and missing
+    fraction. The lag passes only if rho_at_lag < correlation_threshold AND
+    lag_m >= practical_range_m, with a resolved fit. Increase the lag and repeat
+    if it fails. Lags outside populated bin-center support return an error.
+    Stationarity/isotropy are assumed; no label or model independence is proved.
+    """
+    try:
+        parameters = _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold)
+        values, profile, provenance = read_local(raster_path, band_index)
+        return _evaluate(values, profile, provenance, lag_m, parameters, band or f"band_{band_index}")
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+def evaluate_sentinel2_autocorrelation(
+    bbox: list[float], lag_m: float = 2560, band: str = "B05",
+    start_date: str = "2024-06-01", end_date: str = "2024-08-31",
+    item_id: str | None = None, max_cloud_cover: float = 10, seed: int = 3,
+    n_bins: int = 24, n_pairs_per_lag: int = 200_000,
+    min_lag_m: float | None = None, max_lag_m: float = 12_800,
+    correlation_threshold: float = 0.1,
+) -> dict:
+    """Measure a Sentinel-2 band's variogram-derived rho at lag_m and fit its range.
+
+    bbox is WGS84 [west,south,east,north], at most one degree and 1 million native
+    pixels. Dates are ISO dates up to 366 days apart. B05 is native 20 m red edge;
+    B08 is native 10 m NIR. Public Planetary Computer STAC provides numeric L2A
+    pixels with SCL masking; item_id pins a scene. Uses the same variogram-only
+    procedure and acceptance rule as evaluate_spatial_autocorrelation. Returns
+    rho_at_lag, practical_range_m, nugget, total sill, fit_rss, counts, variance,
+    missing fraction, decision, provenance, and full-report/numeric-band paths.
+    """
+    try:
+        parameters = _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold)
+        values, profile, provenance = read_sentinel2(bbox, start_date, end_date, band, item_id, max_cloud_cover)
+        return _evaluate(values, profile, provenance, lag_m, parameters, provenance["band"])
+    except Exception as exc:
+        return _error(exc)
 
 
 @mcp.tool()
 def plan_sentinel2_split(
     bbox: list[float], start_date: str = "2024-06-01", end_date: str = "2024-08-31",
     band: str = "B05", item_id: str | None = None, max_cloud_cover: float = 10,
-    buffer_m: float | None = None, seed: int = 42,
-    split_ratios: list[float] | None = None, patch_radius_m: float = 0,
+    buffer_m: float | None = None, seed: int = 3, split_ratios: list[float] | None = None,
+    patch_radius_m: float = 0, lag_m: float | None = None,
+    n_bins: int = 24, n_pairs_per_lag: int = 200_000,
+    min_lag_m: float | None = None, max_lag_m: float = 12_800,
+    correlation_threshold: float = 0.1,
+    patch_size_pixels: int | list[int] | None = None, n_patches: int | None = None,
 ) -> dict:
-    """Plan train/validation/test spatial splits from real Sentinel-2 L2A imagery.
+    """Create random two-dimensional rectangular Sentinel-2 train/validation/test patches.
 
-    bbox is WGS84 [west,south,east,north], at most 1 degree and 1 million native
-    pixels. Use a small AOI, e.g. [13.30,52.35,13.50,52.50]. Dates are ISO dates,
-    at most 366 days apart. B05 is the 20 m red-edge band. Finds one covering
-    scene via public Planetary Computer STAC, cloud masks with SCL and reads
-    native COG pixels. item_id can pin a STAC scene returned by another tool.
-    buffer_m=None measures a heuristic decorrelation range; unresolved estimates
-    are flagged. split_ratios defaults to [0.6,0.2,0.2]. patch_radius_m reserves
-    extra space around ML patch centers. seed fixes sampling and spatial order.
-    Returns compact diagnostics, exact separation checks, random baseline,
-    retention, provenance and GeoTIFF/JSON paths on the server filesystem.
-    Spectral decorrelation does not prove label or temporal independence.
+    Imagery inputs match evaluate_sentinel2_autocorrelation. buffer_m=None
+    recommends a sampled guard satisfying both empirical rho<threshold and the
+    fitted spherical practical range; unresolved recommendations return an error.
+    An explicit buffer still creates a geometric partition when feasible, but
+    its dependence decision can fail. lag_m optionally evaluates a separate lag
+    of interest. split_ratios defaults to [0.6,0.2,0.2]; patch_radius_m reserves
+    additional footprint space. patch_size_pixels is a side length or [height,
+    width]; n_patches controls sparse, seeded rectangular placements in BOTH
+    axes. Buffers exclude whole patches; retained validation/test rectangles are
+    identical in the exported buffered and paired unbuffered masks. Reports
+    distinguish sampled coverage from buffer loss. Large infeasible guards
+    return errors. Returns masks, patch manifest, variogram evidence and checks.
     """
     try:
+        parameters = _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold)
         values, profile, provenance = read_sentinel2(bbox, start_date, end_date, band, item_id, max_cloud_cover)
-        return _export(values, profile, provenance, buffer_m, seed, split_ratios, patch_radius_m)
+        return _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
+                     patch_size_pixels, n_patches)
     except Exception as exc:
         return _error(exc)
 
@@ -98,20 +218,29 @@ def plan_sentinel2_split(
 @mcp.tool()
 def plan_spatial_split(
     raster_path: str, band_index: int = 1, buffer_m: float | None = None,
-    seed: int = 42, split_ratios: list[float] | None = None, patch_radius_m: float = 0,
+    seed: int = 3, split_ratios: list[float] | None = None, patch_radius_m: float = 0,
+    lag_m: float | None = None, n_bins: int = 24, n_pairs_per_lag: int = 200_000,
+    min_lag_m: float | None = None, max_lag_m: float = 12_800,
+    correlation_threshold: float = 0.1,
+    patch_size_pixels: int | list[int] | None = None, n_patches: int | None = None,
 ) -> dict:
-    """Plan reproducible spatial splits for a local cloud-masked EO GeoTIFF.
+    """Create reproducible spatial partitions for a local continuous EO GeoTIFF.
 
-    raster_path must exist on this MCP server, allowing handoff from another
-    imagery MCP tool sharing its filesystem. Requires a north-up, square,
-    projected metre grid with at most 1 million pixels. Dataset masks and nodata
-    are honored; band_index is 1-based. Buffer, ratios and patch radius have the
-    same meaning as plan_sentinel2_split. Returns JSON diagnostics and artifact
-    paths, not raster arrays. An image preview/PNG is not a scientific raster.
+    Raster requirements match evaluate_spatial_autocorrelation. Uses only the
+    empirical isotropic variogram and spherical fit for dependence, with the
+    same options as plan_sentinel2_split. Dataset masks/nodata are honored;
+    callers supply the cloud mask. Explicit buffer_m permits a geometry-only
+    split even if the separately reported dependence decision does not pass.
+    patch_size_pixels is a side or [height,width] and n_patches controls seeded
+    sparse random rectangles in both axes. Whole-patch exclusions produce paired
+    buffered/unbuffered masks sharing the same validation/test rectangles.
+    Returns compact JSON and server-local GeoTIFF/JSON artifact paths.
     """
     try:
+        parameters = _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold)
         values, profile, provenance = read_local(raster_path, band_index)
-        return _export(values, profile, provenance, buffer_m, seed, split_ratios, patch_radius_m)
+        return _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
+                     patch_size_pixels, n_patches)
     except Exception as exc:
         return _error(exc)
 

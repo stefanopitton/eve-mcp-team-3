@@ -1,10 +1,45 @@
 {
+  "schema_version": "0.3.0",
   "transport": "stateless streamable HTTP",
   "initialize": "passed",
   "tools_list": [
+    "evaluate_spatial_autocorrelation",
+    "evaluate_sentinel2_autocorrelation",
     "plan_sentinel2_split",
     "plan_spatial_split"
   ],
-  "real_raster_tool_call": "passed",
-  "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+  "random_2d_rectangles": "passed",
+  "paired_mask_and_manifest_export": "passed",
+  "patch_size_pixels": [
+    48,
+    64
+  ],
+  "patch_counts": {
+    "train": {
+      "candidate": 24,
+      "buffered": 8,
+      "unbuffered": 24
+    },
+    "validation": {
+      "candidate": 8,
+      "buffered": 6,
+      "unbuffered": 6
+    },
+    "test": {
+      "candidate": 8,
+      "buffered": 8,
+      "unbuffered": 8
+    }
+  },
+  "actual_buffer": {
+    "lag_m": 1298.2387330451975,
+    "rho_at_lag": 0.08397721109551093,
+    "within_sampled_support": true,
+    "decision": {
+      "accepted": true,
+      "rho_below_threshold": true,
+      "lag_at_least_practical_range": true,
+      "correlation_threshold": 0.1
+    }
+  }
 }

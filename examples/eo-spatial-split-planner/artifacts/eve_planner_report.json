@@ -1,22 +1,250 @@
 {
-  "method": "three contiguous geographic stripes with discarded separation gaps",
-  "seed": 42,
+  "method": "seeded random two-dimensional rectangle patches with whole-patch buffer exclusion",
+  "seed": 3,
   "pixel_size_m": 20.0,
   "requested_split_ratios": {
     "train": 0.6,
     "validation": 0.2,
     "test": 0.2
   },
-  "requested_buffer_m": 1923.330444827409,
-  "recommended_buffer_m": 1923.330444827409,
-  "buffer_source": "measured_dependence",
+  "requested_buffer_m": 2560.0,
+  "recommended_buffer_m": 1699.333925600761,
+  "buffer_source": "user_supplied",
   "patch_radius_m": 0.0,
-  "discarded_gap_width_pixels": 97,
-  "stripe_axis": "rows",
-  "stripe_order": [
+  "patch_size_pixels": [
+    48,
+    64
+  ],
+  "n_candidate_patches": 12,
+  "n_available_patch_placements": 126,
+  "patch_counts": {
+    "train": {
+      "candidate": 7,
+      "buffered": 4,
+      "unbuffered": 7
+    },
+    "validation": {
+      "candidate": 3,
+      "buffered": 2,
+      "unbuffered": 2
+    },
+    "test": {
+      "candidate": 2,
+      "buffered": 2,
+      "unbuffered": 2
+    }
+  },
+  "buffer_priority": [
     "test",
     "validation",
     "train"
+  ],
+  "paired_comparison": "Unbuffered restores candidate training rectangles; both masks share identical retained validation and test rectangles.",
+  "patches": [
+    {
+      "row_start": 789,
+      "row_stop": 837,
+      "col_start": 172,
+      "col_stop": 236,
+      "valid_pixel_count": 3072,
+      "patch_id": 0,
+      "split_code": 2,
+      "split": "validation",
+      "retained": false,
+      "keep": false,
+      "buffered_retained": false,
+      "unbuffered_retained": false,
+      "drop_reason": "within_buffer_of_higher_priority_split",
+      "buffered_pixel_count": 0,
+      "unbuffered_pixel_count": 0
+    },
+    {
+      "row_start": 432,
+      "row_stop": 480,
+      "col_start": 95,
+      "col_stop": 159,
+      "valid_pixel_count": 3072,
+      "patch_id": 1,
+      "split_code": 1,
+      "split": "train",
+      "retained": false,
+      "keep": false,
+      "buffered_retained": false,
+      "unbuffered_retained": true,
+      "drop_reason": "within_buffer_of_higher_priority_split",
+      "buffered_pixel_count": 0,
+      "unbuffered_pixel_count": 3072
+    },
+    {
+      "row_start": 780,
+      "row_stop": 828,
+      "col_start": 334,
+      "col_stop": 398,
+      "valid_pixel_count": 3072,
+      "patch_id": 2,
+      "split_code": 3,
+      "split": "test",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 3072,
+      "unbuffered_pixel_count": 3072
+    },
+    {
+      "row_start": 132,
+      "row_stop": 180,
+      "col_start": 325,
+      "col_stop": 389,
+      "valid_pixel_count": 3035,
+      "patch_id": 3,
+      "split_code": 1,
+      "split": "train",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 3035,
+      "unbuffered_pixel_count": 3035
+    },
+    {
+      "row_start": 308,
+      "row_stop": 356,
+      "col_start": 326,
+      "col_stop": 390,
+      "valid_pixel_count": 3058,
+      "patch_id": 4,
+      "split_code": 1,
+      "split": "train",
+      "retained": false,
+      "keep": false,
+      "buffered_retained": false,
+      "unbuffered_retained": true,
+      "drop_reason": "within_buffer_of_higher_priority_split",
+      "buffered_pixel_count": 0,
+      "unbuffered_pixel_count": 3058
+    },
+    {
+      "row_start": 603,
+      "row_stop": 651,
+      "col_start": 489,
+      "col_stop": 553,
+      "valid_pixel_count": 3072,
+      "patch_id": 5,
+      "split_code": 1,
+      "split": "train",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 3072,
+      "unbuffered_pixel_count": 3072
+    },
+    {
+      "row_start": 311,
+      "row_stop": 359,
+      "col_start": 408,
+      "col_stop": 472,
+      "valid_pixel_count": 3072,
+      "patch_id": 6,
+      "split_code": 1,
+      "split": "train",
+      "retained": false,
+      "keep": false,
+      "buffered_retained": false,
+      "unbuffered_retained": true,
+      "drop_reason": "within_buffer_of_higher_priority_split",
+      "buffered_pixel_count": 0,
+      "unbuffered_pixel_count": 3072
+    },
+    {
+      "row_start": 540,
+      "row_stop": 588,
+      "col_start": 5,
+      "col_stop": 69,
+      "valid_pixel_count": 1803,
+      "patch_id": 7,
+      "split_code": 2,
+      "split": "validation",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 1803,
+      "unbuffered_pixel_count": 1803
+    },
+    {
+      "row_start": 671,
+      "row_stop": 719,
+      "col_start": 88,
+      "col_stop": 152,
+      "valid_pixel_count": 3066,
+      "patch_id": 8,
+      "split_code": 2,
+      "split": "validation",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 3066,
+      "unbuffered_pixel_count": 3066
+    },
+    {
+      "row_start": 362,
+      "row_stop": 410,
+      "col_start": 652,
+      "col_stop": 716,
+      "valid_pixel_count": 2433,
+      "patch_id": 9,
+      "split_code": 1,
+      "split": "train",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 2433,
+      "unbuffered_pixel_count": 2433
+    },
+    {
+      "row_start": 792,
+      "row_stop": 840,
+      "col_start": 573,
+      "col_stop": 637,
+      "valid_pixel_count": 3058,
+      "patch_id": 10,
+      "split_code": 1,
+      "split": "train",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 3058,
+      "unbuffered_pixel_count": 3058
+    },
+    {
+      "row_start": 361,
+      "row_stop": 409,
+      "col_start": 330,
+      "col_stop": 394,
+      "valid_pixel_count": 3072,
+      "patch_id": 11,
+      "split_code": 3,
+      "split": "test",
+      "retained": true,
+      "keep": true,
+      "buffered_retained": true,
+      "unbuffered_retained": true,
+      "drop_reason": null,
+      "buffered_pixel_count": 3072,
+      "unbuffered_pixel_count": 3072
+    }
   ],
   "mask_codes": {
     "0": "invalid_or_discarded",
@@ -25,939 +253,225 @@
     "3": "test"
   },
   "autocorrelation": {
-    "estimator": "directional paired Pearson correlation and empirical semivariance",
-    "range_rule": "three consecutive lag bins with absolute Pearson correlation <= threshold in all four directions",
-    "correlation_threshold": 0.1,
+    "estimator": "isotropic Monte Carlo empirical variogram",
+    "lag_edges_m": [
+      20.0,
+      26.179066797903033,
+      34.26717692045342,
+      44.854135678805555,
+      58.71197070488281,
+      76.85123014598264,
+      100.59467437463486,
+      131.67373499834358,
+      172.35477520255083,
+      225.6043586482568,
+      295.30557874753947,
+      386.5412235912623,
+      505.96442562694097,
+      662.2838247925166,
+      866.8986244206995,
+      1134.7298497859865,
+      1485.3084267560912,
+      1944.1994259767976,
+      2544.866332054564,
+      3331.111284929547,
+      4360.269241970957,
+      5707.388987119982,
+      7470.705876771509,
+      9778.805408774397,
+      12800.0
+    ],
+    "lag_centers_m": [
+      22.8818997453896,
+      29.951339094873727,
+      39.20490534256717,
+      51.31739178842657,
+      67.17207137616897,
+      87.92510717551185,
+      115.08986269802539,
+      150.64726016665472,
+      197.1902343411964,
+      258.11281583561663,
+      337.8576323577725,
+      442.23987628377427,
+      578.8713630964648,
+      757.7156040947766,
+      991.8143706705297,
+      1298.2387330451975,
+      1699.333925600761,
+      2224.348817512254,
+      2911.568813774495,
+      3811.1077231246895,
+      4988.562182884266,
+      6529.795130561007,
+      8547.197144978927,
+      11187.882249662456
+    ],
+    "counts": [
+      144321,
+      185794,
+      276787,
+      52665,
+      194670,
+      187937,
+      172189,
+      181321,
+      162023,
+      168442,
+      174430,
+      166148,
+      164734,
+      163806,
+      159682,
+      155794,
+      150118,
+      142063,
+      133373,
+      120967,
+      106416,
+      87784,
+      64978,
+      38306
+    ],
+    "sq_diff_sum": [
+      89.77933933804063,
+      183.47490917116752,
+      395.19053308813056,
+      91.18446347934449,
+      356.5186571739418,
+      401.41186629642345,
+      398.0557421116256,
+      466.9613411981609,
+      456.9645915797023,
+      493.01027534860856,
+      554.9045979844063,
+      548.9258451053726,
+      569.3285401004383,
+      598.087973417334,
+      611.4225076499456,
+      603.7043401030163,
+      605.8865402334338,
+      583.0251526369902,
+      547.0329310238254,
+      499.5067703566243,
+      450.2114470994927,
+      364.6633380521878,
+      276.7623263006521,
+      174.5665254761521
+    ],
+    "gamma": [
+      0.0003110404561291864,
+      0.0004937589727632957,
+      0.000713889259770384,
+      0.0008657026818507974,
+      0.0009157000492472949,
+      0.0010679426251787127,
+      0.001155868673700485,
+      0.0012876648077116298,
+      0.0014101843305570885,
+      0.0014634422393126673,
+      0.0015906225935458532,
+      0.0016519183050815315,
+      0.001728023784101759,
+      0.001825598492782114,
+      0.0019145004059629314,
+      0.0019375083125891123,
+      0.0020180342804774704,
+      0.0020519950748505602,
+      0.002050763389231049,
+      0.002064640647270017,
+      0.0021153372007005184,
+      0.0020770489955583464,
+      0.0021296617801459887,
+      0.002278579406309091
+    ],
+    "rho": [
+      0.8575793539431302,
+      0.7739153524513935,
+      0.6731210760977977,
+      0.6036080425784006,
+      0.5807150162037402,
+      0.5110054797294591,
+      0.4707454930012457,
+      0.41039806814449664,
+      0.35429826101528417,
+      0.329912282847039,
+      0.2716783526340868,
+      0.24361198806509632,
+      0.20876445850120406,
+      0.16408649852774249,
+      0.12337967836527142,
+      0.11284471141307595,
+      0.07597310791256084,
+      0.06042298194048756,
+      0.06098695186212666,
+      0.05463276861534394,
+      0.0314195956979606,
+      0.048951176575147914,
+      0.024860590851756514,
+      -0.043326502207918116
+    ],
+    "variance": 0.002183956222224869,
+    "nan_fraction": 0.1208843205966681,
     "valid_pixel_count": 562947,
-    "global_mean": 0.10864860244392456,
-    "global_variance": 0.002183956239589114,
-    "max_pairs_per_direction_per_lag": 20000,
-    "seed": 42,
-    "lags": [
-      {
-        "nominal_lag_m": 20.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 20.0,
-            "offset_pixels": [
-              0,
-              1
-            ],
-            "pair_count": 20000,
-            "correlation": 0.8619492997378458,
-            "semivariance": 0.00029831426675
-          },
-          "north_south": {
-            "distance_m": 20.0,
-            "offset_pixels": [
-              1,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.8653328286953308,
-            "semivariance": 0.00030098237725
-          },
-          "northwest_southeast": {
-            "distance_m": 28.284271247461902,
-            "offset_pixels": [
-              1,
-              1
-            ],
-            "pair_count": 20000,
-            "correlation": 0.7728831253136389,
-            "semivariance": 0.00049404030525
-          },
-          "northeast_southwest": {
-            "distance_m": 28.284271247461902,
-            "offset_pixels": [
-              1,
-              -1
-            ],
-            "pair_count": 20000,
-            "correlation": 0.7868556078415443,
-            "semivariance": 0.0004727941195000001
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 220.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 220.0,
-            "offset_pixels": [
-              0,
-              11
-            ],
-            "pair_count": 20000,
-            "correlation": 0.3452867274869573,
-            "semivariance": 0.0014436805395000001
-          },
-          "north_south": {
-            "distance_m": 220.0,
-            "offset_pixels": [
-              11,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.35220710529071747,
-            "semivariance": 0.0013905923972500002
-          },
-          "northwest_southeast": {
-            "distance_m": 226.27416997969522,
-            "offset_pixels": [
-              8,
-              8
-            ],
-            "pair_count": 20000,
-            "correlation": 0.3147796879757238,
-            "semivariance": 0.0015585752082500003
-          },
-          "northeast_southwest": {
-            "distance_m": 226.27416997969522,
-            "offset_pixels": [
-              8,
-              -8
-            ],
-            "pair_count": 20000,
-            "correlation": 0.3265275474059476,
-            "semivariance": 0.0014520055705
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 400.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 400.0,
-            "offset_pixels": [
-              0,
-              20
-            ],
-            "pair_count": 20000,
-            "correlation": 0.2417518269215582,
-            "semivariance": 0.0016323052682500002
-          },
-          "north_south": {
-            "distance_m": 400.0,
-            "offset_pixels": [
-              20,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.24008943896441606,
-            "semivariance": 0.0016665173332500005
-          },
-          "northwest_southeast": {
-            "distance_m": 395.9797974644666,
-            "offset_pixels": [
-              14,
-              14
-            ],
-            "pair_count": 20000,
-            "correlation": 0.2467753561291003,
-            "semivariance": 0.00164267969825
-          },
-          "northeast_southwest": {
-            "distance_m": 395.9797974644666,
-            "offset_pixels": [
-              14,
-              -14
-            ],
-            "pair_count": 20000,
-            "correlation": 0.24763966084543906,
-            "semivariance": 0.0015601589212500002
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 600.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 600.0,
-            "offset_pixels": [
-              0,
-              30
-            ],
-            "pair_count": 20000,
-            "correlation": 0.18805703802541673,
-            "semivariance": 0.0017172157202500003
-          },
-          "north_south": {
-            "distance_m": 600.0,
-            "offset_pixels": [
-              30,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.18979703800475167,
-            "semivariance": 0.0017770272830000004
-          },
-          "northwest_southeast": {
-            "distance_m": 593.9696961966999,
-            "offset_pixels": [
-              21,
-              21
-            ],
-            "pair_count": 20000,
-            "correlation": 0.18952370647730388,
-            "semivariance": 0.0017484284085000003
-          },
-          "northeast_southwest": {
-            "distance_m": 593.9696961966999,
-            "offset_pixels": [
-              21,
-              -21
-            ],
-            "pair_count": 20000,
-            "correlation": 0.17883820391514005,
-            "semivariance": 0.0017581912912500001
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 780.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 780.0,
-            "offset_pixels": [
-              0,
-              39
-            ],
-            "pair_count": 20000,
-            "correlation": 0.13901510199415168,
-            "semivariance": 0.0017901597065000001
-          },
-          "north_south": {
-            "distance_m": 780.0,
-            "offset_pixels": [
-              39,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.15320716716270844,
-            "semivariance": 0.0017810200217500004
-          },
-          "northwest_southeast": {
-            "distance_m": 791.9595949289333,
-            "offset_pixels": [
-              28,
-              28
-            ],
-            "pair_count": 20000,
-            "correlation": 0.15580074373402075,
-            "semivariance": 0.001765599333
-          },
-          "northeast_southwest": {
-            "distance_m": 791.9595949289333,
-            "offset_pixels": [
-              28,
-              -28
-            ],
-            "pair_count": 20000,
-            "correlation": 0.13275246358842122,
-            "semivariance": 0.0018569717547500001
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 980.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 980.0,
-            "offset_pixels": [
-              0,
-              49
-            ],
-            "pair_count": 20000,
-            "correlation": 0.10117213882056723,
-            "semivariance": 0.0018945659075000002
-          },
-          "north_south": {
-            "distance_m": 980.0,
-            "offset_pixels": [
-              49,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.13250931958457426,
-            "semivariance": 0.0018478059787500002
-          },
-          "northwest_southeast": {
-            "distance_m": 989.9494936611666,
-            "offset_pixels": [
-              35,
-              35
-            ],
-            "pair_count": 20000,
-            "correlation": 0.12435893202847155,
-            "semivariance": 0.00193775977425
-          },
-          "northeast_southwest": {
-            "distance_m": 989.9494936611666,
-            "offset_pixels": [
-              35,
-              -35
-            ],
-            "pair_count": 20000,
-            "correlation": 0.11206396954234005,
-            "semivariance": 0.0018634405127500003
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 1160.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 1160.0,
-            "offset_pixels": [
-              0,
-              58
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0854031907009223,
-            "semivariance": 0.0018777269075
-          },
-          "north_south": {
-            "distance_m": 1160.0,
-            "offset_pixels": [
-              58,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.12088812641770541,
-            "semivariance": 0.00192084740125
-          },
-          "northwest_southeast": {
-            "distance_m": 1159.655121145938,
-            "offset_pixels": [
-              41,
-              41
-            ],
-            "pair_count": 20000,
-            "correlation": 0.1028897955358277,
-            "semivariance": 0.001906418008
-          },
-          "northeast_southwest": {
-            "distance_m": 1159.655121145938,
-            "offset_pixels": [
-              41,
-              -41
-            ],
-            "pair_count": 20000,
-            "correlation": 0.09309762889536527,
-            "semivariance": 0.0018813509840000001
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 1360.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 1360.0,
-            "offset_pixels": [
-              0,
-              68
-            ],
-            "pair_count": 20000,
-            "correlation": 0.07201947649032055,
-            "semivariance": 0.001954404397
-          },
-          "north_south": {
-            "distance_m": 1360.0,
-            "offset_pixels": [
-              68,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.1153170431341395,
-            "semivariance": 0.0019200771435000004
-          },
-          "northwest_southeast": {
-            "distance_m": 1357.645019878171,
-            "offset_pixels": [
-              48,
-              48
-            ],
-            "pair_count": 20000,
-            "correlation": 0.08817273134406392,
-            "semivariance": 0.0019317916875000003
-          },
-          "northeast_southwest": {
-            "distance_m": 1357.645019878171,
-            "offset_pixels": [
-              48,
-              -48
-            ],
-            "pair_count": 20000,
-            "correlation": 0.06345013273738015,
-            "semivariance": 0.0019686901060000004
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 1540.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 1540.0,
-            "offset_pixels": [
-              0,
-              77
-            ],
-            "pair_count": 20000,
-            "correlation": 0.05821935097406735,
-            "semivariance": 0.0019417747017500002
-          },
-          "north_south": {
-            "distance_m": 1540.0,
-            "offset_pixels": [
-              77,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.09312588565982977,
-            "semivariance": 0.00196096687875
-          },
-          "northwest_southeast": {
-            "distance_m": 1527.3506473629427,
-            "offset_pixels": [
-              54,
-              54
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0803655241681427,
-            "semivariance": 0.0020002228370000004
-          },
-          "northeast_southwest": {
-            "distance_m": 1527.3506473629427,
-            "offset_pixels": [
-              54,
-              -54
-            ],
-            "pair_count": 20000,
-            "correlation": 0.06308714862895493,
-            "semivariance": 0.0019217217107500002
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 1740.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 1740.0,
-            "offset_pixels": [
-              0,
-              87
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0402955488597054,
-            "semivariance": 0.0019779155175
-          },
-          "north_south": {
-            "distance_m": 1740.0,
-            "offset_pixels": [
-              87,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.08388013039133145,
-            "semivariance": 0.00199022514775
-          },
-          "northwest_southeast": {
-            "distance_m": 1753.624817342638,
-            "offset_pixels": [
-              62,
-              62
-            ],
-            "pair_count": 20000,
-            "correlation": 0.08233546384798897,
-            "semivariance": 0.001957368633
-          },
-          "northeast_southwest": {
-            "distance_m": 1753.624817342638,
-            "offset_pixels": [
-              62,
-              -62
-            ],
-            "pair_count": 20000,
-            "correlation": 0.04556774099977994,
-            "semivariance": 0.00198231112
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 1920.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 1920.0,
-            "offset_pixels": [
-              0,
-              96
-            ],
-            "pair_count": 20000,
-            "correlation": 0.023429596182963832,
-            "semivariance": 0.0020530214522500004
-          },
-          "north_south": {
-            "distance_m": 1920.0,
-            "offset_pixels": [
-              96,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.07584444181201255,
-            "semivariance": 0.0019990843437500006
-          },
-          "northwest_southeast": {
-            "distance_m": 1923.330444827409,
-            "offset_pixels": [
-              68,
-              68
-            ],
-            "pair_count": 20000,
-            "correlation": 0.07889916762981353,
-            "semivariance": 0.001960090881
-          },
-          "northeast_southwest": {
-            "distance_m": 1923.330444827409,
-            "offset_pixels": [
-              68,
-              -68
-            ],
-            "pair_count": 20000,
-            "correlation": 0.03937206939849105,
-            "semivariance": 0.0020161631675
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 2120.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 2120.0,
-            "offset_pixels": [
-              0,
-              106
-            ],
-            "pair_count": 20000,
-            "correlation": 0.021103427314201544,
-            "semivariance": 0.0020582762847500004
-          },
-          "north_south": {
-            "distance_m": 2120.0,
-            "offset_pixels": [
-              106,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0811828915147926,
-            "semivariance": 0.00202374044775
-          },
-          "northwest_southeast": {
-            "distance_m": 2121.3203435596424,
-            "offset_pixels": [
-              75,
-              75
-            ],
-            "pair_count": 20000,
-            "correlation": 0.06162530819750156,
-            "semivariance": 0.00204841947125
-          },
-          "northeast_southwest": {
-            "distance_m": 2121.3203435596424,
-            "offset_pixels": [
-              75,
-              -75
-            ],
-            "pair_count": 20000,
-            "correlation": 0.019229334280059473,
-            "semivariance": 0.0020501440475000003
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 2300.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 2300.0,
-            "offset_pixels": [
-              0,
-              115
-            ],
-            "pair_count": 20000,
-            "correlation": 0.011041281496847145,
-            "semivariance": 0.0020269910584999997
-          },
-          "north_south": {
-            "distance_m": 2300.0,
-            "offset_pixels": [
-              115,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.07684291761021003,
-            "semivariance": 0.0019230441800000002
-          },
-          "northwest_southeast": {
-            "distance_m": 2291.025971044414,
-            "offset_pixels": [
-              81,
-              81
-            ],
-            "pair_count": 20000,
-            "correlation": 0.06315420702012874,
-            "semivariance": 0.002015770096
-          },
-          "northeast_southwest": {
-            "distance_m": 2291.025971044414,
-            "offset_pixels": [
-              81,
-              -81
-            ],
-            "pair_count": 20000,
-            "correlation": 0.031149656535886493,
-            "semivariance": 0.0021730191055000002
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 2500.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 2500.0,
-            "offset_pixels": [
-              0,
-              125
-            ],
-            "pair_count": 20000,
-            "correlation": 0.03988810184580514,
-            "semivariance": 0.002117455998
-          },
-          "north_south": {
-            "distance_m": 2500.0,
-            "offset_pixels": [
-              125,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.052631515316840766,
-            "semivariance": 0.0020499335400000003
-          },
-          "northwest_southeast": {
-            "distance_m": 2489.0158697766474,
-            "offset_pixels": [
-              88,
-              88
-            ],
-            "pair_count": 20000,
-            "correlation": 0.036767441540332985,
-            "semivariance": 0.00204895274975
-          },
-          "northeast_southwest": {
-            "distance_m": 2489.0158697766474,
-            "offset_pixels": [
-              88,
-              -88
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0032087309444280314,
-            "semivariance": 0.0020837074702500006
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 2680.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 2680.0,
-            "offset_pixels": [
-              0,
-              134
-            ],
-            "pair_count": 20000,
-            "correlation": 0.053826665235784145,
-            "semivariance": 0.00202407721025
-          },
-          "north_south": {
-            "distance_m": 2680.0,
-            "offset_pixels": [
-              134,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.06462646393904803,
-            "semivariance": 0.0019907501305000005
-          },
-          "northwest_southeast": {
-            "distance_m": 2687.0057685088805,
-            "offset_pixels": [
-              95,
-              95
-            ],
-            "pair_count": 20000,
-            "correlation": 0.018997246796648173,
-            "semivariance": 0.0021532267585000005
-          },
-          "northeast_southwest": {
-            "distance_m": 2687.0057685088805,
-            "offset_pixels": [
-              95,
-              -95
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0077962223860227504,
-            "semivariance": 0.0021181285655000005
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 2880.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 2880.0,
-            "offset_pixels": [
-              0,
-              144
-            ],
-            "pair_count": 20000,
-            "correlation": 0.05515435175027589,
-            "semivariance": 0.0019824026962500002
-          },
-          "north_south": {
-            "distance_m": 2880.0,
-            "offset_pixels": [
-              144,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.060220202565098,
-            "semivariance": 0.0019689691137500004
-          },
-          "northwest_southeast": {
-            "distance_m": 2884.995667241114,
-            "offset_pixels": [
-              102,
-              102
-            ],
-            "pair_count": 20000,
-            "correlation": 0.015947562179123624,
-            "semivariance": 0.0020940117435
-          },
-          "northeast_southwest": {
-            "distance_m": 2884.995667241114,
-            "offset_pixels": [
-              102,
-              -102
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0260858214131037,
-            "semivariance": 0.0019988078045
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 3060.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 3060.0,
-            "offset_pixels": [
-              0,
-              153
-            ],
-            "pair_count": 20000,
-            "correlation": 0.06694063810027734,
-            "semivariance": 0.0019801814322500002
-          },
-          "north_south": {
-            "distance_m": 3060.0,
-            "offset_pixels": [
-              153,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.04230572023862821,
-            "semivariance": 0.002074602445
-          },
-          "northwest_southeast": {
-            "distance_m": 3054.7012947258854,
-            "offset_pixels": [
-              108,
-              108
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0195646070842129,
-            "semivariance": 0.002145752554
-          },
-          "northeast_southwest": {
-            "distance_m": 3054.7012947258854,
-            "offset_pixels": [
-              108,
-              -108
-            ],
-            "pair_count": 20000,
-            "correlation": 0.01577919192997587,
-            "semivariance": 0.00204500955625
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 3260.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 3260.0,
-            "offset_pixels": [
-              0,
-              163
-            ],
-            "pair_count": 20000,
-            "correlation": 0.05284303783597747,
-            "semivariance": 0.001955194384
-          },
-          "north_south": {
-            "distance_m": 3260.0,
-            "offset_pixels": [
-              163,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.03684817690824875,
-            "semivariance": 0.0020269856485
-          },
-          "northwest_southeast": {
-            "distance_m": 3252.6911934581185,
-            "offset_pixels": [
-              115,
-              115
-            ],
-            "pair_count": 20000,
-            "correlation": 0.028467213915765323,
-            "semivariance": 0.00213512400325
-          },
-          "northeast_southwest": {
-            "distance_m": 3252.6911934581185,
-            "offset_pixels": [
-              115,
-              -115
-            ],
-            "pair_count": 20000,
-            "correlation": 0.02828835995298944,
-            "semivariance": 0.0020461689867500004
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 3440.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 3440.0,
-            "offset_pixels": [
-              0,
-              172
-            ],
-            "pair_count": 20000,
-            "correlation": 0.048396119108030065,
-            "semivariance": 0.0020967551075000003
-          },
-          "north_south": {
-            "distance_m": 3440.0,
-            "offset_pixels": [
-              172,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.04363168285616066,
-            "semivariance": 0.0020357942532500005
-          },
-          "northwest_southeast": {
-            "distance_m": 3450.681092190352,
-            "offset_pixels": [
-              122,
-              122
-            ],
-            "pair_count": 20000,
-            "correlation": 0.01891124670813926,
-            "semivariance": 0.0021254566872500004
-          },
-          "northeast_southwest": {
-            "distance_m": 3450.681092190352,
-            "offset_pixels": [
-              122,
-              -122
-            ],
-            "pair_count": 20000,
-            "correlation": 0.01770232692163529,
-            "semivariance": 0.00207208219825
-          }
-        }
-      },
-      {
-        "nominal_lag_m": 3640.0,
-        "directions": {
-          "east_west": {
-            "distance_m": 3640.0,
-            "offset_pixels": [
-              0,
-              182
-            ],
-            "pair_count": 20000,
-            "correlation": 0.036494658596651006,
-            "semivariance": 0.0020760744640000005
-          },
-          "north_south": {
-            "distance_m": 3640.0,
-            "offset_pixels": [
-              182,
-              0
-            ],
-            "pair_count": 20000,
-            "correlation": 0.05415232050189007,
-            "semivariance": 0.00203441903175
-          },
-          "northwest_southeast": {
-            "distance_m": 3648.670990922585,
-            "offset_pixels": [
-              129,
-              129
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0060656171205529285,
-            "semivariance": 0.0022062084072500005
-          },
-          "northeast_southwest": {
-            "distance_m": 3648.670990922585,
-            "offset_pixels": [
-              129,
-              -129
-            ],
-            "pair_count": 20000,
-            "correlation": 0.0005860475976967934,
-            "semivariance": 0.002128630375
-          }
-        }
-      }
-    ],
-    "range_status": "observed",
-    "observed_range_m": 1923.330444827409,
-    "recommended_buffer_m": 1923.330444827409,
+    "n_pairs_per_lag": 200000,
+    "seed": 3,
+    "sampled_lag_min_m": 22.8818997453896,
+    "sampled_lag_max_m": 11187.882249662456,
+    "band": null,
+    "fit_status": "resolved",
+    "fit_resolved": true,
+    "nugget": 0.0005551674217064627,
+    "partial_sill": 0.0014017921718830555,
+    "sill": 0.001956959593589518,
+    "practical_range_m": 525.656625818225,
+    "fit_rss": 6.075747080979894e-07,
+    "recommended_buffer_m": 1699.333925600761,
+    "correlation_threshold": 0.1,
     "warnings": [
-      "Spectral dependence in this scene is exploratory; labels, model features, season, and landscape can have longer ranges. No statistical independence guarantee is made."
+      "Stationarity and isotropy are assumed; Monte Carlo point estimates do not establish model or label independence."
     ],
-    "max_tested_lag_m": 3648.670990922585
+    "lag_m": 2560.0,
+    "rho_at_lag": 0.060717387057803614,
+    "decision": {
+      "accepted": true,
+      "rho_below_threshold": true,
+      "lag_at_least_practical_range": true,
+      "correlation_threshold": 0.1
+    }
+  },
+  "buffer_autocorrelation": {
+    "lag_m": 2560.0,
+    "rho_at_lag": 0.060717387057803614,
+    "within_sampled_support": true,
+    "decision": {
+      "accepted": true,
+      "rho_below_threshold": true,
+      "lag_at_least_practical_range": true,
+      "correlation_threshold": 0.1
+    }
   },
   "splits": {
     "valid_pixel_count": 562947,
-    "retained_pixel_count": 431857,
-    "discarded_valid_pixel_count": 131090,
-    "retention_fraction": 0.7671361602424385,
+    "retained_pixel_count": 22611,
+    "discarded_valid_pixel_count": 540336,
+    "retention_fraction": 0.04016541521670779,
     "counts": {
-      "train": 258623,
-      "validation": 86580,
-      "test": 86654
+      "train": 11598,
+      "validation": 4869,
+      "test": 6144
     },
     "fractions_of_retained": {
-      "train": 0.5988625864580174,
-      "validation": 0.20048303026233222,
-      "test": 0.20065438327965043
-    }
+      "train": 0.5129361815045774,
+      "validation": 0.21533766750696565,
+      "test": 0.2717261509884569
+    },
+    "candidate_pixel_count": 34885,
+    "unbuffered_retained_pixel_count": 31813,
+    "buffer_discarded_candidate_pixel_count": 12274,
+    "buffer_discarded_training_pixel_count": 9202,
+    "unselected_valid_pixel_count": 528062,
+    "retention_fraction_of_candidates": 0.6481582341980794
   },
   "spatial_diagnostics": {
     "method": "exact Euclidean distance transform over every retained pixel",
@@ -966,41 +480,41 @@
       {
         "first_split": "train",
         "second_split": "validation",
-        "minimum_center_distance_m": 1960.0,
-        "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+        "minimum_center_distance_m": 6773.03477032268,
+        "minimum_footprint_gap_lower_bound_m": 6744.750499075218
       },
       {
         "first_split": "train",
         "second_split": "test",
-        "minimum_center_distance_m": 6460.0,
-        "minimum_footprint_gap_lower_bound_m": 6431.715728752538
+        "minimum_center_distance_m": 3185.215848258953,
+        "minimum_footprint_gap_lower_bound_m": 3156.931577011491
       },
       {
         "first_split": "validation",
         "second_split": "test",
-        "minimum_center_distance_m": 1960.0,
-        "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+        "minimum_center_distance_m": 3864.349880639692,
+        "minimum_footprint_gap_lower_bound_m": 3836.06560939223
       }
     ],
-    "minimum_center_distance_m": 1960.0,
-    "minimum_footprint_gap_lower_bound_m": 1931.715728752538,
+    "minimum_center_distance_m": 3185.215848258953,
+    "minimum_footprint_gap_lower_bound_m": 3156.931577011491,
     "requested_buffer_met": true
   },
   "random_baseline": {
     "description": "seeded random shuffle of the same retained pixels and exact split counts",
     "valid_pixel_count": 562947,
-    "retained_pixel_count": 431857,
-    "discarded_valid_pixel_count": 131090,
-    "retention_fraction": 0.7671361602424385,
+    "retained_pixel_count": 22611,
+    "discarded_valid_pixel_count": 540336,
+    "retention_fraction": 0.04016541521670779,
     "counts": {
-      "train": 258623,
-      "validation": 86580,
-      "test": 86654
+      "train": 11598,
+      "validation": 4869,
+      "test": 6144
     },
     "fractions_of_retained": {
-      "train": 0.5988625864580174,
-      "validation": 0.20048303026233222,
-      "test": 0.20065438327965043
+      "train": 0.5129361815045774,
+      "validation": 0.21533766750696565,
+      "test": 0.2717261509884569
     },
     "separation": {
       "method": "exact Euclidean distance transform over every retained pixel",
@@ -1029,52 +543,83 @@
       "minimum_footprint_gap_lower_bound_m": 0.0
     }
   },
+  "unbuffered_baseline": {
+    "valid_pixel_count": 562947,
+    "retained_pixel_count": 31813,
+    "discarded_valid_pixel_count": 531134,
+    "retention_fraction": 0.05651153661001835,
+    "counts": {
+      "train": 20800,
+      "validation": 4869,
+      "test": 6144
+    },
+    "fractions_of_retained": {
+      "train": 0.6538207650960299,
+      "validation": 0.1530506396756043,
+      "test": 0.19312859522836576
+    },
+    "separation": {
+      "method": "exact Euclidean distance transform over every retained pixel",
+      "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+      "pairwise": [
+        {
+          "first_split": "train",
+          "second_split": "validation",
+          "minimum_center_distance_m": 1334.1664064126335,
+          "minimum_footprint_gap_lower_bound_m": 1305.8821351651716
+        },
+        {
+          "first_split": "train",
+          "second_split": "test",
+          "minimum_center_distance_m": 120.0,
+          "minimum_footprint_gap_lower_bound_m": 91.7157287525381
+        },
+        {
+          "first_split": "validation",
+          "second_split": "test",
+          "minimum_center_distance_m": 3864.349880639692,
+          "minimum_footprint_gap_lower_bound_m": 3836.06560939223
+        }
+      ],
+      "minimum_center_distance_m": 120.0,
+      "minimum_footprint_gap_lower_bound_m": 91.7157287525381
+    }
+  },
   "warnings": [
-    "Spectral dependence in this scene is exploratory; labels, model features, season, and landscape can have longer ranges. No statistical independence guarantee is made.",
-    "Partitions are three contiguous geographic stripes, without class stratification. Spatial holdout can expose geographic distribution shift; repeat across AOIs/seasons before model claims."
+    "Stationarity and isotropy are assumed; Monte Carlo point estimates do not establish model or label independence.",
+    "Whole-rectangle buffer exclusions and nodata change the retained split ratios; requested ratios apply to the initial candidate patch assignment.",
+    "Rectangles are sampled randomly in both spatial directions without class stratification. Repeat across seeds, AOIs, and seasons before model claims; buffer exclusions reduce training support."
   ],
-  "schema_version": "0.1.0",
+  "schema_version": "0.3.0",
   "provenance": {
-    "source": "Microsoft Planetary Computer STAC + native Sentinel-2 L2A COG windows",
-    "catalog_url": "https://planetarycomputer.microsoft.com/api/stac/v1",
-    "collection": "sentinel-2-l2a",
-    "item_id": "S2A_MSIL2A_20240828T102021_R065_T32UQD_20240828T150452",
-    "item_url": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-2-l2a/items/S2A_MSIL2A_20240828T102021_R065_T32UQD_20240828T150452",
-    "datetime": "2024-08-28T10:20:21.024000Z",
-    "band": "B05",
-    "bbox_wgs84": [
-      13.3,
-      52.35,
-      13.5,
-      52.5
-    ],
-    "scene_cloud_cover_percent": 0.001135,
-    "processing_baseline": 5.11,
-    "reflectance_scale": 0.0001,
-    "reflectance_offset": -0.1,
-    "calibration_source": "Sentinel-2 L2A processing baseline convention",
+    "source": "local_raster",
+    "filename": "analysis_band.tif",
+    "band_index": 1,
     "pixel_size_m": 20.0,
-    "crs": "EPSG:32632",
-    "shape": [
-      876,
-      731
-    ],
-    "valid_pixels": 562947,
-    "cloud_mask": "SCL classes 4 vegetation, 5 nonvegetated, 6 water; all other classes and nodata excluded",
-    "acquisition_path": "Public STAC directly; no Sentinel-2 downloader exposed by this EVE account at test time",
-    "selection": "Least scene cloud cover among first 100 covering catalog items, then item ID; pin item_id for replay"
+    "cloud_mask": "Only the supplied dataset mask/nodata; supply a cloud-masked raster."
+  },
+  "reference_implementation": {
+    "repository": "https://github.com/stefanopitton/lulc-classification",
+    "branch": "stepit/eve-hackathon-checkpoint",
+    "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
+    "source": "src/lulc/validation/autocorrelation.py",
+    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)"
   },
   "artifacts": {
     "scope": "Preserved workspace copies from the local MCP server",
-    "analysis_band": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d81b8c7872d8e5a6/analysis_band.tif",
-    "split_mask": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d81b8c7872d8e5a6/split_mask.tif",
-    "report_json": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d81b8c7872d8e5a6/report.json"
+    "analysis_band": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d1d8cefe63bfb8de/analysis_band.tif",
+    "split_mask": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d1d8cefe63bfb8de/split_mask.tif",
+    "unbuffered_split_mask": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d1d8cefe63bfb8de/unbuffered_split_mask.tif",
+    "patch_manifest": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d1d8cefe63bfb8de/patches.json",
+    "report_json": "./examples/eo-spatial-split-planner/artifacts/eve_runs/d1d8cefe63bfb8de/report.json"
   },
-  "run_fingerprint": "d81b8c7872d8e5a6",
+  "run_fingerprint": "d1d8cefe63bfb8de",
   "source_server_artifacts": {
-    "split_mask": "/tmp/eo-spatial-split-planner/d81b8c7872d8e5a6-cht_9w0s/split_mask.tif",
-    "analysis_band": "/tmp/eo-spatial-split-planner/d81b8c7872d8e5a6-cht_9w0s/analysis_band.tif",
-    "report_json": "/tmp/eo-spatial-split-planner/d81b8c7872d8e5a6-cht_9w0s/report.json",
-    "scope": "Paths on the MCP server filesystem"
+    "analysis_band": "/tmp/eo-spatial-split-planner/d1d8cefe63bfb8de-6d2lmow3/analysis_band.tif",
+    "report_json": "/tmp/eo-spatial-split-planner/d1d8cefe63bfb8de-6d2lmow3/report.json",
+    "scope": "Paths on the MCP server filesystem",
+    "split_mask": "/tmp/eo-spatial-split-planner/d1d8cefe63bfb8de-6d2lmow3/split_mask.tif",
+    "unbuffered_split_mask": "/tmp/eo-spatial-split-planner/d1d8cefe63bfb8de-6d2lmow3/unbuffered_split_mask.tif",
+    "patch_manifest": "/tmp/eo-spatial-split-planner/d1d8cefe63bfb8de-6d2lmow3/patches.json"
   }
 }

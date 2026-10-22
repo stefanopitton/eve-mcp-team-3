@@ -1,12 +1,99 @@
 {
+  "schema_version": "0.3.0",
   "official_registry_structural_checks_passed": true,
-  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 18\n  Servers touched: eo-spatial-split-planner\n\n",
+  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 46\n  Servers touched: eo-spatial-split-planner\n\n",
   "stderr": "",
-  "docker_build": "not run: Docker daemon unavailable on this host",
-  "recorded_unit_tests": "29 passed",
-  "recorded_mcp_stdio": "passed synthetic and real Sentinel-2",
-  "recorded_mcp_http": "passed real raster through stateless streamable HTTP",
-  "live_eve_agent": "passed hosted geocoder + local planner",
-  "notebook_execution": "passed",
-  "published": false
+  "recorded_validation": {
+    "schema_version": "0.3.0",
+    "reference_implementation": {
+      "repository": "https://github.com/stefanopitton/lulc-classification",
+      "branch": "stepit/eve-hackathon-checkpoint",
+      "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
+      "source": "src/lulc/validation/autocorrelation.py",
+      "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)"
+    },
+    "unit_tests": {
+      "status": "passed",
+      "count": 90
+    },
+    "lint": {
+      "status": "passed"
+    },
+    "mcp_stdio": {
+      "status": "passed",
+      "evidence": "mcp_smoke_test.json",
+      "random_rectangles_and_paired_masks": true
+    },
+    "mcp_streamable_http": {
+      "status": "passed",
+      "evidence": "mcp_http_test.json"
+    },
+    "reference_parity": {
+      "status": "passed",
+      "evidence": "reference_validation.json",
+      "note": "Variogram estimator unchanged; geometry changed to two-dimensional rectangles."
+    },
+    "live_eve": {
+      "status": "passed",
+      "configuration_source": "repository .env",
+      "api_url_model_key_match_env_file": true,
+      "verification": {
+        "expected_evaluation_tool": "evaluate_sentinel2_autocorrelation",
+        "evaluation_tool_returned": true,
+        "evaluation_status_ok": true,
+        "expected_planner_tool": "plan_spatial_split",
+        "planner_tool_returned": true,
+        "planner_status_ok": true,
+        "hosted_geocode_tool_returned": true,
+        "hosted_geocode_success": true
+      },
+      "schema_version": "0.3.0",
+      "evidence": "eve_demo.json"
+    },
+    "segmentation_benchmark": {
+      "status": "trained_and_evaluated",
+      "label_type": "WorldCover2021 weak reference",
+      "model": {
+        "architecture": "3 x Conv2d(3x3, 16 channels) + ReLU, then Conv2d(1x1, K classes)",
+        "trainable_parameters": 5283,
+        "pretrained_weights": false,
+        "device": "cpu",
+        "torch_version": "2.14.1"
+      },
+      "same_test_pixels": true,
+      "optimizer_steps_each": 150,
+      "buffer_m": 1298.2387330451975,
+      "retained_training_fraction": 0.33949342938906846,
+      "conditions": {
+        "without_buffer": {
+          "training_patches": 24,
+          "test_mean_iou": 0.5306811236981029,
+          "minimum_train_test_patch_edge_distance_m": 100.0
+        },
+        "with_buffer": {
+          "training_patches": 8,
+          "test_mean_iou": 0.47898616791963833,
+          "minimum_train_test_patch_edge_distance_m": 1700.0
+        },
+        "size_matched_without_buffer": {
+          "training_patches": 8,
+          "test_mean_iou": 0.4785191618818076,
+          "minimum_train_test_patch_edge_distance_m": 220.0
+        }
+      }
+    },
+    "gis_mcp": {
+      "status": "contract_reviewed_not_configured_or_live_tested",
+      "evidence": "gis_mcp_contract.json"
+    },
+    "notebook_execution": {
+      "status": "passed",
+      "code_cells": 11
+    },
+    "docker_build": {
+      "status": "not_run",
+      "reason": "Docker daemon unavailable on this host"
+    }
+  },
+  "official_registry_submission_created": false
 }

@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import re
 import shutil
 import sys
@@ -20,9 +21,21 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
+from dotenv import dotenv_values
+
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parents[1]
 sys.path.insert(0, str(REPO_ROOT / "lib"))
+
+# The user requires live tests to use this project's .env, even if the shell
+# contains a different EVE configuration. Never print or persist these values.
+_eve_env = dotenv_values(REPO_ROOT / ".env")
+for _name in ("EVE_API_BASE_URL", "EVE_API_KEY"):
+    if not _eve_env.get(_name):
+        raise RuntimeError(f"The repository .env must contain {_name} for live EVE tests")
+for _name in ("EVE_API_BASE_URL", "EVE_API_KEY", "EVE_LLM_MODEL"):
+    if _eve_env.get(_name):
+        os.environ[_name] = _eve_env[_name]
 
 from agentic_eo import create_agent  # noqa: E402
 from agentic_eo.env import settings  # noqa: E402
@@ -73,7 +86,8 @@ def decoded_tool_output(content):
     return content
 
 
-def preserve_planner_artifacts(planner: dict, output_dir: Path) -> dict:
+def preserve_planner_artifacts(planner: dict, output_dir: Path,
+                               report_filename: str = "eve_planner_report.json") -> dict:
     """Copy files from the local stdio server's scratch directory into the project."""
     original = planner.get("artifacts", {})
     report_path = Path(original.get("report_json", ""))
@@ -83,7 +97,9 @@ def preserve_planner_artifacts(planner: dict, output_dir: Path) -> dict:
     directory = output_dir / "eve_runs" / report["run_fingerprint"]
     directory.mkdir(parents=True, exist_ok=True)
     artifacts = {"scope": "Preserved workspace copies from the local MCP server"}
-    for key in ("analysis_band", "split_mask"):
+    for key in ("analysis_band", "split_mask", "unbuffered_split_mask", "patch_manifest"):
+        if key not in original:
+            continue
         source = Path(original[key])
         destination = directory / source.name
         shutil.copy2(source, destination)
@@ -92,7 +108,7 @@ def preserve_planner_artifacts(planner: dict, output_dir: Path) -> dict:
     report["source_server_artifacts"] = original
     report["artifacts"] = artifacts
     write_evidence(Path(artifacts["report_json"]), report)
-    write_evidence(output_dir / "eve_planner_report.json", report)
+    write_evidence(output_dir / report_filename, report)
     return artifacts
 
 
@@ -103,6 +119,7 @@ async def discover(output_dir: Path) -> dict:
     evidence = {
         "tested_at_utc": datetime.now(UTC).isoformat(),
         "authentication": "EVE_API_KEY loaded from local .env; value omitted",
+        "configuration_source": "repository .env (overrides inherited EVE settings)",
         "servers": servers,
         "inspected_tools": {},
         "sentinel2_discovery_calls": [],
@@ -144,36 +161,58 @@ async def discover(output_dir: Path) -> dict:
 async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
     """Require the real EVE model to call the hosted and local MCP tools."""
     if raster_path:
-        planner_instruction = (
-            "Call plan_spatial_split with raster_path="
-            f"{str(Path(raster_path).resolve())!r}, band_index=1, and seed=42."
+        evaluation_instruction = (
+            "Call evaluate_spatial_autocorrelation with raster_path="
+            f"{str(Path(raster_path).resolve())!r}, band_index=1, lag_m=2560, "
+            "seed=3, n_pairs_per_lag=200000, n_bins=24, max_lag_m=12800. "
         )
-        expected_planner = "plan_spatial_split"
+        expected_evaluator = "evaluate_spatial_autocorrelation"
     else:
-        planner_instruction = (
-            "Call plan_sentinel2_split with bbox=[13.30,52.35,13.50,52.50], "
+        evaluation_instruction = (
+            "Call evaluate_sentinel2_autocorrelation with bbox=[13.30,52.35,13.50,52.50], "
             "start_date='2024-06-01', end_date='2024-08-31', band='B05', "
-            "max_cloud_cover=10, and seed=42. Keep this exact small bbox."
+            "max_cloud_cover=10, lag_m=2560, seed=3, n_pairs_per_lag=200000, "
+            "n_bins=24, max_lag_m=12800. Keep this exact small bbox. "
         )
-        expected_planner = "plan_sentinel2_split"
+        expected_evaluator = "evaluate_sentinel2_autocorrelation"
+    expected_planner = "plan_spatial_split"
+    planner_instruction = (
+        "Then call plan_spatial_split with raster_path equal to the evaluator's "
+        "artifacts.analysis_band path, band_index=1, buffer_m=2560, lag_m=2560, "
+        "seed=3, patch_size_pixels=[48,64], and n_patches=12. Use seeded random "
+        "rectangles in both row and column directions. Report the paired "
+        "unbuffered mask with exactly the same validation/test rectangles and "
+        "restored training rectangles. This is a geometric demonstration of the requested gap, "
+        "including when the scientific lag decision rejects it. Report an "
+        "infeasible split accurately if this AOI cannot support that guard. "
+    )
     question = (
         "Create a defensible spatial train/validation/test plan for the small "
         "study area [13.30,52.35,13.50,52.50] west,south,east,north. "
         "First identify its setting by calling reverse_geocode_place with "
         "latitude=52.425, longitude=13.40, zoom=10. "
-        + planner_instruction + " Report the actual scene/band or raster used, "
-        "spatial correlation/range evidence, split counts, guard buffer, and "
-        "leakage comparison when returned. Distinguish observed results from "
+        + evaluation_instruction + planner_instruction
+        + "Report the actual scene/band or raster used, variogram-derived "
+        "rho_at_lag, practical_range_m, nugget, sill, fit_rss, per-bin count "
+        "reliability, and the two-condition decision. Accept the lag only when "
+        "rho_at_lag<0.1 AND lag_m>=practical_range_m with a resolved fit. "
+        "Report patch counts before/after the buffer, candidate coverage, "
+        "unselected valid pixels, excluded training pixels, and geometric "
+        "separation. Keep unselected coverage separate from pixels removed by "
+        "the buffer. This secondary 2024 test does not train a segmentation "
+        "model; do not invent model accuracy. Distinguish observed results from "
         "recommendations, identify tool failures, and cite each tool. "
         "Explain that this unsupervised image analysis cannot establish a "
         "downstream model's prediction accuracy. Keep the answer concise."
     )
     prompt = (
         "You are an Earth Observation research assistant. Use the connected "
-        "tools for every numerical result. Complete both requested tool calls. "
+        "tools for every numerical result. Complete all three requested tool calls. "
         "Never invent pixels, statistics, an acquisition route, or test results. "
         "Use the exact AOI and dates requested, rather than a geocoder's larger "
-        "bounding box. If a tool fails, report its error accurately."
+        "bounding box. This chain uses geocoding, not a GIS viewer. Geometric "
+        "separation and low single-band rho do not prove no data leakage. "
+        "If a tool fails, report its error accurately."
     )
     agent = await create_agent([HERE / "server.py", "geocode"], prompt=prompt)
     try:
@@ -181,6 +220,7 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
         evidence = {
             "tested_at_utc": datetime.now(UTC).isoformat(),
             "model": settings.eve_llm_model,
+            "configuration_source": "repository .env (overrides inherited EVE settings)",
             "servers": ["local eo-spatial-split-planner", "EVE hosted geocode"],
             "available_tool_names": agent.tool_names,
             "query": question,
@@ -197,20 +237,35 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
     }
     planner = tool_results.get(expected_planner)
     planner_ok = isinstance(planner, dict) and planner.get("status") == "ok"
+    evaluation = tool_results.get(expected_evaluator)
+    evaluation_ok = isinstance(evaluation, dict) and evaluation.get("status") == "ok"
     geocode = tool_results.get("reverse_geocode_place")
     geocode_ok = isinstance(geocode, dict) and not geocode.get("error")
     evidence["verification"] = {
+        "expected_evaluation_tool": expected_evaluator,
+        "evaluation_tool_returned": expected_evaluator in completed,
+        "evaluation_status_ok": evaluation_ok,
         "expected_planner_tool": expected_planner,
         "planner_tool_returned": expected_planner in completed,
         "planner_status_ok": planner_ok,
         "hosted_geocode_tool_returned": "reverse_geocode_place" in completed,
         "hosted_geocode_success": geocode_ok,
     }
+    if evaluation_ok:
+        evidence["workspace_evaluation_artifacts"] = preserve_planner_artifacts(
+            evaluation, output_dir, "eve_variogram_report.json")
     if planner_ok:
         evidence["workspace_artifacts"] = preserve_planner_artifacts(planner, output_dir)
     write_evidence(output_dir / "eve_demo.json", evidence)
-    if not planner_ok or not geocode_ok:
-        raise AssertionError("EVE did not complete both requested MCP calls successfully; inspect eve_demo.json")
+    if not evaluation_ok or not planner_ok or not geocode_ok:
+        raise AssertionError("EVE did not complete all three requested MCP calls successfully; inspect eve_demo.json")
+    from test import verify_rectangles, verify_variogram
+
+    evaluation_report = json.loads((output_dir / "eve_variogram_report.json").read_text())
+    planner_report = json.loads((output_dir / "eve_planner_report.json").read_text())
+    evidence["scientific_verification"] = verify_variogram(evaluation_report)
+    evidence["rectangle_verification"] = verify_rectangles(planner_report)
+    write_evidence(output_dir / "eve_demo.json", evidence)
     print(sanitize(evidence["answer"]))
     return evidence
 

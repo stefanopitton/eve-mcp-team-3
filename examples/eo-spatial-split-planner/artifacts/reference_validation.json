@@ -1,0 +1,58 @@
+{
+  "status": "passed",
+  "repository": "https://github.com/stefanopitton/lulc-classification",
+  "branch": "stepit/eve-hackathon-checkpoint",
+  "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
+  "source_file": "src/lulc/validation/autocorrelation.py",
+  "source_sha256": "e860db7bd491916b689618caa465568d6e25b5e19df836d75596886bf21e86a7",
+  "comparisons": [
+    {
+      "field": "synthetic float32 continuous field with NaNs",
+      "shape": [
+        160,
+        192
+      ],
+      "resolution_m": 10,
+      "seed": 3,
+      "n_pairs_per_lag": 4000,
+      "n_bins": 24,
+      "lag_m": 400,
+      "exact_matches": [
+        "counts",
+        "sq_diff_sum",
+        "gamma",
+        "rho",
+        "variance",
+        "rho_at_lag"
+      ],
+      "spherical_fit_matches": true,
+      "sill_mapping": "reference sill parameter is partial_sill; output sill = nugget + partial_sill",
+      "rho_at_lag": 0.04003304241352373,
+      "practical_range_m": 149.5292132933802
+    },
+    {
+      "field": "actual cached Sentinel-2 B05",
+      "shape": [
+        876,
+        731
+      ],
+      "resolution_m": 20.0,
+      "seed": 3,
+      "n_pairs_per_lag": 200000,
+      "n_bins": 24,
+      "lag_m": 2560,
+      "exact_matches": [
+        "counts",
+        "sq_diff_sum",
+        "gamma",
+        "rho",
+        "variance",
+        "rho_at_lag"
+      ],
+      "spherical_fit_matches": true,
+      "sill_mapping": "reference sill parameter is partial_sill; output sill = nugget + partial_sill",
+      "rho_at_lag": 0.060717387057803614,
+      "practical_range_m": 525.656625818225
+    }
+  ]
+}
