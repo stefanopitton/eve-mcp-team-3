@@ -86,6 +86,43 @@ def test_paired_heldout_members_are_byte_identical(tmp_path):
     assert result["conditions"]["buffered"]["patch_counts"] == {"train": 1, "val": 1, "test": 1}
 
 
+def test_lossless_archive_shards_cover_every_patch_and_preserve_paired_bytes(tmp_path):
+    values, labels, plan = _fixture()
+    factor = 8
+    values = np.random.default_rng(3).normal(size=(4, 64, 96)).astype("float32")
+    labels = labels.repeat(factor, 0).repeat(factor, 1)
+    for patch in plan["patches"]:
+        for key in ("r0", "r1", "c0", "c1"):
+            patch[key] *= factor
+    for key in ("split_mask", "unbuffered_split_mask"):
+        plan[key] = plan[key].repeat(factor, 0).repeat(factor, 1)
+    baseline = export_patch_datasets(values, labels, plan, tmp_path / "whole")
+    sharded = export_patch_datasets(values, labels, plan, tmp_path / "shards", max_archive_bytes=40_000)
+    heldout = {}
+    for condition in ("buffered", "unbuffered"):
+        item = sharded["conditions"][condition]
+        assert len(item["archive_paths"]) >= 2
+        assert item["archive_path"] == item["archive_paths"][0]
+        assert all(size < 40_000 for size in item["archive_shard_bytes"])
+        assert item["archive_below_5_mib"]
+        combined = {}
+        for path in item["archive_paths"]:
+            with zipfile.ZipFile(path) as archive:
+                for member in archive.namelist():
+                    assert member not in combined
+                    combined[member] = archive.read(member)
+        with zipfile.ZipFile(baseline["conditions"][condition]["archive_path"]) as archive:
+            assert combined == {name: archive.read(name) for name in archive.namelist()}
+        heldout[condition] = {name: data for name, data in combined.items() if name.startswith(("val/", "test/"))}
+        with zipfile.ZipFile(item["archive_path"]) as first:
+            assert "patches_metadata.json" in first.namelist()
+            assert "normalization_params.json" in first.namelist()
+    assert heldout["buffered"] == heldout["unbuffered"]
+    persisted = json.loads(Path(sharded["manifest_path"]).read_text())
+    for item in persisted["conditions"].values():
+        assert all(not Path(path).is_absolute() for path in item["archive_paths"])
+
+
 def test_normalization_is_reproducible_and_ignores_validation_test(tmp_path):
     values, labels, plan = _fixture()
     first = export_patch_datasets(values, labels, plan, tmp_path / "first")

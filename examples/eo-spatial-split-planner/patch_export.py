@@ -10,6 +10,7 @@ import hashlib
 import io
 import json
 import zipfile
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -52,6 +53,32 @@ def _write_member(archive, filename, data):
     info.compress_type = zipfile.ZIP_DEFLATED
     info.external_attr = 0o644 << 16
     archive.writestr(info, data, compresslevel=9)
+
+
+def _zip_member_size(filename, data):
+    """Exact standard ZIP cost with the same raw DEFLATE settings as writer."""
+    compressor = zlib.compressobj(9, zlib.DEFLATED, -15)
+    compressed = compressor.compress(data) + compressor.flush()
+    return len(compressed) + 76 + 2 * len(filename.encode("utf-8"))
+
+
+def _archive_parts(entries, metadata_bytes, normalization_bytes, max_archive_bytes):
+    metadata = [("patches_metadata.json", metadata_bytes), ("normalization_params.json", normalization_bytes)]
+    first_size = 22 + sum(_zip_member_size(name, data) for name, data in metadata)
+    if first_size >= max_archive_bytes:
+        raise ValueError("max_archive_bytes is too small for the dataset metadata and normalization members")
+    parts, current, size = [], list(metadata), first_size
+    for name, data in sorted(entries.items()):
+        member_size = _zip_member_size(name, data)
+        if 22 + member_size >= max_archive_bytes:
+            raise ValueError(f"A single patch member exceeds max_archive_bytes: {name}")
+        if size + member_size >= max_archive_bytes:
+            parts.append(current)
+            current, size = [], 22
+        current.append((name, data))
+        size += member_size
+    parts.append(current)
+    return parts
 
 
 def _coordinate(patch, short, long):
@@ -147,6 +174,7 @@ def export_patch_datasets(
     values, labels, plan, output_dir,
     channel_names=("B05", "B03", "B04", "B08"),
     class_names=("vegetation", "built-up", "water"), source_metadata=None,
+    max_archive_bytes=9 * 1024**2 // 2,
 ):
     """Write paired ZIP datasets, coordinate metadata and training-only statistics.
 
@@ -156,6 +184,10 @@ def export_patch_datasets(
     Validation/test membership and member bytes must match between conditions.
     """
     values, labels = np.asarray(values), np.asarray(labels)
+    if (isinstance(max_archive_bytes, (bool, np.bool_)) or
+            not isinstance(max_archive_bytes, (int, np.integer)) or
+            not 1024 <= max_archive_bytes <= 5 * 1024**2):
+        raise ValueError("max_archive_bytes must be an integer between 1024 and 5 MiB")
     if values.ndim != 3 or labels.ndim != 2 or values.shape[1:] != labels.shape:
         raise ValueError("values must be C,H,W and labels H,W on the same grid")
     if len(channel_names) != values.shape[0] or not values.shape[0]:
@@ -257,18 +289,33 @@ def export_patch_datasets(
         metadata_bytes, normalization_bytes = _json_bytes(metadata), _json_bytes(normalization)
         metadata_path.write_bytes(metadata_bytes)
         normalization_path.write_bytes(normalization_bytes)
-        archive_path = output / f"{condition}_patches.zip"
-        temporary = archive_path.with_suffix(".tmp.zip")
-        with zipfile.ZipFile(temporary, "w") as archive:
-            for name, data in sorted(entries.items()):
-                _write_member(archive, name, data)
-            _write_member(archive, "patches_metadata.json", metadata_bytes)
-            _write_member(archive, "normalization_params.json", normalization_bytes)
-        temporary.replace(archive_path)
+        archive_paths = []
+        parts = _archive_parts(entries, metadata_bytes, normalization_bytes, max_archive_bytes)
+        for number, members in enumerate(parts, start=1):
+            suffix = "" if number == 1 else f"_part{number:02d}"
+            archive_path = output / f"{condition}_patches{suffix}.zip"
+            temporary = archive_path.with_suffix(".tmp.zip")
+            with zipfile.ZipFile(temporary, "w") as archive:
+                for name, data in members:
+                    _write_member(archive, name, data)
+            if temporary.stat().st_size >= max_archive_bytes:
+                temporary.unlink()
+                raise RuntimeError("Internal ZIP shard size validation failed")
+            temporary.replace(archive_path)
+            archive_paths.append(archive_path)
+        # A smaller subsequent export must not leave stale extra shards behind.
+        for stale in output.glob(f"{condition}_patches_part*.zip"):
+            if stale not in archive_paths:
+                stale.unlink()
+        archive_path = archive_paths[0]
+        shard_bytes = [path.stat().st_size for path in archive_paths]
         manifest["conditions"][condition] = {
             "archive_path": str(archive_path), "metadata_path": str(metadata_path),
-            "normalization_path": str(normalization_path), "archive_bytes": archive_path.stat().st_size,
-            "archive_below_5_mib": archive_path.stat().st_size < 5 * 1024**2,
+            "archive_paths": [str(path) for path in archive_paths],
+            "archive_shard_bytes": shard_bytes, "archive_part_count": len(archive_paths),
+            "max_archive_bytes": int(max_archive_bytes),
+            "normalization_path": str(normalization_path), "archive_bytes": sum(shard_bytes),
+            "archive_below_5_mib": all(size < 5 * 1024**2 for size in shard_bytes),
             "patch_counts": metadata["patches_per_split"],
             "class_counts": metadata["class_counts_per_split"],
             "selected_train_pixel_count": normalization["selected_train_pixel_count"],
@@ -280,6 +327,7 @@ def export_patch_datasets(
     # the exported directory, including when extracted on another machine.
     persisted = _jsonable(manifest)
     for exported in persisted["conditions"].values():
+        exported["archive_paths"] = [str(Path(path).relative_to(output)) for path in exported["archive_paths"]]
         for key in ("archive_path", "metadata_path", "normalization_path"):
             exported[key] = str(Path(exported[key]).relative_to(output))
     persisted["manifest_path"] = "patch_export_manifest.json"

@@ -22,8 +22,8 @@
   "files": [
     {
       "path": "servers/eo-spatial-split-planner/EVE_PROMPT_AND_OUTPUT.md",
-      "bytes": 10430,
-      "sha256": "6e2be0a721ecc7539c4813807958bd35122fe7d1b01ddde8ef1f946827dad848"
+      "bytes": 8856,
+      "sha256": "64542c8bc058bdc7eea7dcf46a66d91fd2c6795ad22ab8bfb5f89be319f136b2"
     },
     {
       "path": "servers/eo-spatial-split-planner/PROCEDURE.md",
@@ -32,13 +32,13 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/PR_DESCRIPTION.md",
-      "bytes": 3556,
-      "sha256": "460aee0304bb72fe35d203c50f3dc90bad92b98aefffe0ca6704d5e015176240"
+      "bytes": 4631,
+      "sha256": "20d21268ba4f17fe93da7e25d984a49ff5537f95d96c6a41cd7cddd5d7b2000f"
     },
     {
       "path": "servers/eo-spatial-split-planner/README.md",
-      "bytes": 19374,
-      "sha256": "ea2cc83a3e529e027ce13f43a9d1827b36027f63f8f5ebfe429b5d4f99214c0b"
+      "bytes": 19096,
+      "sha256": "c196e955dd61f1db28ac9d8f3e0fcee53d619e6e78c6e8ebdc97f3df524eb6f4"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/analysis_band.tif",
@@ -52,8 +52,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/eve_demo.json",
-      "bytes": 51216,
-      "sha256": "6dea69ad6bc46076a1ba968aa6b61a9ff94d019f66c30b7e7198dd7875d3cb20"
+      "bytes": 38179,
+      "sha256": "2adca9487a0f4e11c3440793148965d5d3a7456bd453de77f6fae0624a7f2fcc"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/eve_gateway_discovery.json",
@@ -61,14 +61,74 @@
       "sha256": "aab8338205bb6ead7e91bf775e2f2b1a11462ddcf5b1010bbc11c3c40c87330b"
     },
     {
-      "path": "servers/eo-spatial-split-planner/artifacts/eve_planner_report.json",
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/EVE_PROMPT_AND_OUTPUT.md",
+      "bytes": 11238,
+      "sha256": "064740e113fe5d1db9d5f95ced78ffb1064c92c570cdc5c05ffe3b5e69d81d1c"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/eve_demo.json",
+      "bytes": 51216,
+      "sha256": "6dea69ad6bc46076a1ba968aa6b61a9ff94d019f66c30b7e7198dd7875d3cb20"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/eve_planner_report.json",
       "bytes": 518640,
       "sha256": "6325f9874d5d6f6096ad6a62f263302c7117ca96bf372016a067cf3412ee4de7"
     },
     {
-      "path": "servers/eo-spatial-split-planner/artifacts/eve_variogram_report.json",
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/eve_variogram_report.json",
       "bytes": 5617,
       "sha256": "aeeec4feab24f777532519cca91a7825e0eb3ec8b281ca241b1ac1e0602ea67a"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_planner_report.json",
+      "bytes": 520784,
+      "sha256": "e556a07254b122cba35f2a0727f2fcf38903ac6c467d2eec6448e3cfae71d4ea"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/analysis_band.tif",
+      "bytes": 1633115,
+      "sha256": "b166e6037eb2d4749574ff5f6f7aee85f380eac33b24ce6ce031ea965bf240f5"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/candidate_split_mask.tif",
+      "bytes": 24186,
+      "sha256": "437d8396eb0e3c6863eca12f65e590550dc98fec268f0b68c9664c5a01c2beeb"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/patches.json",
+      "bytes": 319482,
+      "sha256": "326b7c8d0d48e88a86454d773cb6e3290ca790a5acdf75467031b49388e1bce8"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/report.json",
+      "bytes": 521390,
+      "sha256": "dd7d994b7fefd38aaf7e7847dc22d387bed93a195d6089b96579bdfa1e02103f"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/split_mask.tif",
+      "bytes": 22810,
+      "sha256": "4e5e97bbc2ad44208a96b6951f10d86565f1191530c63ee9ee26d21213f2bbf4"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/unbuffered_split_mask.tif",
+      "bytes": 24162,
+      "sha256": "37b63b0a31f3cdad683e5c559571ee0b80004769cc6312db316b0ba36100ecb3"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/analysis_band.tif",
+      "bytes": 1633115,
+      "sha256": "b166e6037eb2d4749574ff5f6f7aee85f380eac33b24ce6ce031ea965bf240f5"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/report.json",
+      "bytes": 5819,
+      "sha256": "96df38ea474bba9cd831de6dfe2437284a12481318a2d55cde800e237154b079"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_variogram_report.json",
+      "bytes": 5617,
+      "sha256": "88b88cda65117fcbfb15baf102a8200481f26f53839be2f2e1192be46c5c16bd"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/gis_mcp_contract.json",
@@ -88,7 +148,7 @@
     {
       "path": "servers/eo-spatial-split-planner/artifacts/patch_reference_validation.json",
       "bytes": 4782,
-      "sha256": "c6413c3b318ad2c2d9e54a32a2265348fa2a6a2f2b0efa2ac59839292b6b4607"
+      "sha256": "b9799bd4952386568dd9e4ab1fd28dab5775eb86a16c88d9367de8bf87db2921"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/patches.json",
@@ -107,98 +167,108 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/benchmark_plan.json",
-      "bytes": 569923,
-      "sha256": "31a1600b896fce95fce6eca7669ce94f47564aaa2df2f05af980539ddc0de102"
+      "bytes": 557867,
+      "sha256": "dee343b31200f2c686f9c0ba3903268a0e6e9b7c51f79bd6b08c18173f37e397"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/buffered_patch_split.tif",
-      "bytes": 11856,
-      "sha256": "53405f958fe0fc09879244a2f0a774d838eb86c1724a58d8650cac6783a0d653"
+      "bytes": 21925,
+      "sha256": "b4ac056bf394490b569740bf18705f87a1c987f3cb1b809340f6d4646d5ac3f7"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/candidate_patch_split.tif",
-      "bytes": 24874,
-      "sha256": "fdc050f354e7e9216bc81816a89a0e749048bc4038721bec088c46b158a3bd69"
+      "bytes": 24247,
+      "sha256": "90c8b6d672c1fd5865c6b494bd844ac64ac07bf39e7f2627395cc37cdf0cfd55"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/buffered/normalization_params.json",
-      "bytes": 1550,
-      "sha256": "9f1967a0914ebab1109a8f197f1a1053735ff329c0dfe752fe74a3c56c907998"
+      "bytes": 1553,
+      "sha256": "070183c90fb264560f60f62a0ef3a35e1cfbd753c1e9b758fa88caebc2776f70"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/buffered/patches_metadata.json",
-      "bytes": 747116,
-      "sha256": "ce25d8197e743002e5a772c3af0e67fc031bba2d47a18cac9cdc16d7beebe200"
+      "bytes": 907127,
+      "sha256": "b783c7b35ec3917692942fc2dceef8db1106dc4361a670fcaff80248ab4e0f00"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/buffered_patches.zip",
-      "bytes": 2138139,
-      "sha256": "1450f31c1f1b9ffa03685b17b9cc98242d846c331053c9831b69c415abad8b38"
+      "bytes": 4703605,
+      "sha256": "f198468c7d14394559f75bfd87e756f0712fed4e86078af15d36934399bd491e"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/buffered_patches_part02.zip",
+      "bytes": 621812,
+      "sha256": "21b8444eae185f7c9a0199d2aea1e2d5275ef77581600533eed31c3abed77e28"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/patch_export_manifest.json",
-      "bytes": 1791,
-      "sha256": "ed0cecbaa617b8ba181eff02bac0e6a215b4e71eaa96c65933f99a6834ba0de0"
+      "bytes": 2291,
+      "sha256": "b45aac8a98d6dacd5480e7ec51a8b0b76f390b50797c22a3ff98e98bd5606509"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/unbuffered/normalization_params.json",
-      "bytes": 1549,
-      "sha256": "76738cd411ecbcfc093da0bc078a476bd96ce7e11a2a2f4f01864691025800f1"
+      "bytes": 1551,
+      "sha256": "8852bc9d04e2a02b8b1b1ad5a834bfa31e7724394c1af7b763aa5d6ee5f44551"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/unbuffered/patches_metadata.json",
-      "bytes": 895946,
-      "sha256": "e984fe16ed9282286be903fed9785af0e7ccd9aeb36840eb0001cc4ebb33f3ed"
+      "bytes": 986120,
+      "sha256": "21bd6071fa62fc1d511fefe82316d19a5ea54efde35e8cf08ce397163e6f9324"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/unbuffered_patches.zip",
-      "bytes": 4886229,
-      "sha256": "03327fc4638d0423a43ad24884551745e6e3196f48037383b7b48e7c64037225"
+      "bytes": 4708457,
+      "sha256": "526cb35d2fd38d8320e9ecb835e4ae3b4e6bce958a1129dafae30b4968c97a7f"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_exports/unbuffered_patches_part02.zip",
+      "bytes": 2071846,
+      "sha256": "cdc9f1dd16c6c47d3f34a9860ab59b0db24c01584f0771c862db9084ca186cad"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/patch_split_layout.png",
-      "bytes": 335796,
-      "sha256": "57ad6723901b158110ae59c9691959f2fcc7c6a38922e9eca310b82952f29be2"
+      "bytes": 330585,
+      "sha256": "d2a34f69ff804f2ed4a63a7a8f08824d955cdf6d93a349446b2143a1a3b5f686"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/segmentation_comparison.png",
-      "bytes": 912086,
-      "sha256": "a94cdb427aae82d368ee7cf4836a127591d49a3acee2cf2f11c1b7277942f7b2"
+      "bytes": 923520,
+      "sha256": "fc16f68af54410f6fa50cf65d1ab92c716d91ceed21967bf94cc7a44515b36aa"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/segmentation_predictions.npz",
-      "bytes": 178814,
-      "sha256": "4218658ad77facdd1767d40769b84ed2f2f2998138d11dcfe46e124bdb4a4a13"
+      "bytes": 262676,
+      "sha256": "c591a5999deee569ac31c6759f2d22de7b15daebc27c2c10f37070ab18d9a3e6"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/segmentation_report.json",
-      "bytes": 25895,
-      "sha256": "bc69514e43994b56e855c5d288688102deddf7098d1df7c90ef21c6345ece0e9"
+      "bytes": 33982,
+      "sha256": "386f6c41b216ee2424652e98ec554a141c1bc36bfd56e31e03fb3651becc26d8"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/size_matched_without_buffer_model.pt",
       "bytes": 25273,
-      "sha256": "2981c8ae0ced93382005bcc809b9131b8c695409938b4218b000859a7bf67493"
+      "sha256": "3afcec04152487dd8982e1daf437b5339c82135b6b56d3387db8f6fe26d2ab7f"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/test_patch_montage.png",
-      "bytes": 224270,
-      "sha256": "0460681d417eb6c48cdfcb5f11246220bf45d0acc66c9e5d105766ec6febad9a"
+      "bytes": 337640,
+      "sha256": "86a81d6b7680e095bbad2f0a958c9f4fa67ffc47592223797edf45d3ecc09809"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/unbuffered_patch_split.tif",
-      "bytes": 19944,
-      "sha256": "e154c2709f36cd5194cfce132bb05dadc478a5cbf7f8829057f3e1b80f4f0e24"
+      "bytes": 24247,
+      "sha256": "90c8b6d672c1fd5865c6b494bd844ac64ac07bf39e7f2627395cc37cdf0cfd55"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/with_buffer_model.pt",
       "bytes": 24921,
-      "sha256": "5215851b6dd7f3fc1784801034f10ec48c71bbd625c0c1fe1cf746d10af07e5b"
+      "sha256": "65e1378a96b137e12e89448cdef7e06e2e939c0777e2ff4169307b27cf323ca3"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_benchmark/without_buffer_model.pt",
       "bytes": 24963,
-      "sha256": "c96e7028ccbb11e3065cdd0668d4cc02de08fe1784afe07711b3695276a70446"
+      "sha256": "8fddca51e518a9f5c517d248bf5b4ef368ef035b204c9738057af2f1ab3d6d1c"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/segmentation_data/manifest.json",
@@ -232,8 +302,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/validation_summary.json",
-      "bytes": 5275,
-      "sha256": "62f4cd4aa64acc676a5defe2c6814b62cf09f7eece95486c1a2d477daee78ed5"
+      "bytes": 8122,
+      "sha256": "ba80e532847e160447ce10e7d432f53db0128bb0ec864b9fe053c274575c951a"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/variogram_report.json",
@@ -242,13 +312,13 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/block_patches.py",
-      "bytes": 21988,
-      "sha256": "691264a07047f316fe3211b3ddfc8cd361a29df9a23cc49995476f6b488591d5"
+      "bytes": 26888,
+      "sha256": "53894e0e9da683590d32eea3796594d548602bedef38a3b64ee105d6934d7b47"
     },
     {
       "path": "servers/eo-spatial-split-planner/core.py",
-      "bytes": 38329,
-      "sha256": "9e36e9f5c1fe12f0510259b6e7a2e876a637fe4149dcc3e2ee99519bb29d3136"
+      "bytes": 39222,
+      "sha256": "ee8f375523b35429046d1b33723ad5504a6c5b6f9462ab74f2390664865db682"
     },
     {
       "path": "servers/eo-spatial-split-planner/imagery.py",
@@ -257,8 +327,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/patch_export.py",
-      "bytes": 16273,
-      "sha256": "2479325f472fc297a23914af8b62ff803792d76d8d1b52f5f2045b92b6f3d0ea"
+      "bytes": 18842,
+      "sha256": "92e2b2a36c0e0ea233a1208411dd718c679554d6e057bf6f81cff7e656328c01"
     },
     {
       "path": "servers/eo-spatial-split-planner/requirements-demo.txt",
@@ -272,8 +342,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/run_segmentation.py",
-      "bytes": 10005,
-      "sha256": "6e52975461c12b235a85fd0ffbb73ed0bfb6453b5af2ba1b95817f1e6b6162a1"
+      "bytes": 10703,
+      "sha256": "ace77f03444f97ddd10ce4625eeaeb0fb63cef7e672c9d4bd32cc366470997aa"
     },
     {
       "path": "servers/eo-spatial-split-planner/segmentation.py",
@@ -287,23 +357,23 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/server.py",
-      "bytes": 17753,
-      "sha256": "a58ef4d8802011df5ea5a1fe5fce9b65f6ca9a89f3bcb0feaccc3b3fca9c105a"
+      "bytes": 18634,
+      "sha256": "f41981c3e7011412b3add00cd5b7872b8c7d75fa597a5b643aa017cda5394246"
     },
     {
       "path": "servers/eo-spatial-split-planner/test.py",
-      "bytes": 26459,
-      "sha256": "39a762b8a9c894ff7e108dd2ab2e5338757202ef628db473582122185e184c02"
+      "bytes": 26651,
+      "sha256": "05ba7c8391a346deb0a99c52e50af520cd979eb6a5f457a81e23a1e07ea32154"
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_agent_contract.py",
-      "bytes": 5098,
-      "sha256": "04f5fd89295512a56fa947e51c40138c33532b83932380c6580d804c0d0b9ec4"
+      "bytes": 6420,
+      "sha256": "eaafaf71687c53a3865ce282434865706d7f8951c987869305a3076f06ee6f29"
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_block_patches.py",
-      "bytes": 18314,
-      "sha256": "17b0f10a83d9edccb51662b5e9fc2d630d88e343c0804e53c333c01137a41837"
+      "bytes": 21571,
+      "sha256": "cb7b4cbe2b7b78764e273cd6f063f48d434c6685c81f91ed4ac0d6e910590338"
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_core.py",
@@ -317,8 +387,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_patch_export.py",
-      "bytes": 7788,
-      "sha256": "cfbfa2490235ae403683faa222360d38f72dd62054c79bc2b18736b7e9b02072"
+      "bytes": 9851,
+      "sha256": "1da9779f439200d6c3f1a354cbd62284397e76d96f4992ea4d29d0af92b82573"
     },
     {
       "path": "servers/eo-spatial-split-planner/tests/test_segmentation.py",
@@ -327,8 +397,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/validate_patches.py",
-      "bytes": 8360,
-      "sha256": "6874c51c2f748589417e4f164f2562fc4ce17729e8613d7c53b4e449cf5d8cf4"
+      "bytes": 8429,
+      "sha256": "92f0ee46697d87f8d9f67616cad3b38818cccf69e614eb88dfdd895292009b89"
     },
     {
       "path": "servers/eo-spatial-split-planner/validate_reference.py",
@@ -337,18 +407,18 @@
     },
     {
       "path": "START_HERE.ipynb",
-      "bytes": 3137444,
-      "sha256": "ef0a72a88bf2f0e37ffe85ccab54203be4f5bedf37bd40319b7e1e2533e8af80"
+      "bytes": 708275,
+      "sha256": "90dcc9406f1af8e379fbb2be64d103a8da81528a11d8df925f6459504d98f3ef"
     },
     {
       "path": "EO_SPATIAL_SPLIT_PLANNER.ipynb",
-      "bytes": 3124927,
-      "sha256": "a2fde818c53201e2f8652f2c0b2dd0168d9b7990ef7a5204c1096e91a102468b"
+      "bytes": 3399917,
+      "sha256": "57e5954a897b281f3061dbd271c7c57f011612f6c370387ebe5b98bf52d0880f"
     },
     {
       "path": "EVE_PROMPT_AND_OUTPUT.md",
-      "bytes": 10630,
-      "sha256": "e5684020979a306136d98ae18ffa5546aec7049f636b88d2516cfbeda6485675"
+      "bytes": 9069,
+      "sha256": "4b6c874ae44192eb85f33da7d54a86604eaeabe70acb038cb2478bed05174695"
     },
     {
       "path": "shared/Dockerfile",
@@ -358,7 +428,17 @@
   ],
   "archive": {
     "path": "EO_Spatial_Split_Planner_submission.zip",
-    "bytes": 21005158,
-    "sha256": "5259089e1e8e3ed99d38a7a4cd305c1cb370d4c878aa1310a2d28564637999a4"
-  }
+    "bytes": 27903646,
+    "sha256": "bdde52ff806207431921ecc7c1e4cb553e49e5375695ea5d53869e4e46450a9c"
+  },
+  "group_assignment": "compact_regions",
+  "buffer_policy": "one_sided",
+  "retention_budget": {
+    "quality_candidate_pixel_count": 530246,
+    "retained_quality_pixel_count": 414474,
+    "buffer_removed_quality_pixel_count": 115772,
+    "retained_fraction_of_quality_candidates": 0.7816636051945701
+  },
+  "start_here_edit_scope": "Only Your turn placeholder cells replaced; 17 original cells and original notebook metadata preserved exactly.",
+  "template_preservation_manifest": "../scripts/start_here_template.json"
 }

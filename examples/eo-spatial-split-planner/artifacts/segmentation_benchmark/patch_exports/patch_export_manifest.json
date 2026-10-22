@@ -4,66 +4,86 @@
     "buffered": {
       "archive_path": "buffered_patches.zip",
       "metadata_path": "buffered/patches_metadata.json",
+      "archive_paths": [
+        "buffered_patches.zip",
+        "buffered_patches_part02.zip"
+      ],
+      "archive_shard_bytes": [
+        4703605,
+        621812
+      ],
+      "archive_part_count": 2,
+      "max_archive_bytes": 4718592,
       "normalization_path": "buffered/normalization_params.json",
-      "archive_bytes": 2138139,
+      "archive_bytes": 5325417,
       "archive_below_5_mib": true,
       "patch_counts": {
-        "train": 124,
-        "val": 14,
-        "test": 10
+        "train": 200,
+        "val": 35,
+        "test": 127
       },
       "class_counts": {
         "train": [
-          94127,
-          44852,
-          102
+          145638,
+          82293,
+          3483
         ],
         "val": [
-          5911,
-          4901,
-          2074
+          13750,
+          26631,
+          4
         ],
         "test": [
-          12429,
-          161,
-          11
+          117548,
+          25085,
+          42
         ]
       },
-      "selected_train_pixel_count": 153344,
-      "finite_train_pixel_count": 139081,
-      "sampled_train_pixel_count": 34749
+      "selected_train_pixel_count": 249952,
+      "finite_train_pixel_count": 231414,
+      "sampled_train_pixel_count": 57706
     },
     "unbuffered": {
       "archive_path": "unbuffered_patches.zip",
       "metadata_path": "unbuffered/patches_metadata.json",
+      "archive_paths": [
+        "unbuffered_patches.zip",
+        "unbuffered_patches_part02.zip"
+      ],
+      "archive_shard_bytes": [
+        4708457,
+        2071846
+      ],
+      "archive_part_count": 2,
+      "max_archive_bytes": 4718592,
       "normalization_path": "unbuffered/normalization_params.json",
-      "archive_bytes": 4886229,
+      "archive_bytes": 6780303,
       "archive_below_5_mib": true,
       "patch_counts": {
-        "train": 306,
-        "val": 14,
-        "test": 10
+        "train": 297,
+        "val": 35,
+        "test": 127
       },
       "class_counts": {
         "train": [
-          234069,
-          120688,
-          403
+          223058,
+          120463,
+          3665
         ],
         "val": [
-          5911,
-          4901,
-          2074
+          13750,
+          26631,
+          4
         ],
         "test": [
-          12429,
-          161,
-          11
+          117548,
+          25085,
+          42
         ]
       },
-      "selected_train_pixel_count": 383168,
-      "finite_train_pixel_count": 355160,
-      "sampled_train_pixel_count": 88722
+      "selected_train_pixel_count": 372096,
+      "finite_train_pixel_count": 347186,
+      "sampled_train_pixel_count": 86658
     }
   },
   "paired_heldout_identical": true,

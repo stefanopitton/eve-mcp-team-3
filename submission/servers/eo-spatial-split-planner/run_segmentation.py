@@ -37,7 +37,8 @@ def run_demo(data_dir=HERE / "artifacts" / "segmentation_data",
              patch_layout="reference_blocks", patch_size_pixels=(32, 40),
              block_size_pixels=(96, 120), split_ratios=(0.7, 0.1, 0.2),
              seed_candidates=200, max_nan_fraction=0.5, require_class_coverage=True,
-             n_patches=None, edge_policy="extend", crop_size=16):
+             n_patches=None, edge_policy="extend", crop_size=16,
+             group_assignment="compact_regions", buffer_policy="one_sided"):
     values, labels, profile, resolution, manifest = load_demo_data(data_dir)
     # Reference mode can use class coverage to choose the split seed, as script04
     # does. This is disclosed dataset design; model scores never select geometry.
@@ -50,6 +51,7 @@ def run_demo(data_dir=HERE / "artifacts" / "segmentation_data",
         seed_candidates=seed_candidates, max_nan_fraction=max_nan_fraction,
         class_labels=labels if use_class_coverage else None,
         require_class_coverage=use_class_coverage, n_patches=n_patches, edge_policy=edge_policy,
+        group_assignment=group_assignment, buffer_policy=buffer_policy,
         max_lag_m=12_800, max_pairs_per_lag=max_pairs_per_lag)
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
@@ -91,20 +93,23 @@ def run_demo(data_dir=HERE / "artifacts" / "segmentation_data",
     for exported in patch_export["conditions"].values():
         for key in ("archive_path", "metadata_path", "normalization_path"):
             exported[key] = str(Path(exported[key]).relative_to(output.resolve()))
+        if "archive_paths" in exported:
+            exported["archive_paths"] = [str(Path(path).relative_to(output.resolve()))
+                                         for path in exported["archive_paths"]]
     patch_export["manifest_path"] = str(Path(patch_export["manifest_path"]).relative_to(output.resolve()))
     patch_export["path_scope"] = "Paths relative to the segmentation report directory"
     result["patch_export"] = patch_export
     result["patch_planning"] = {key: plan["report"][key] for key in (
         "method", "patch_layout", "seed", "selected_seed", "requested_split_ratios",
-        "patch_size_pixels", "block_size_pixels", "edge_policy", "seed_search", "buffer_radius_patches",
+        "patch_size_pixels", "block_size_pixels", "edge_policy", "group_assignment", "buffer_policy", "seed_search", "buffer_radius_patches",
         "paired_comparison", "buffer_scope", "buffer_not_applied_to", "reference_implementation") if key in plan["report"]}
     if "seed_search" in result["patch_planning"]:
         result["patch_planning"]["seed_search"] = {
             key: value for key, value in result["patch_planning"]["seed_search"].items() if key != "candidates"}
     result["interpretation"] += (
-        " Reference-block mode uses symmetric erosion of heldout patches. The paired baseline restores "
-        "training only and can already have a one-sided heldout guard; this is not a leaky-versus-independent "
-        "test. Optional class-coverage seed search uses reference labels for dataset design, not model scores.")
+        " Compact assignment minimizes needless interfaces while one-sided guards retain higher-priority heldouts. "
+        "The paired baseline restores training only with identical validation/test support. "
+        "Class-coverage seed search uses reference labels for dataset design, never model scores.")
     (output / "segmentation_report.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     return result
 
@@ -127,6 +132,8 @@ def main():
     parser.add_argument("--seed-candidates", type=int, default=200)
     parser.add_argument("--max-nan-fraction", type=float, default=0.5)
     parser.add_argument("--no-class-coverage", action="store_true")
+    parser.add_argument("--group-assignment", choices=("compact_regions", "random_groups"), default="compact_regions")
+    parser.add_argument("--buffer-policy", choices=("one_sided", "symmetric"), default="one_sided")
     parser.add_argument("--crop-size", type=int, default=16)
     parser.add_argument("--edge-policy", choices=("extend", "crop"), default="extend")
     parser.add_argument("--n-patches", type=int, default=None, help="Only for random_rectangles")
@@ -138,7 +145,8 @@ def main():
                       patch_layout=arguments.patch_layout, patch_size_pixels=arguments.patch_size_pixels,
                       block_size_pixels=arguments.block_size_pixels, split_ratios=arguments.split_ratios,
                       seed_candidates=arguments.seed_candidates, max_nan_fraction=arguments.max_nan_fraction,
-                      require_class_coverage=not arguments.no_class_coverage, n_patches=arguments.n_patches, edge_policy=arguments.edge_policy, crop_size=arguments.crop_size)
+                      require_class_coverage=not arguments.no_class_coverage, n_patches=arguments.n_patches, edge_policy=arguments.edge_policy, crop_size=arguments.crop_size,
+                      group_assignment=arguments.group_assignment, buffer_policy=arguments.buffer_policy)
     print(json.dumps({"output_dir": str(arguments.output_dir),
                       "retained_training_fraction": report["retained_training_labelled_fraction"],
                       "conditions": {name: {"train_patches": value["training_patch_count"],

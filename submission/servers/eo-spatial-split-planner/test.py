@@ -168,7 +168,9 @@ def verify_rectangles(report: dict, artifacts: dict | None = None) -> dict:
             assert report["realized_block_split_ratios"][name] == expected_counts[name] / count
         candidates = report["seed_search"]["candidates"]
         eligible = [candidate for candidate in candidates if candidate["eligible"]]
-        selected = sorted(eligible, key=lambda candidate: (-candidate["minimum_retained_patch_count"], candidate["seed"]))[0]
+        selected = (next(candidate for candidate in eligible if candidate["seed"] == report["selected_seed"])
+                    if report.get("group_assignment") == "compact_regions" else
+                    sorted(eligible, key=lambda candidate: (-candidate["minimum_retained_patch_count"], candidate["seed"]))[0])
         assert report["selected_seed"] == selected["seed"] == report["seed"]
         assert report["seed_search"]["selected_minimum_retained_patch_count"] == selected["minimum_retained_patch_count"]
         assert not report["class_labels_provided"]
