@@ -1,0 +1,12 @@
+{
+  "official_registry_structural_checks_passed": true,
+  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 18\n  Servers touched: eo-spatial-split-planner\n\n",
+  "stderr": "",
+  "docker_build": "not run: Docker daemon unavailable on this host",
+  "recorded_unit_tests": "29 passed",
+  "recorded_mcp_stdio": "passed synthetic and real Sentinel-2",
+  "recorded_mcp_http": "passed real raster through stateless streamable HTTP",
+  "live_eve_agent": "passed hosted geocoder + local planner",
+  "notebook_execution": "passed",
+  "published": false
+}

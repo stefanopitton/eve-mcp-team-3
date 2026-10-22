@@ -1,0 +1,10 @@
+{
+  "transport": "stateless streamable HTTP",
+  "initialize": "passed",
+  "tools_list": [
+    "plan_sentinel2_split",
+    "plan_spatial_split"
+  ],
+  "real_raster_tool_call": "passed",
+  "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+}
