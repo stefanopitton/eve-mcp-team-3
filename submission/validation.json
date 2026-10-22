@@ -1,7 +1,7 @@
 {
   "schema_version": "0.4.0",
   "official_registry_structural_checks_passed": true,
-  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 65\n  Servers touched: eo-spatial-split-planner\n\n",
+  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 77\n  Servers touched: eo-spatial-split-planner\n\n",
   "stderr": "",
   "recorded_validation": {
     "schema_version": "0.4.0",
@@ -41,7 +41,7 @@
       "note": "Variogram estimator unchanged; exact counts/sums/rho/fit parity is recorded separately from patch geometry."
     },
     "live_eve": {
-      "status": "historical_prior_policy_passed",
+      "status": "passed",
       "configuration_source": "repository .env",
       "schema_version": "0.4.0",
       "verification": {
@@ -57,14 +57,30 @@
         "reference_block_geometry": true,
         "requested_70_10_20_fractions": true,
         "full_aoi_no_edge_cropping": true,
+        "compact_region_assignment": true,
+        "one_sided_cross_split_buffer": true,
         "class_coverage_unverified_without_categorical_labels": true
       },
       "evidence": "eve_demo.json",
       "acquisition": "cached actual2021 Sentinel-2 imagery; no new remote acquisition in this trace",
-      "review_notes": "Four scope/interpretation notes; raw EVE output is preserved.",
-      "group_assignment": "random_groups",
-      "buffer_policy": "symmetric",
-      "scope": "Exact saved .env-backed EVE trace predates compact_regions/one_sided. It does not validate current retention policy."
+      "review_notes": [
+        {
+          "issue": "Incorrect buffer-range relationship",
+          "correction": "The selected 1298.238733 m guard is not twice the 521.492810 m fitted range. It is a sampled recommendation satisfying both empirical rho and fitted-range criteria; no fixed two-times rule is used."
+        },
+        {
+          "issue": "Fraction denominator",
+          "correction": "The reported 55.8%/9.7%/34.4% values describe retained pixel proportions after buffering, not the requested 70%/10%/20% assignment-group fractions. The requested fractions are realized exactly across 40 groups; patch proportions are separately reported."
+        },
+        {
+          "issue": "Acquisition and model scope",
+          "correction": "This fresh live EVE replay used cached actual 2021 Sentinel-2 reflectance with the current compact_regions/one_sided planner. It performed no new imagery download or CNN training. The CNN comparison is a separate local experiment with WorldCover weak reference labels."
+        }
+      ],
+      "group_assignment": "compact_regions",
+      "buffer_policy": "one_sided",
+      "scope": "Fresh .env-backed current-policy EVE run with hosted geocoding and cached actual 2021 Sentinel-2; complete visible timeline in both notebooks. No imagery download or CNN training in the agent call.",
+      "tested_at_utc": "2026-10-22T11:38:08.543859+00:00"
     },
     "segmentation_benchmark": {
       "status": "trained_and_evaluated",
@@ -134,11 +150,12 @@
     },
     "notebook_execution": {
       "status": "passed",
-      "START_HERE_added_summary_code_cells": 5,
+      "START_HERE_added_summary_code_cells": 6,
       "START_HERE_original_cells_preserved_exactly": 17,
       "START_HERE_original_tutorial_cells_execution": "not rerun; original cells and outputs preserved",
       "EO_SPATIAL_SPLIT_PLANNER_code_cells": 13,
-      "protected_template_commit": "f38353aaa6b26e7e7c7f3d576b9917adcc0c2caa"
+      "protected_template_commit": "f38353aaa6b26e7e7c7f3d576b9917adcc0c2caa",
+      "agent_trace": "Current real EVE trace rendered with show_trace in both notebooks; START preserves original Running the agent section unchanged."
     },
     "docker_build": {
       "status": "not_run",

@@ -22,8 +22,8 @@
   "files": [
     {
       "path": "servers/eo-spatial-split-planner/EVE_PROMPT_AND_OUTPUT.md",
-      "bytes": 11000,
-      "sha256": "1d0e724a87f1f0e7edf0040fcf38f1f5fbfb50e78a7b4060184d15e2e354abf3"
+      "bytes": 8856,
+      "sha256": "64542c8bc058bdc7eea7dcf46a66d91fd2c6795ad22ab8bfb5f89be319f136b2"
     },
     {
       "path": "servers/eo-spatial-split-planner/PROCEDURE.md",
@@ -32,13 +32,13 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/PR_DESCRIPTION.md",
-      "bytes": 4432,
-      "sha256": "8ff76b688689c67bec89a09b5dea240b4aa86d89ddc20f46137741c285c688f3"
+      "bytes": 4631,
+      "sha256": "20d21268ba4f17fe93da7e25d984a49ff5537f95d96c6a41cd7cddd5d7b2000f"
     },
     {
       "path": "servers/eo-spatial-split-planner/README.md",
-      "bytes": 19632,
-      "sha256": "a740e00a98ea19ff08c78c22df03db8e70751be174ba365a873ff33baa9b0c5e"
+      "bytes": 19096,
+      "sha256": "c196e955dd61f1db28ac9d8f3e0fcee53d619e6e78c6e8ebdc97f3df524eb6f4"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/analysis_band.tif",
@@ -52,8 +52,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/eve_demo.json",
-      "bytes": 51216,
-      "sha256": "6dea69ad6bc46076a1ba968aa6b61a9ff94d019f66c30b7e7198dd7875d3cb20"
+      "bytes": 38179,
+      "sha256": "2adca9487a0f4e11c3440793148965d5d3a7456bd453de77f6fae0624a7f2fcc"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/eve_gateway_discovery.json",
@@ -61,14 +61,74 @@
       "sha256": "aab8338205bb6ead7e91bf775e2f2b1a11462ddcf5b1010bbc11c3c40c87330b"
     },
     {
-      "path": "servers/eo-spatial-split-planner/artifacts/eve_planner_report.json",
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/EVE_PROMPT_AND_OUTPUT.md",
+      "bytes": 11238,
+      "sha256": "064740e113fe5d1db9d5f95ced78ffb1064c92c570cdc5c05ffe3b5e69d81d1c"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/eve_demo.json",
+      "bytes": 51216,
+      "sha256": "6dea69ad6bc46076a1ba968aa6b61a9ff94d019f66c30b7e7198dd7875d3cb20"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/eve_planner_report.json",
       "bytes": 518640,
       "sha256": "6325f9874d5d6f6096ad6a62f263302c7117ca96bf372016a067cf3412ee4de7"
     },
     {
-      "path": "servers/eo-spatial-split-planner/artifacts/eve_variogram_report.json",
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_history/2026-10-22_random_groups_symmetric/eve_variogram_report.json",
       "bytes": 5617,
       "sha256": "aeeec4feab24f777532519cca91a7825e0eb3ec8b281ca241b1ac1e0602ea67a"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_planner_report.json",
+      "bytes": 520784,
+      "sha256": "e556a07254b122cba35f2a0727f2fcf38903ac6c467d2eec6448e3cfae71d4ea"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/analysis_band.tif",
+      "bytes": 1633115,
+      "sha256": "b166e6037eb2d4749574ff5f6f7aee85f380eac33b24ce6ce031ea965bf240f5"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/candidate_split_mask.tif",
+      "bytes": 24186,
+      "sha256": "437d8396eb0e3c6863eca12f65e590550dc98fec268f0b68c9664c5a01c2beeb"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/patches.json",
+      "bytes": 319482,
+      "sha256": "326b7c8d0d48e88a86454d773cb6e3290ca790a5acdf75467031b49388e1bce8"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/report.json",
+      "bytes": 521390,
+      "sha256": "dd7d994b7fefd38aaf7e7847dc22d387bed93a195d6089b96579bdfa1e02103f"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/split_mask.tif",
+      "bytes": 22810,
+      "sha256": "4e5e97bbc2ad44208a96b6951f10d86565f1191530c63ee9ee26d21213f2bbf4"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/0105ef5a1b71e364/unbuffered_split_mask.tif",
+      "bytes": 24162,
+      "sha256": "37b63b0a31f3cdad683e5c559571ee0b80004769cc6312db316b0ba36100ecb3"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/analysis_band.tif",
+      "bytes": 1633115,
+      "sha256": "b166e6037eb2d4749574ff5f6f7aee85f380eac33b24ce6ce031ea965bf240f5"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/report.json",
+      "bytes": 5819,
+      "sha256": "96df38ea474bba9cd831de6dfe2437284a12481318a2d55cde800e237154b079"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_variogram_report.json",
+      "bytes": 5617,
+      "sha256": "88b88cda65117fcbfb15baf102a8200481f26f53839be2f2e1192be46c5c16bd"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/gis_mcp_contract.json",
@@ -242,8 +302,8 @@
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/validation_summary.json",
-      "bytes": 6838,
-      "sha256": "b3aab1431e2dcef29881263f236929cebfed38099d6670b682c4e17b24f9b32c"
+      "bytes": 8122,
+      "sha256": "ba80e532847e160447ce10e7d432f53db0128bb0ec864b9fe053c274575c951a"
     },
     {
       "path": "servers/eo-spatial-split-planner/artifacts/variogram_report.json",
@@ -347,18 +407,18 @@
     },
     {
       "path": "START_HERE.ipynb",
-      "bytes": 592085,
-      "sha256": "7c4935cff92738afb3256e090be107509df4dd6b75088a6d0d9b9c3234aabc2e"
+      "bytes": 708275,
+      "sha256": "90dcc9406f1af8e379fbb2be64d103a8da81528a11d8df925f6459504d98f3ef"
     },
     {
       "path": "EO_SPATIAL_SPLIT_PLANNER.ipynb",
-      "bytes": 3287343,
-      "sha256": "c8309633590e39b63394ad8661662a5a48c9d752c5d3e256578473e1d8ddf1ac"
+      "bytes": 3399917,
+      "sha256": "57e5954a897b281f3061dbd271c7c57f011612f6c370387ebe5b98bf52d0880f"
     },
     {
       "path": "EVE_PROMPT_AND_OUTPUT.md",
-      "bytes": 11238,
-      "sha256": "064740e113fe5d1db9d5f95ced78ffb1064c92c570cdc5c05ffe3b5e69d81d1c"
+      "bytes": 9069,
+      "sha256": "4b6c874ae44192eb85f33da7d54a86604eaeabe70acb038cb2478bed05174695"
     },
     {
       "path": "shared/Dockerfile",
@@ -368,8 +428,8 @@
   ],
   "archive": {
     "path": "EO_Spatial_Split_Planner_submission.zip",
-    "bytes": 24470965,
-    "sha256": "93902bd26c670e0cd90b338747814cf91cbefb0ec3218c10eba9af733206548e"
+    "bytes": 27903646,
+    "sha256": "bdde52ff806207431921ecc7c1e4cb553e49e5375695ea5d53869e4e46450a9c"
   },
   "group_assignment": "compact_regions",
   "buffer_policy": "one_sided",

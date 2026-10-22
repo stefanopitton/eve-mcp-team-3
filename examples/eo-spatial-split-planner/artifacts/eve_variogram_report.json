@@ -208,8 +208,8 @@
   },
   "run_fingerprint": "3bddd0e7a161f6e3",
   "source_server_artifacts": {
-    "analysis_band": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-evuiwngy/analysis_band.tif",
-    "report_json": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-evuiwngy/report.json",
+    "analysis_band": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-qmy_qnqs/analysis_band.tif",
+    "report_json": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-qmy_qnqs/report.json",
     "scope": "Paths on the MCP server filesystem"
   }
 }

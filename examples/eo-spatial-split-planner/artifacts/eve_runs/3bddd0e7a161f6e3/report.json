@@ -203,13 +203,13 @@
   },
   "artifacts": {
     "scope": "Preserved workspace copies from the local MCP server",
-    "analysis_band": "./examples/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/analysis_band.tif",
-    "report_json": "./examples/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/report.json"
+    "analysis_band": "/Users/huikyole/Library/CloudStorage/GoogleDrive-huikyolee@gmail.com/My Drive/MCP_Hackathon/agentic-eo/examples/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/analysis_band.tif",
+    "report_json": "/Users/huikyole/Library/CloudStorage/GoogleDrive-huikyolee@gmail.com/My Drive/MCP_Hackathon/agentic-eo/examples/eo-spatial-split-planner/artifacts/eve_runs/3bddd0e7a161f6e3/report.json"
   },
   "run_fingerprint": "3bddd0e7a161f6e3",
   "source_server_artifacts": {
-    "analysis_band": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-evuiwngy/analysis_band.tif",
-    "report_json": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-evuiwngy/report.json",
+    "analysis_band": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-qmy_qnqs/analysis_band.tif",
+    "report_json": "/tmp/eo-spatial-split-planner/3bddd0e7a161f6e3-qmy_qnqs/report.json",
     "scope": "Paths on the MCP server filesystem"
   }
 }
