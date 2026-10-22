@@ -1,45 +1,50 @@
 {
-  "schema_version": "0.3.0",
-  "transport": "stateless streamable HTTP",
-  "initialize": "passed",
-  "tools_list": [
-    "evaluate_spatial_autocorrelation",
-    "evaluate_sentinel2_autocorrelation",
-    "plan_sentinel2_split",
-    "plan_spatial_split"
+  "status": "passed",
+  "schema_version": "0.4.0",
+  "transport": "streamable-http",
+  "edge_policy": "extend",
+  "edge_discarded_pixel_count": 0,
+  "block_grid_shape": [
+    8,
+    5
   ],
-  "random_2d_rectangles": "passed",
-  "paired_mask_and_manifest_export": "passed",
-  "patch_size_pixels": [
-    48,
-    64
+  "patch_grid_shape": [
+    27,
+    18
   ],
+  "n_candidate_patches": 486,
   "patch_counts": {
     "train": {
-      "candidate": 24,
-      "buffered": 8,
-      "unbuffered": 24
+      "candidate": 324,
+      "quality_candidate": 306,
+      "buffered": 124,
+      "unbuffered": 306
     },
     "validation": {
-      "candidate": 8,
-      "buffered": 6,
-      "unbuffered": 6
+      "candidate": 63,
+      "quality_candidate": 60,
+      "buffered": 14,
+      "unbuffered": 14
     },
     "test": {
-      "candidate": 8,
-      "buffered": 8,
-      "unbuffered": 8
+      "candidate": 99,
+      "quality_candidate": 93,
+      "buffered": 10,
+      "unbuffered": 10
     }
   },
-  "actual_buffer": {
-    "lag_m": 1298.2387330451975,
-    "rho_at_lag": 0.08397721109551093,
-    "within_sampled_support": true,
-    "decision": {
-      "accepted": true,
-      "rho_below_threshold": true,
-      "lag_at_least_practical_range": true,
-      "correlation_threshold": 0.1
-    }
-  }
+  "requested_split_ratios": {
+    "train": 0.7,
+    "validation": 0.1,
+    "test": 0.2
+  },
+  "buffer_scope": "only nearby quality-eligible patches assigned to different splits",
+  "buffer_not_applied_to": [
+    "same-split patch/block seams",
+    "AOI exterior",
+    "nodata or quality-rejected patches"
+  ],
+  "requested_buffer_m": 1298.2387330451975,
+  "compact_output_bytes": 22443,
+  "requested_buffer_met": true
 }

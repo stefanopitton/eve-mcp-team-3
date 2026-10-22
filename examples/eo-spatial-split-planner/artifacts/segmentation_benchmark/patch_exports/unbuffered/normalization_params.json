@@ -1,0 +1,61 @@
+{
+  "normalization": {
+    "percentiles": [
+      1,
+      99
+    ],
+    "low": [
+      0.06452099695801736,
+      0.04259999841451645,
+      0.02319999970495701,
+      0.12491049848496914
+    ],
+    "high": [
+      0.2728999853134155,
+      0.2013999968767166,
+      0.22813949346542325,
+      0.49949997663497925
+    ],
+    "median": [
+      0.12540000677108765,
+      0.08590000122785568,
+      0.08139999955892563,
+      0.29269999265670776
+    ],
+    "mean": [
+      0.1327497137320947,
+      0.09041632091135282,
+      0.08806354345381302,
+      0.29462932936594816
+    ],
+    "std": [
+      0.04172853030684668,
+      0.03019063219847663,
+      0.04241099173187754,
+      0.08568608397892635
+    ]
+  },
+  "channel_names": [
+    "B05",
+    "B03",
+    "B04",
+    "B08"
+  ],
+  "seed": 3,
+  "stats_retention_fraction": 0.25,
+  "selected_train_pixel_count": 383168,
+  "finite_train_pixel_count": 355160,
+  "sampled_pixel_count": 88722,
+  "sampled_pixel_count_per_channel": [
+    88722,
+    88722,
+    88722,
+    88722
+  ],
+  "sample_method": "Independent Bernoulli 0.25 draw per training patch; jointly finite training pixels only",
+  "empty_draw_training_pixel_fallback": false,
+  "fit_scope": "Retained training patches in this condition only; validation/test excluded",
+  "applied_to_exported_arrays": false,
+  "optional_application": "Clip each channel at low/high, scale to [0,1], and impute missing values with the normalized training median; constant channels map to zero",
+  "upstream_commit": "ac7dfc6578c2c408c87398e15073354752bbd32b"
+}

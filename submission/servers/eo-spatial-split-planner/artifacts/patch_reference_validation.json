@@ -1,0 +1,161 @@
+{
+  "status": "passed",
+  "exact_parity": true,
+  "repository": "https://github.com/stefanopitton/lulc-classification",
+  "branch": "stepit/eve-hackathon-checkpoint",
+  "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
+  "source_file": "src/lulc/data/patches.py",
+  "source_sha256": "b1205318171665986ecaa03441e8ad4368b2de0e583e84a16df0627bdabd220f",
+  "local_source_file": "block_patches.py",
+  "local_source_sha256": "691264a07047f316fe3211b3ddfc8cd361a29df9a23cc49995476f6b488591d5",
+  "extraction": "AST extraction of five numerical functions only; upstream package and entrypoints not imported",
+  "functions_compared": [
+    "assign_blocks",
+    "counts_classes_per_patch",
+    "create_buffer_mask",
+    "create_labelled_patches",
+    "select_seed"
+  ],
+  "primary_fixture": {
+    "raster_shape": [
+      240,
+      240
+    ],
+    "patch_size_pixels": [
+      10,
+      10
+    ],
+    "block_size_pixels": [
+      60,
+      60
+    ],
+    "block_grid_shape": [
+      4,
+      4
+    ],
+    "pixel_size_m": 10,
+    "buffer_m": 1,
+    "buffer_radius_patches": 1,
+    "class_labels": "(row + column) % 3; all pixels valid; classes 0,1,2",
+    "requested_fractions": {
+      "train": 0.7,
+      "validation": 0.1,
+      "test": 0.2
+    },
+    "seed_candidates": 200,
+    "selected_seed": 8,
+    "retained_patch_counts": {
+      "train": 307,
+      "validation": 55,
+      "test": 90
+    },
+    "retained_class_pixel_counts": {
+      "train": [
+        10233,
+        10233,
+        10234
+      ],
+      "validation": [
+        1834,
+        1833,
+        1833
+      ],
+      "test": [
+        3000,
+        2999,
+        3001
+      ]
+    },
+    "exact_matches": [
+      "selected_seed",
+      "block_labels (upstream + 1)",
+      "patch_label_grid (upstream + 1)",
+      "symmetric_keep_mask",
+      "retained_class_pixel_counts"
+    ]
+  },
+  "additional_geometry_comparisons": [
+    {
+      "seed": 0,
+      "radius_patches": 0,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 576
+    },
+    {
+      "seed": 0,
+      "radius_patches": 1,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 408
+    },
+    {
+      "seed": 0,
+      "radius_patches": 2,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 264
+    },
+    {
+      "seed": 3,
+      "radius_patches": 0,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 576
+    },
+    {
+      "seed": 3,
+      "radius_patches": 1,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 418
+    },
+    {
+      "seed": 3,
+      "radius_patches": 2,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 280
+    },
+    {
+      "seed": 17,
+      "radius_patches": 0,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 576
+    },
+    {
+      "seed": 17,
+      "radius_patches": 1,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 450
+    },
+    {
+      "seed": 17,
+      "radius_patches": 2,
+      "exact_block_assignment": true,
+      "exact_patch_grid": true,
+      "exact_symmetric_buffer_mask": true,
+      "retained_patch_count": 336
+    }
+  ],
+  "explicit_adaptations": [
+    "MCP codes 1/2/3 replace upstream train/val/test codes 0/1/2; zero remains excluded.",
+    "Rectangular rasters and patches are supported; terminal blocks extend to the full AOI by default, terminal patches clip to actual bounds, and cropping is opt-in.",
+    "Input quality and ignored-label filtering occur before seed ranking and class-coverage checks.",
+    "Quality-inactive patches do not trigger buffers; the reference applies its label-grid buffer before quality filtering.",
+    "Buffers exclude nearby unlike active splits only; same-split seams, AOI edges and missing-data boundaries are retained.",
+    "Class coverage is optional and remains unverified when only a continuous raster is supplied.",
+    "The paired comparison restores training patches and retains the buffered validation/test support."
+  ],
+  "scope": "Exact parity on square all-valid fixtures; rectangular and quality-filter adaptations have separate local tests. No segmentation accuracy or satellite-data claim is made by this validator."
+}

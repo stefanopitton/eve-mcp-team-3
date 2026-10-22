@@ -27,16 +27,19 @@
     "patch_counts": {
       "train": {
         "candidate": 7,
+        "quality_candidate": 7,
         "buffered": 7,
         "unbuffered": 7
       },
       "validation": {
         "candidate": 3,
+        "quality_candidate": 3,
         "buffered": 3,
         "unbuffered": 3
       },
       "test": {
         "candidate": 2,
+        "quality_candidate": 2,
         "buffered": 2,
         "unbuffered": 2
       }
@@ -100,16 +103,19 @@
     "patch_counts": {
       "train": {
         "candidate": 7,
+        "quality_candidate": 7,
         "buffered": 5,
         "unbuffered": 7
       },
       "validation": {
         "candidate": 3,
+        "quality_candidate": 3,
         "buffered": 3,
         "unbuffered": 3
       },
       "test": {
         "candidate": 2,
+        "quality_candidate": 2,
         "buffered": 2,
         "unbuffered": 2
       }
@@ -173,16 +179,19 @@
     "patch_counts": {
       "train": {
         "candidate": 7,
+        "quality_candidate": 7,
         "buffered": 4,
         "unbuffered": 7
       },
       "validation": {
         "candidate": 3,
+        "quality_candidate": 3,
         "buffered": 2,
         "unbuffered": 2
       },
       "test": {
         "candidate": 2,
+        "quality_candidate": 2,
         "buffered": 2,
         "unbuffered": 2
       }
@@ -246,16 +255,19 @@
     "patch_counts": {
       "train": {
         "candidate": 7,
+        "quality_candidate": 7,
         "buffered": 1,
         "unbuffered": 7
       },
       "validation": {
         "candidate": 3,
+        "quality_candidate": 3,
         "buffered": 1,
         "unbuffered": 1
       },
       "test": {
         "candidate": 2,
+        "quality_candidate": 2,
         "buffered": 2,
         "unbuffered": 2
       }

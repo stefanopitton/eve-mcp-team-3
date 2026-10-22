@@ -44,7 +44,7 @@ def _ratios(split_ratios):
     ratios = np.asarray(split_ratios, dtype=float)
     if ratios.shape != (3,) or not np.all(np.isfinite(ratios)):
         raise ValueError("split_ratios must contain three finite values")
-    if np.any(ratios <= 0) or not np.isclose(ratios.sum(), 1.0, atol=1e-8):
+    if np.any(ratios <= 0) or not np.isclose(ratios.sum(), 1.0, atol=1e-8, rtol=0):
         raise ValueError("split_ratios must be positive and sum to 1")
     return ratios / ratios.sum()
 
@@ -453,7 +453,7 @@ def create_spatial_split(
     valid_mask=None,
     *,
     pixel_size_m: float,
-    split_ratios: Sequence[float] = (0.6, 0.2, 0.2),
+    split_ratios: Sequence[float] = (0.7, 0.1, 0.2),
     buffer_m: float | None = None,
     patch_radius_m: float = 0.0,
     seed: int = 3,
@@ -465,23 +465,39 @@ def create_spatial_split(
     correlation_threshold: float = 0.1,
     patch_size_pixels: int | tuple[int, int] | None = None,
     n_patches: int | None = None,
+    patch_layout: str = "random_rectangles",
+    block_size_pixels: int | tuple[int, int] | None = None,
+    seed_candidates: int = 200,
+    max_nan_fraction: float = 0.5,
+    class_labels=None,
+    require_class_coverage: bool = False,
+    edge_policy: str = "extend",
 ):
     """Sample random 2-D rectangle patches, buffer them, and verify separation.
 
     Mask codes: 0 = invalid/discarded, 1 = train, 2 = validation, 3 = test.
-    Test rectangles have first priority, validation second, training third.
-    A lower-priority rectangle is dropped whole if its complete footprint is
-    too close to an already retained higher-priority rectangle. No rectangle
-    is cropped, and missing pixels inside rectangles remain excluded.
+    The default random_rectangles layout samples sparse jittered rectangles
+    with test > validation > train priority. The reference_blocks layout
+    follows the pinned extraction workflow: shuffle whole blocks, tile dense
+    patches inside them, and symmetrically drop patches near unlike boundaries.
+    Terminal grid patches clip to the AOI edge when edge_policy='extend'; the
+    last existing blocks absorb those edges. Missing pixels remain excluded.
 
     The paired unbuffered mask restores dropped TRAINING rectangles only;
     validation and test rectangles are identical in both masks, enabling a
-    fair model comparison on exactly the same heldout pixels. Candidate
-    geometry and initial assignments depend on seed, never on buffer or labels.
+    fair model comparison on exactly the same heldout pixels. Sparse rectangle
+    geometry and initial assignments depend only on the supplied seed. Reference
+    block mode selects a seed using geometric retention and optional categorical
+    class coverage; no model score participates in selection. Its paired
+    baseline still inherits the heldout side of the symmetric buffer.
     The legacy random_split_mask is an additional pixel-shuffled diagnostic.
     """
     data, valid = _grid(values, valid_mask, pixel_size_m)
     ratios = _ratios(split_ratios)
+    if patch_layout not in ("random_rectangles", "reference_blocks"):
+        raise ValueError("patch_layout must be random_rectangles or reference_blocks")
+    if patch_layout == "random_rectangles" and (class_labels is not None or require_class_coverage):
+        raise ValueError("class_labels and require_class_coverage are supported by patch_layout='reference_blocks'")
     if not math.isfinite(float(patch_radius_m)) or patch_radius_m < 0:
         raise ValueError("patch_radius_m must be finite and nonnegative")
     autocorrelation = analyze_autocorrelation(data, valid, pixel_size_m=pixel_size_m, seed=seed,
@@ -501,29 +517,51 @@ def create_spatial_split(
     required_center = (float(buffer_m) + math.sqrt(2) * pixel_size_m + 2 * patch_radius_m
                        if buffer_m > 0 or patch_radius_m > 0 else 0.0)
     rng = np.random.default_rng(seed)
-    patches, dimensions, placement_count = _rectangular_patch_candidates(
-        valid, ratios, patch_size_pixels, n_patches, rng)
-    retained_higher = []
-    for code in (3, 2, 1):
-        same_split_retained = []
-        for patch in patches:
-            if patch["split_code"] != code:
-                continue
-            keep = all(_rectangle_center_distance(patch, other, pixel_size_m) + 1e-7 >= required_center
-                       for other in retained_higher)
-            patch.update({"retained": keep, "keep": keep,
-                          "buffered_retained": keep,
-                          "unbuffered_retained": bool(keep or code == 1),
-                          "drop_reason": None if keep else "within_buffer_of_higher_priority_split",
-                          "buffered_pixel_count": patch["valid_pixel_count"] if keep else 0,
-                          "unbuffered_pixel_count": patch["valid_pixel_count"] if keep or code == 1 else 0})
-            if keep:
-                same_split_retained.append(patch)
-        retained_higher.extend(same_split_retained)
+    layout_metadata = {"patch_layout": patch_layout}
+    if patch_layout == "reference_blocks":
+        if n_patches is not None:
+            raise ValueError("n_patches must be None for reference_blocks; the complete block/patch grid defines the candidates")
+        # Local import keeps the core's pinned variogram API independent of the
+        # optional patch-grid adapter and avoids circular imports.
+        from block_patches import plan_reference_blocks
+        planned = plan_reference_blocks(
+            valid, pixel_size_m=pixel_size_m, buffer_m=buffer_m,
+            split_ratios=ratios, patch_size_pixels=32 if patch_size_pixels is None else patch_size_pixels,
+            block_size_pixels=block_size_pixels, seed_candidates=seed_candidates,
+            max_nan_fraction=max_nan_fraction, class_labels=class_labels,
+            require_class_coverage=require_class_coverage, patch_radius_m=patch_radius_m,
+            edge_policy=edge_policy,
+        )
+        patches, dimensions = planned["patches"], planned["patch_size_pixels"]
+        valid, layout_metadata = planned["valid_mask"], planned["metadata"]
+        placement_count = len(patches)
+        rng = np.random.default_rng(layout_metadata["selected_seed"])
+    else:
+        patches, dimensions, placement_count = _rectangular_patch_candidates(
+            valid, ratios, patch_size_pixels, n_patches, rng)
+        retained_higher = []
+        for code in (3, 2, 1):
+            same_split_retained = []
+            for patch in patches:
+                if patch["split_code"] != code:
+                    continue
+                keep = all(_rectangle_center_distance(patch, other, pixel_size_m) + 1e-7 >= required_center
+                           for other in retained_higher)
+                patch.update({"retained": keep, "keep": keep,
+                              "candidate_retained": True, "quality_retained": True,
+                              "buffered_retained": keep,
+                              "unbuffered_retained": bool(keep or code == 1),
+                              "drop_reason": None if keep else "within_buffer_of_higher_priority_split",
+                              "buffered_pixel_count": patch["valid_pixel_count"] if keep else 0,
+                              "unbuffered_pixel_count": patch["valid_pixel_count"] if keep or code == 1 else 0})
+                if keep:
+                    same_split_retained.append(patch)
+            retained_higher.extend(same_split_retained)
     if any(not any(p["retained"] and p["split_code"] == code for p in patches) for code in (1, 2, 3)):
         raise ValueError("AOI is too small or too masked for three nonempty rectangle splits at this buffer; enlarge the AOI, sample fewer heldout patches, choose smaller patch_size_pixels, or reduce an explicit buffer_m")
     labels = _patch_mask(data.shape, valid, patches, "buffered_retained")
     unbuffered_labels = _patch_mask(data.shape, valid, patches, "unbuffered_retained")
+    candidate_labels = _patch_mask(data.shape, valid, patches, "candidate_retained")
     stats = _split_stats(labels, int(valid.sum()))
     candidate_count = sum(patch["valid_pixel_count"] for patch in patches)
     paired_count = int(np.count_nonzero(unbuffered_labels))
@@ -533,6 +571,12 @@ def create_spatial_split(
                   "buffer_discarded_training_pixel_count": paired_count - stats["retained_pixel_count"],
                   "unselected_valid_pixel_count": int(valid.sum()) - candidate_count,
                   "retention_fraction_of_candidates": stats["retained_pixel_count"] / candidate_count})
+    if patch_layout == "reference_blocks":
+        stats.update({key: layout_metadata[key] for key in (
+            "edge_discarded_pixel_count", "edge_discarded_valid_pixel_count",
+            "quality_rejected_valid_pixel_count", "quality_eligible_candidate_pixel_count")})
+        stats["buffer_discarded_candidate_pixel_count"] = layout_metadata["buffer_discarded_quality_candidate_pixel_count"]
+        stats["retention_fraction_of_quality_candidates"] = stats["retained_pixel_count"] / layout_metadata["quality_eligible_candidate_pixel_count"]
     diagnostics = separation_diagnostics(labels, pixel_size_m=pixel_size_m, patch_radius_m=patch_radius_m)
     diagnostics["requested_buffer_met"] = all(p["minimum_footprint_gap_lower_bound_m"] is not None and
                                                p["minimum_footprint_gap_lower_bound_m"] + 1e-7 >= buffer_m
@@ -563,12 +607,20 @@ def create_spatial_split(
     ratio_error = max(abs(stats["fractions_of_retained"][name] - requested)
                       for name, requested in zip(SPLIT_NAMES.values(), ratios, strict=True))
     if ratio_error > 0.03:
-        warnings.append("Whole-rectangle buffer exclusions and nodata change the retained split ratios; requested ratios apply to the initial candidate patch assignment.")
-    if stats["retention_fraction_of_candidates"] < 0.5:
-        warnings.append("More than half the sampled candidate pixels are excluded by the requested separation; unselected imagery is reported separately.")
+        warnings.append("Requested ratios define block assignment fractions; ceil rounding, extended edge blocks, quality filtering, and buffers change patch/pixel fractions."
+                        if patch_layout == "reference_blocks" else
+                        "Whole-rectangle buffer exclusions and nodata change the retained split ratios; requested ratios apply to the initial candidate patch assignment.")
+    if stats.get("retention_fraction_of_quality_candidates", stats["retention_fraction_of_candidates"]) < 0.5:
+        warnings.append("More than half the quality-eligible candidate pixels are excluded by the requested separation; unselected imagery and quality exclusions are reported separately.")
     if buffer_m < (autocorrelation["recommended_buffer_m"] or 0):
         warnings.append("The supplied buffer is smaller than the exploratory data-derived recommendation.")
-    warnings.append("Rectangles are sampled randomly in both spatial directions without class stratification. Repeat across seeds, AOIs, and seasons before model claims; buffer exclusions reduce training support.")
+    if patch_layout == "reference_blocks":
+        warnings.append("Blocks are randomly assigned across a two-dimensional grid; whole patches are removed symmetrically only near a different active split. AOI edges, nodata/quality exclusions, and seams within the same split do not create buffers. Quantization and both-sided removal can produce a gap larger than requested.")
+        warnings.append("The paired training comparison keeps buffered validation/test patches fixed. Its restored-training baseline still inherits the heldout side of the symmetric buffer; inspect its actual separation rather than assuming it fails the requested guard.")
+        if class_labels is not None:
+            warnings.append("Optional class labels affect patch quality and seed coverage only; the continuous-field variogram is computed independently before label filtering.")
+    else:
+        warnings.append("Rectangles are sampled randomly in both spatial directions without class stratification. Repeat across seeds, AOIs, and seasons before model claims; buffer exclusions reduce training support.")
     report = {
         "method": "seeded random two-dimensional rectangle patches with whole-patch buffer exclusion",
         "seed": int(seed), "pixel_size_m": float(pixel_size_m),
@@ -579,6 +631,7 @@ def create_spatial_split(
         "patch_size_pixels": list(dimensions), "n_candidate_patches": len(patches),
         "n_available_patch_placements": placement_count,
         "patch_counts": {name: {"candidate": sum(p["split_code"] == code for p in patches),
+                                  "quality_candidate": sum(p["split_code"] == code and p["candidate_retained"] for p in patches),
                                   "buffered": sum(p["split_code"] == code and p["retained"] for p in patches),
                                   "unbuffered": sum(p["split_code"] == code and p["unbuffered_retained"] for p in patches)}
                          for code, name in SPLIT_NAMES.items()},
@@ -594,5 +647,20 @@ def create_spatial_split(
                                                                       patch_radius_m=patch_radius_m)},
         "warnings": warnings,
     }
+    report.update(layout_metadata)
+    report["realized_buffered_patch_split_ratios"] = {
+        name: report["patch_counts"][name]["buffered"] / sum(p["retained"] for p in patches)
+        for name in SPLIT_NAMES.values()}
+    report["realized_paired_unbuffered_patch_split_ratios"] = {
+        name: report["patch_counts"][name]["unbuffered"] / sum(p["unbuffered_retained"] for p in patches)
+        for name in SPLIT_NAMES.values()}
+    if patch_layout == "reference_blocks":
+        report["method"] = "reference block-assigned rectangular patch grid with symmetric whole-patch buffers"
+        report["seed"] = layout_metadata["selected_seed"]
+        report["autocorrelation_seed"] = int(seed)
+        report["buffer_priority"] = []
+        report["paired_comparison"] = "Restore quality-eligible training patches only; share identical symmetrically buffered validation/test patches. The baseline retains the heldout side of the buffer and may already meet the requested gap."
+        report["candidate_grid"] = _split_stats(candidate_labels, int(valid.sum()))
     return {"split_mask": labels, "unbuffered_split_mask": unbuffered_labels,
+            "candidate_split_mask": candidate_labels,
             "random_split_mask": random_labels, "patches": patches, "report": report}

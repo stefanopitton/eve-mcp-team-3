@@ -1,18 +1,34 @@
-# EO Spatial Split Planner — draft patch demo
+# EO Spatial Split Planner — reference patch extraction demo
 
-An MCP server for EVE that measures spatial autocorrelation in continuous Earth Observation data and samples **random rectangular train/validation/test patches in both spatial axes**. It removes whole patches to create a measured guard, exports paired buffered/unbuffered masks, and reports retained support and actual separation. The notebook now trains a small semantic-segmentation CNN on real imagery to compare prediction behavior with and without excluding nearby training patches.
+An MCP server for EVE that measures spatial autocorrelation in continuous Earth Observation data and generates a fixed 2-D patch grid using the checkpoint's block-assignment and extraction procedure. Blocks are shuffled between train/validation/test, patches near differing split labels are symmetrically excluded, and paired datasets preserve common held-out support. The notebook trains a small CPU segmentation CNN on real imagery and inspects extracted `.npy` arrays, metadata and training statistics.
 
 The implementation is aligned with the variogram subset of the reference repository's frozen checkpoint [`ac7dfc6`](https://github.com/stefanopitton/lulc-classification/tree/ac7dfc6578c2c408c87398e15073354752bbd32b): [scientific functions](https://github.com/stefanopitton/lulc-classification/blob/ac7dfc6578c2c408c87398e15073354752bbd32b/src/lulc/validation/autocorrelation.py), [configuration](https://github.com/stefanopitton/lulc-classification/blob/ac7dfc6578c2c408c87398e15073354752bbd32b/config/analysis.toml), and [worked example](https://github.com/stefanopitton/lulc-classification/blob/ac7dfc6578c2c408c87398e15073354752bbd32b/notebooks/autocorrelation.py). That checkpoint also contains additional estimators; `PROCEDURE.md` selects only its variogram and spherical model for this POC. Here `partial_sill` is the spherical model's second coefficient, and output `sill` means the total `nugget + partial_sill`.
 
-## Random rectangles and paired masks
+## Full-AOI groups, patch extraction and paired masks
 
-Seeded selection and row/column jitter place nonoverlapping rectangles in two dimensions. The primary demo requests 40 rectangles of 48 × 64 pixels (960 × 1,280 m at 20 m resolution), with seed 3 and initial split ratios 0.6/0.2/0.2. Patch placement and split assignment use the supplied finite-pixel mask without class stratification. The cache already applies imagery/reference-availability exclusions; vegetation/built-up/water identities and model scores do not select patch geometry.
+The submission notebook is [`START_HERE.ipynb`](../../START_HERE.ipynb); [`EO_SPATIAL_SPLIT_PLANNER.ipynb`](../../EO_SPATIAL_SPLIT_PLANNER.ipynb) contains the detailed retraining workflow. Both inspect actual data, MCP calls and reviewed EVE evidence.
 
-The buffer applies to whole rectangle footprints. Test has priority, then validation, then training; a conflicting lower-priority rectangle is removed rather than cropped. The paired condition without a training buffer restores candidate training rectangles while retaining **identical validation and test patches**. In the recorded experiment, 24 training candidates become 8 buffered training patches, with 6 validation and 8 test patches fixed in both conditions. Two candidate validation patches are excluded to keep the held-out geometry compatible.
+The primary layout is `patch_layout="reference_blocks"`, adapted from the checkpoint's `scripts/04_extract_patches.py`. A fixed grid of **32 × 40-pixel model patches** is grouped using nominal **96 × 120-pixel assignment groups**. The default `edge_policy="extend"` extends the final groups to the image boundary, covering the full **850 × 699** scene with an **8 × 5 group grid** and **27 × 18 patch grid**. The terminal patches are clipped to the actual source extent (18 pixels high and/or 19 wide). There are no bottom/right crop strips; nodata and quality failures remain separately excluded.
 
-`patches.json` records coordinates, assigned split and keep flags. The masks use `0=excluded`, `1=train`, `2=validation`, `3=test`. Unselected valid AOI pixels, invalid pixels and buffer-discarded candidate patches are reported separately: the whole-scene exclusion count must not be described as pixels lost to the guard. Requested ratios describe the initial candidate assignment; retained ratios change after exclusions.
+Configurable `split_ratios` default to **[0.7, 0.1, 0.2]** for train/validation/test. The 40 randomly shuffled groups realize 28 train, 4 validation and 8 test assignments before filtering. Extended edge groups cover different areas, and quality filtering/buffering changes patch and pixel proportions, which the report records. Seed candidates 0–199 are ranked by retained split support. Offline extraction also requires available model classes in every retained split after quality filtering (`max_nan_fraction=0.5`); this class-aware dataset-design choice is disclosed. Imagery-only MCP planning uses geometric support without claiming class coverage.
 
-`buffer_autocorrelation` evaluates the actual guard separately from any query `lag_m`. A passing result at a larger query lag cannot endorse a smaller guard. Too few retained patches produces an actionable error. Exact retained-pixel center distances and conservative footprint-gap bounds are reported alongside rectangle coordinates.
+The upstream reference radius per axis is `ceil(buffer_m / (patch_size_pixels * resolution_m))`. Applied radii can increase to preserve conservative footprint gaps when inactive cells interrupt a two-sided interface. **Only different active train/validation/test splits trigger buffers.** Same-split seams, AOI boundaries, nodata and quality-rejected cells do not create guard zones. Orange in the notebook is guard exclusion; grey is nodata/quality failure, not an artificial edge trim.
+
+The raw assignment and quality-eligible candidates are shown separately. The paired baseline restores eligible **training patches only**, retaining the symmetrically buffered validation/test support. It can already have a one-sided separation, so the comparison is not labelled leaky versus independent. Actual center, rectangle-edge and conservative footprint distances govern interpretation, rather than substituting the requested input for measured separation.
+
+Extraction writes paired feature/label `.npy` arrays, metadata, sampled training statistics and portable ZIP datasets. Statistics sample 25% of training pixels with RNG seed 3 and include 1st/99th percentiles, median, mean and standard deviation. They remain distinct from the CNN's training-only z-score fit. The export records terminal shapes, assignment/keep flags, class counts, provenance and identical paired held-outs.
+
+## Checkpoint scripts 00–04
+
+| Stage | Reference task | Executed demo / scope |
+| --- | --- | --- |
+| `00_select_aoi.py` | Compare candidate AOIs and seasonal scene availability | Berlin AOI is explicit; full candidate survey is not rerun |
+| `01_download_sentinel2.py` | Acquire aligned multiband scenes per season | Real matched-2021 scene and four calibrated bands via Planetary Computer |
+| `02_create_seasonal_composite.py` | Mask scenes, median-composite seasons, append indices | Actual single-scene NDVI/NDWI are computed; seasonal medians/52-channel stack are not generated |
+| `03_download_world_cover.py` | Align WorldCover, remap classes, report distribution | Actual WorldCover 2021 alignment and explicit three-class model mapping |
+| `04_extract_patches.py` | Select block assignment, buffer fixed grid, export arrays/statistics | Local adaptation executed, including class-coverage selection and paired dataset exports |
+
+The notebook links every pinned script. Full seasonal acquisition/compositing remains optional; a single scene is not presented as a seasonal composite. The checkpoint's example config uses 2022 seasonal dates with 2021 WorldCover, whereas this demo keeps image and label years matched. NDVI/NDWI are visualization-only adaptations of stage 02: the CNN still uses four reflectance bands and the variogram still uses raw B05. NDBI is not computed because SWIR is absent.
 
 ## MCP tools
 
@@ -20,10 +36,10 @@ The buffer applies to whole rectangle footprints. Test has priority, then valida
 | --- | --- | --- |
 | `evaluate_sentinel2_autocorrelation` | WGS84 bbox, continuous band, lag in metres; optional dates/scene | Variogram estimate and accept/increase-lag decision on real Sentinel-2 |
 | `evaluate_spatial_autocorrelation` | Local numeric GeoTIFF, lag, 1-based band index | The same evaluation for an imagery-tool handoff |
-| `plan_sentinel2_split` | Sentinel-2 search, `patch_size_pixels`, `n_patches`, optional guard | Random rectangular patches, paired masks and separation evidence |
-| `plan_spatial_split` | Local raster, rectangle settings, optional guard | The same patch planning for an existing raster |
+| `plan_sentinel2_split` | Sentinel-2 search, block/patch layout, optional guard | Block-assigned patch grid, paired masks and separation evidence |
+| `plan_spatial_split` | Local raster, block/patch settings, optional guard | The same patch planning for an existing raster |
 
-Planning accepts `patch_size_pixels=[48,64]` (or an integer for a square) and `n_patches=40`. Band aliases such as `red_edge1`/`nir` resolve to `B05`/`B08`. The evaluator reports `rho_at_lag`, `practical_range_m`, nugget, partial/total sill, fit RSS, variance, missing fraction and per-bin accepted counts. Complete reports, numeric imagery, buffered and paired unbuffered masks, and patch records are files on the MCP server. Another machine needs shared storage or artifact transfer to read them.
+Planning accepts `patch_layout="reference_blocks"`, `patch_size_pixels=[32,40]`, `block_size_pixels=[96,120]`, `edge_policy="extend"`, `split_ratios=[0.7,0.1,0.2]`, `seed_candidates=200` and `max_nan_fraction=0.5`. The earlier `random_rectangles` layout remains available for explicit compatibility use. Band aliases such as `red_edge1`/`nir` resolve to `B05`/`B08`. Evaluators return rho, spherical-fit parameters, fit RSS, variance, missing fraction and per-bin accepted counts. Full reports, numeric imagery, masks and patch records are server-local files; another machine needs shared storage or transfer. Offline class-coverage extraction uses reference labels, while imagery-only MCP planning does not claim class coverage.
 
 The optional segmentation experiment is a separate CPU runner; PyTorch is not required by the four MCP tools.
 
@@ -33,21 +49,21 @@ The primary notebook uses Berlin `[13.30,52.35,13.50,52.50]`, with Sentinel-2 sc
 
 ESA WorldCover 2021 v200 is nearest-neighbor aligned to the same grid, mapped to vegetation, built-up and water, with other labels ignored. Matching imagery and label years avoids using a 2021 reference for a 2024 scene. WorldCover is a **weak annual, machine-generated reference using Sentinel-1/Sentinel-2**, so the scores measure reference-map agreement rather than independent field accuracy. Annual labels can differ from land cover visible on the single acquisition date. Labels are distributed under CC BY 4.0; see the [WorldCover 2021 record](https://doi.org/10.5281/zenodo.7254221) and saved attribution.
 
-The B05 variogram selects a **1,298.24 m** guard. The experiment trains a 5,283-parameter CNN from scratch: three 3 × 3 convolutional layers with 16 channels and ReLU, followed by a 1 × 1 class head. All conditions start from seed-42 weights and use AdamW (learning rate 0.003, weight decay 0.0001), 150 optimizer steps, batch size 8 and 32 × 32 training crops on CPU. Normalization is fitted on each condition's labelled training pixels only. Validation every 25 steps selects the highest-mIoU checkpoint; the common test support is scored once per selected model.
+The B05 variogram selects a **1,298.24 m** guard. The experiment trains a 5,283-parameter CNN from scratch: three 3 × 3 convolutional layers with 16 channels and ReLU, followed by a 1 × 1 class head. All conditions start from seed-42 weights and use AdamW (learning rate 0.003, weight decay 0.0001), 150 optimizer steps, batch size 8 and fixed 16 × 16 training crops on CPU. Normalization is fitted on each condition's labelled training pixels only. Validation every 25 steps selects the highest-mIoU checkpoint; the common test support is scored once per selected model.
 
-| Condition | Train patches | Labelled train pixels | Test mIoU | Test pixel accuracy | Minimum train–test rectangle-edge gap |
+| Condition | Train patches | Labelled train pixels | Test mIoU | Test accuracy | Minimum train–test patch-edge gap |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Without training buffer | 24 | 70,237 | 0.5307 | 0.9016 | 100 m |
-| With measured buffer | 8 | 23,845 | 0.4790 | 0.8519 | 1,700 m |
-| Size-matched, without distance filter | 8 | 23,326 | 0.4785 | 0.8515 | 220 m |
+| Without training erosion, fixed held-outs | 306 | 355,160 | 0.3527 | 0.9502 | 1,600 m |
+| Symmetric training erosion | 124 | 139,081 | 0.3055 | 0.8579 | 3,200 m |
+| Size-matched, without training erosion | 124 | 142,756 | 0.3259 | 0.8948 | 1,600 m |
 
-All models use the same 6 validation/8 test patches and 23,240 labelled test pixels. The buffered condition retains 33.95% of the unbuffered labelled training pixels. The size-matched control samples 8 training rectangles using seed 43; it matches patch count, while pixel counts and class composition can differ. Water has only 229 test pixels, and every model has water IoU 0 in this run.
+The refreshed model results, train-patch counts, per-class IoU, reference counts and measured distances are recorded in the [segmentation report](artifacts/segmentation_benchmark/segmentation_report.json) and displayed in both executed notebooks. They compare all eligible training patches, symmetric training exclusions and a size-matched control on identical held-out support. The shared test support has 12,601 labelled pixels: 12,429 vegetation, 161 built-up and 11 water, so overall pixel accuracy is strongly affected by vegetation dominance. No accuracy gain is assumed. Rare-class counts and errors are displayed explicitly; weak WorldCover labels measure reference-map agreement rather than independent field accuracy.
 
-The buffer increases separation and reduces the training pool. The larger unbuffered training set scores higher; the size-matched control is close to the buffered result. **This does not isolate leakage as the cause of the score difference or establish that a buffer improves accuracy.** A lower buffered score is a valid observed result. Repeat across seeds, independent labels, regions and seasons before making model claims.
+See the executed [notebook](../../EO_SPATIAL_SPLIT_PLANNER.ipynb), [data manifest](artifacts/segmentation_data/manifest.json), [patch plan](artifacts/segmentation_benchmark/benchmark_plan.json), and [trained results](artifacts/segmentation_benchmark/segmentation_report.json). Saved masks, predictions, checkpoints and figures make the comparison inspectable. The [patch-export manifest](artifacts/segmentation_benchmark/patch_exports/patch_export_manifest.json) links both extracted datasets and their training statistics.
 
-See the executed [notebook](../../EO_SPATIAL_SPLIT_PLANNER.ipynb), [data manifest](artifacts/segmentation_data/manifest.json), [patch plan](artifacts/segmentation_benchmark/benchmark_plan.json), and [trained results](artifacts/segmentation_benchmark/segmentation_report.json). Saved masks, predictions, checkpoints and figures make the comparison inspectable.
+![Raw blocks, eligible candidates, orange cross-split exclusions and paired masks; grey is quality failure or nodata](artifacts/segmentation_benchmark/patch_split_layout.png)
 
-![Real imagery, weak labels, random rectangular patches, model predictions and validation curves](artifacts/segmentation_benchmark/segmentation_comparison.png)
+![Real imagery, weak labels, block-assigned patches, model predictions and validation curves](artifacts/segmentation_benchmark/segmentation_comparison.png)
 
 ## Variogram procedure
 
@@ -85,12 +101,12 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r examples/eo-spatial-split-planner/requirements.txt pytest
 .venv/bin/python -m pip install -r examples/eo-spatial-split-planner/requirements-demo.txt
 .venv/bin/python examples/eo-spatial-split-planner/segmentation_data.py
-.venv/bin/python examples/eo-spatial-split-planner/run_segmentation.py --steps 150
+.venv/bin/python examples/eo-spatial-split-planner/run_segmentation.py --steps 150 --split-ratios 0.7 0.1 0.2
 .venv/bin/python -m pytest examples/eo-spatial-split-planner/tests -q
 .venv/bin/python examples/eo-spatial-split-planner/test.py
 ```
 
-Data acquisition reuses matching cached inputs unless `--force` is passed. The model runner retrains from those real rasters; it uses the full procedure defaults of 24 bins, 200,000 attempted pairs per source bin and split seed 3. The notebook also retrains by default with `TRAIN_MODELS=True`; `RECOMPUTE_IMAGES=True` refreshes imagery. The saved [reference-validation artifact](artifacts/reference_validation.json) records parity with the frozen variogram checkpoint.
+Data acquisition reuses matching cached inputs unless `--force` is passed. The model runner retrains from those real rasters; it uses the full procedure defaults of 24 bins, 200,000 attempted pairs per source bin and variogram sampling seed 3. The notebook also retrains by default with `TRAIN_MODELS=True`; `RECOMPUTE_IMAGES=True` refreshes imagery. The saved [variogram comparison](artifacts/reference_validation.json) and [patch-source comparison](artifacts/patch_reference_validation.json) record parity with the frozen checkpoint. The latter extracts the actual upstream functions and records source hashes, geometry comparisons and explicit adaptations. To replay the source comparison, point `.venv/bin/python examples/eo-spatial-split-planner/validate_patches.py --reference-root /path/to/lulc-classification` at a checkout of the pinned commit.
 
 Start the MCP server with:
 
@@ -99,7 +115,7 @@ Start the MCP server with:
 .venv/bin/python examples/eo-spatial-split-planner/server.py --transport http
 ```
 
-HTTP uses port 8000 and `/mcp`. `EO_SPLIT_OUTPUT_DIR` selects persistent artifact storage; otherwise a server temporary directory is used. Local rasters must be square, north-up and projected in metres, with at most 32 million pixels. Remote Sentinel-2 acquisition is capped at one million pixels and a one-degree AOI span per axis.
+HTTP uses port 8000 and `/mcp`. `EO_SPLIT_OUTPUT_DIR` selects persistent artifact storage; otherwise a server temporary directory is used. Local rasters must be north-up with square pixels and a projected metre CRS, with at most 32 million pixels. Remote Sentinel-2 acquisition is capped at one million pixels and a one-degree AOI span per axis.
 
 Example `plan_spatial_split` arguments:
 
@@ -108,8 +124,13 @@ Example `plan_spatial_split` arguments:
   "raster_path": "/shared/sentinel2_reflectance_20m.tif",
   "band_index": 1,
   "seed": 3,
-  "patch_size_pixels": [48, 64],
-  "n_patches": 40
+  "patch_layout": "reference_blocks",
+  "patch_size_pixels": [32, 40],
+  "block_size_pixels": [96, 120],
+  "edge_policy": "extend",
+  "split_ratios": [0.7, 0.1, 0.2],
+  "seed_candidates": 200,
+  "max_nan_fraction": 0.5
 }
 ```
 
@@ -117,7 +138,9 @@ Omitting `buffer_m` measures a sufficient guard from the variogram. An explicit 
 
 ## EVE and draft submission
 
-Gateway discovery and live EVE traces are saved under `artifacts/`. The recorded account did not expose a dedicated Sentinel-2 downloader; public STAC acquisition is explicit in the tool provenance. Inspect trace verification, schema/geometry version and `review_notes` before treating model prose as evidence. Older successful traces do not validate revised rectangle behavior. The live MCP imagery replay can use the separate 2024 B05 scene recorded in its provenance; the primary matched-year 2021 segmentation experiment is a distinct local CPU run.
+The exact live prompts, both replies, verified results and corrections are recorded in [EVE_PROMPT_AND_OUTPUT.md](../../EVE_PROMPT_AND_OUTPUT.md).
+
+Gateway discovery and live EVE traces are saved under `artifacts/`. The recorded account did not expose a dedicated Sentinel-2 downloader. The actual 2021 cache was acquired through this project's Planetary Computer reader; the current EVE replay starts from that numeric raster and does not reacquire imagery. Inspect trace verification, schema/geometry version and `review_notes` before treating model prose as evidence. The latest live EVE replay verifies schema 0.4.0, reference-block geometry and the requested 70%/10%/20% ratios. The raw model answer is preserved with review notes; use only the actual saved artifact paths and machine-computed results. Older successful traces do not validate later implementations. The current live EVE replay uses the cached actual 2021 Sentinel-2 raster through the local evaluator and planner; it does not download imagery again or train a CNN. The matched-2021 segmentation experiment is a separate CPU run on the same data. Earlier 2024 remote-acquisition traces are historical.
 
 Optional EVE testing uses repository helpers and credentials from `.env` without saving secrets:
 

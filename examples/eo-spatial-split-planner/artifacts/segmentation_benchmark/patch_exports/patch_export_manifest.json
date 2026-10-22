@@ -1,0 +1,73 @@
+{
+  "schema_version": "eo-spatial-patch-export-v1",
+  "conditions": {
+    "buffered": {
+      "archive_path": "buffered_patches.zip",
+      "metadata_path": "buffered/patches_metadata.json",
+      "normalization_path": "buffered/normalization_params.json",
+      "archive_bytes": 2138139,
+      "archive_below_5_mib": true,
+      "patch_counts": {
+        "train": 124,
+        "val": 14,
+        "test": 10
+      },
+      "class_counts": {
+        "train": [
+          94127,
+          44852,
+          102
+        ],
+        "val": [
+          5911,
+          4901,
+          2074
+        ],
+        "test": [
+          12429,
+          161,
+          11
+        ]
+      },
+      "selected_train_pixel_count": 153344,
+      "finite_train_pixel_count": 139081,
+      "sampled_train_pixel_count": 34749
+    },
+    "unbuffered": {
+      "archive_path": "unbuffered_patches.zip",
+      "metadata_path": "unbuffered/patches_metadata.json",
+      "normalization_path": "unbuffered/normalization_params.json",
+      "archive_bytes": 4886229,
+      "archive_below_5_mib": true,
+      "patch_counts": {
+        "train": 306,
+        "val": 14,
+        "test": 10
+      },
+      "class_counts": {
+        "train": [
+          234069,
+          120688,
+          403
+        ],
+        "val": [
+          5911,
+          4901,
+          2074
+        ],
+        "test": [
+          12429,
+          161,
+          11
+        ]
+      },
+      "selected_train_pixel_count": 383168,
+      "finite_train_pixel_count": 355160,
+      "sampled_train_pixel_count": 88722
+    }
+  },
+  "paired_heldout_identical": true,
+  "upstream_commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
+  "manifest_path": "patch_export_manifest.json",
+  "path_scope": "Paths relative to the directory containing this manifest"
+}

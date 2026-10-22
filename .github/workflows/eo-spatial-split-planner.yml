@@ -1,0 +1,68 @@
+name: EO Spatial Split Planner
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/eo-spatial-split-planner.yml
+      - scripts/validate_demo_notebooks.py
+      - START_HERE.ipynb
+      - EO_SPATIAL_SPLIT_PLANNER.ipynb
+      - examples/eo-spatial-split-planner/**
+      - submission/**
+  push:
+    paths:
+      - .github/workflows/eo-spatial-split-planner.yml
+      - scripts/validate_demo_notebooks.py
+      - START_HERE.ipynb
+      - EO_SPATIAL_SPLIT_PLANNER.ipynb
+      - examples/eo-spatial-split-planner/**
+      - submission/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eo-spatial-split-planner-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-validation:
+    name: Python 3.13, CPU model and offline MCP contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MPLBACKEND: Agg
+      PYTHONDONTWRITEBYTECODE: "1"
+      OMP_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            examples/eo-spatial-split-planner/requirements.txt
+            examples/eo-spatial-split-planner/requirements-demo.txt
+
+      - name: Install CPU PyTorch and bounded demo dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.6.0,<3.0.0"
+          python -m pip install -r examples/eo-spatial-split-planner/requirements-demo.txt "pytest>=8,<10" "nbformat>=5,<6" "ruff>=0.6,<1"
+          python -c "import torch; assert torch.version.cuda is None"
+
+      - name: Lint using the registry configuration
+        run: python -m ruff check --config submission/ruff.toml examples/eo-spatial-split-planner scripts/validate_demo_notebooks.py
+
+      - name: Test variogram, full AOI geometry, patch exports, CNN and agent contracts
+        run: python -m pytest examples/eo-spatial-split-planner/tests -q
+
+      - name: Validate and compile both notebooks without executing EVE calls
+        run: python scripts/validate_demo_notebooks.py
+
+      - name: Check official registry structure, startup, file sizes and secrets
+        run: PATH="$pythonLocation/bin:$PATH" python submission/validate_submission.py
