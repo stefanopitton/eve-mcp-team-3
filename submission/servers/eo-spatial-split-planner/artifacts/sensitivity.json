@@ -1,0 +1,194 @@
+[
+  {
+    "buffer_m": 0,
+    "status": "ok",
+    "splits": {
+      "valid_pixel_count": 562947,
+      "retained_pixel_count": 562947,
+      "discarded_valid_pixel_count": 0,
+      "retention_fraction": 1.0,
+      "counts": {
+        "train": 337522,
+        "validation": 112561,
+        "test": 112864
+      },
+      "fractions_of_retained": {
+        "train": 0.5995626586517026,
+        "validation": 0.19994955120108998,
+        "test": 0.20048779014720747
+      }
+    },
+    "spatial_diagnostics": {
+      "method": "exact Euclidean distance transform over every retained pixel",
+      "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+      "pairwise": [
+        {
+          "first_split": "train",
+          "second_split": "validation",
+          "minimum_center_distance_m": 20.0,
+          "minimum_footprint_gap_lower_bound_m": 0.0
+        },
+        {
+          "first_split": "train",
+          "second_split": "test",
+          "minimum_center_distance_m": 3360.0,
+          "minimum_footprint_gap_lower_bound_m": 3331.715728752538
+        },
+        {
+          "first_split": "validation",
+          "second_split": "test",
+          "minimum_center_distance_m": 20.0,
+          "minimum_footprint_gap_lower_bound_m": 0.0
+        }
+      ],
+      "minimum_center_distance_m": 20.0,
+      "minimum_footprint_gap_lower_bound_m": 0.0,
+      "requested_buffer_met": true
+    },
+    "retention_fraction": 1.0
+  },
+  {
+    "buffer_m": 961.6652224137046,
+    "status": "ok",
+    "splits": {
+      "valid_pixel_count": 562947,
+      "retained_pixel_count": 496713,
+      "discarded_valid_pixel_count": 66234,
+      "retention_fraction": 0.8823441638378036,
+      "counts": {
+        "train": 298102,
+        "validation": 99198,
+        "test": 99413
+      },
+      "fractions_of_retained": {
+        "train": 0.6001493820375147,
+        "validation": 0.19970888621799712,
+        "test": 0.20014173174448827
+      }
+    },
+    "spatial_diagnostics": {
+      "method": "exact Euclidean distance transform over every retained pixel",
+      "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+      "pairwise": [
+        {
+          "first_split": "train",
+          "second_split": "validation",
+          "minimum_center_distance_m": 1000.0,
+          "minimum_footprint_gap_lower_bound_m": 971.7157287525381
+        },
+        {
+          "first_split": "train",
+          "second_split": "test",
+          "minimum_center_distance_m": 4920.0,
+          "minimum_footprint_gap_lower_bound_m": 4891.715728752538
+        },
+        {
+          "first_split": "validation",
+          "second_split": "test",
+          "minimum_center_distance_m": 1000.0,
+          "minimum_footprint_gap_lower_bound_m": 971.7157287525381
+        }
+      ],
+      "minimum_center_distance_m": 1000.0,
+      "minimum_footprint_gap_lower_bound_m": 971.7157287525381,
+      "requested_buffer_met": true
+    },
+    "retention_fraction": 0.8823441638378036
+  },
+  {
+    "buffer_m": 1923.330444827409,
+    "status": "ok",
+    "splits": {
+      "valid_pixel_count": 562947,
+      "retained_pixel_count": 431857,
+      "discarded_valid_pixel_count": 131090,
+      "retention_fraction": 0.7671361602424385,
+      "counts": {
+        "train": 258623,
+        "validation": 86580,
+        "test": 86654
+      },
+      "fractions_of_retained": {
+        "train": 0.5988625864580174,
+        "validation": 0.20048303026233222,
+        "test": 0.20065438327965043
+      }
+    },
+    "spatial_diagnostics": {
+      "method": "exact Euclidean distance transform over every retained pixel",
+      "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+      "pairwise": [
+        {
+          "first_split": "train",
+          "second_split": "validation",
+          "minimum_center_distance_m": 1960.0,
+          "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+        },
+        {
+          "first_split": "train",
+          "second_split": "test",
+          "minimum_center_distance_m": 6460.0,
+          "minimum_footprint_gap_lower_bound_m": 6431.715728752538
+        },
+        {
+          "first_split": "validation",
+          "second_split": "test",
+          "minimum_center_distance_m": 1960.0,
+          "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+        }
+      ],
+      "minimum_center_distance_m": 1960.0,
+      "minimum_footprint_gap_lower_bound_m": 1931.715728752538,
+      "requested_buffer_met": true
+    },
+    "retention_fraction": 0.7671361602424385
+  },
+  {
+    "buffer_m": 3846.660889654818,
+    "status": "ok",
+    "splits": {
+      "valid_pixel_count": 562947,
+      "retained_pixel_count": 302149,
+      "discarded_valid_pixel_count": 260798,
+      "retention_fraction": 0.5367272585163435,
+      "counts": {
+        "train": 180908,
+        "validation": 60518,
+        "test": 60723
+      },
+      "fractions_of_retained": {
+        "train": 0.598737708878732,
+        "validation": 0.20029190895882495,
+        "test": 0.20097038216244303
+      }
+    },
+    "spatial_diagnostics": {
+      "method": "exact Euclidean distance transform over every retained pixel",
+      "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+      "pairwise": [
+        {
+          "first_split": "train",
+          "second_split": "validation",
+          "minimum_center_distance_m": 3880.0,
+          "minimum_footprint_gap_lower_bound_m": 3851.715728752538
+        },
+        {
+          "first_split": "train",
+          "second_split": "test",
+          "minimum_center_distance_m": 9520.0,
+          "minimum_footprint_gap_lower_bound_m": 9491.715728752539
+        },
+        {
+          "first_split": "validation",
+          "second_split": "test",
+          "minimum_center_distance_m": 3880.0,
+          "minimum_footprint_gap_lower_bound_m": 3851.715728752538
+        }
+      ],
+      "minimum_center_distance_m": 3880.0,
+      "minimum_footprint_gap_lower_bound_m": 3851.715728752538,
+      "requested_buffer_met": true
+    },
+    "retention_fraction": 0.5367272585163435
+  }
+]

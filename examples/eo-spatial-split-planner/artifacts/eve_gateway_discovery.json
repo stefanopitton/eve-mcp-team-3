@@ -1,0 +1,293 @@
+{
+  "tested_at_utc": "2026-10-22T09:05:37.120011+00:00",
+  "authentication": "EVE_API_KEY loaded from local .env; value omitted",
+  "servers": [
+    {
+      "name": "gdac",
+      "description": "GDACS is a cooperation framework between the United Nations and the European Commission. It includes disaster managers and disaster information systems worldwide and aims at filling the information and coordination gaps in the first phase after major disasters.",
+      "enabled": true
+    },
+    {
+      "name": "esa_moocs",
+      "description": "Semantic search over ESA MOOC transcripts",
+      "enabled": true
+    },
+    {
+      "name": "trallie",
+      "description": "Trallie: extract structured records from unstructured text or documents according to a requested schema.",
+      "enabled": true
+    },
+    {
+      "name": "serpapi",
+      "description": "Live web search via SerpAPI: run a Google query and get back ranked results with titles, links and snippets.",
+      "enabled": true
+    },
+    {
+      "name": "eve_retrieval",
+      "description": "Retrieval over the EVE knowledge base: fetch the passages most relevant to a query for grounding an answer.",
+      "enabled": true
+    },
+    {
+      "name": "eotdl",
+      "description": "Earth Observation Training Data Lab (EOTDL): search the catalogue for training datasets and models.",
+      "enabled": true
+    },
+    {
+      "name": "eodashboard",
+      "description": "EO Dashboard: browse and search Earth-observation narratives and themes, read narrative content and its indicators, find narratives for a given indicator, and search data collections and list their items.",
+      "enabled": true
+    },
+    {
+      "name": "effis",
+      "description": "European Forest Fire Information System (EFFIS): retrieve burnt-area records for a location or time window, geocode place names to coordinates, and compute summary metrics over the returned areas.",
+      "enabled": true
+    },
+    {
+      "name": "geocode",
+      "description": "Geocoding tools (AgentCore runtime from eve-esa/mcp-tool-registry)",
+      "enabled": true
+    },
+    {
+      "name": "dummy_image",
+      "description": "Returns a demo image (AgentCore runtime, artifact capture test)",
+      "enabled": false
+    }
+  ],
+  "inspected_tools": {
+    "geocode": [
+      {
+        "name": "geocode_place",
+        "description": "\nConvert a place name to a bounding box.\n\nGeocodes a place name (city, region, country, landmark, etc.) into a\nbounding box string in \"west,south,east,north\" format.\n\nUses the OpenStreetMap Nominatim API (free, no API key required).\n\nArgs:\n    place_name: Name of the place to geocode (e.g. \"Greece\",\n                \"Athens\", \"Evia island\", \"Peloponnese\").\n    buffer_km:  Optional buffer in km to expand the bbox (default 0).\n    limit:      Maximum number of candidate results to return (default 5).\n\nReturns:\n    JSON with the top result's bbox string (ready to pass to other tools)\n    and all candidate matches.\n",
+        "inputSchema": {
+          "properties": {
+            "place_name": {
+              "title": "Place Name",
+              "type": "string"
+            },
+            "buffer_km": {
+              "default": 0.0,
+              "title": "Buffer Km",
+              "type": "number"
+            },
+            "limit": {
+              "default": 5,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "place_name"
+          ],
+          "title": "geocode_placeArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "reverse_geocode_place",
+        "description": "\nConvert latitude and longitude to a place name (reverse geocoding).\n\nUses the OpenStreetMap Nominatim API via geopy.\n\nArgs:\n    latitude:  Latitude coordinate.\n    longitude: Longitude coordinate.\n    zoom:      Detail level from 0 (country) to 18 (building).\n\nReturns:\n    JSON with the place name and address details.\n",
+        "inputSchema": {
+          "properties": {
+            "latitude": {
+              "title": "Latitude",
+              "type": "number"
+            },
+            "longitude": {
+              "title": "Longitude",
+              "type": "number"
+            },
+            "zoom": {
+              "default": 18,
+              "title": "Zoom",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude"
+          ],
+          "title": "reverse_geocode_placeArguments",
+          "type": "object"
+        }
+      }
+    ],
+    "eodashboard": [
+      {
+        "name": "list_narratives",
+        "description": "Get a list of all available EODashboard narratives.",
+        "inputSchema": {
+          "properties": {},
+          "title": "list_narrativesArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "search_narratives",
+        "description": "Search narratives by keyword in title or theme.",
+        "inputSchema": {
+          "properties": {
+            "keyword": {
+              "title": "Keyword",
+              "type": "string"
+            }
+          },
+          "required": [
+            "keyword"
+          ],
+          "title": "search_narrativesArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "get_narrative_content",
+        "description": "Get the full content of a specific narrative by its URL.",
+        "inputSchema": {
+          "properties": {
+            "url": {
+              "title": "Url",
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "title": "get_narrative_contentArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "list_themes",
+        "description": "Get all available themes from narratives.",
+        "inputSchema": {
+          "properties": {},
+          "title": "list_themesArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "get_narrative_indicators",
+        "description": "Get collection codes referenced in a narrative.",
+        "inputSchema": {
+          "properties": {
+            "narrative_title": {
+              "title": "Narrative Title",
+              "type": "string"
+            }
+          },
+          "required": [
+            "narrative_title"
+          ],
+          "title": "get_narrative_indicatorsArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "search_collections",
+        "description": "Search STAC collections by code, theme, or keyword.",
+        "inputSchema": {
+          "properties": {
+            "code": {
+              "default": "",
+              "title": "Code",
+              "type": "string"
+            },
+            "theme": {
+              "default": "",
+              "title": "Theme",
+              "type": "string"
+            },
+            "keyword": {
+              "default": "",
+              "title": "Keyword",
+              "type": "string"
+            }
+          },
+          "title": "search_collectionsArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "get_collection_items",
+        "description": "Get data items from a specific STAC collection.",
+        "inputSchema": {
+          "properties": {
+            "collection_code": {
+              "title": "Collection Code",
+              "type": "string"
+            },
+            "limit": {
+              "default": 10,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "collection_code"
+          ],
+          "title": "get_collection_itemsArguments",
+          "type": "object"
+        }
+      },
+      {
+        "name": "find_narratives_for_indicator",
+        "description": "Reverse lookup narratives that reference a collection code.",
+        "inputSchema": {
+          "properties": {
+            "indicator_code": {
+              "title": "Indicator Code",
+              "type": "string"
+            }
+          },
+          "required": [
+            "indicator_code"
+          ],
+          "title": "find_narratives_for_indicatorArguments",
+          "type": "object"
+        }
+      }
+    ],
+    "eotdl": [
+      {
+        "name": "eotdl_search",
+        "description": "\nSearch for datasets, models, and pipelines in the EOTDL (https://www.eotdl.com/).\nArgs:\n    query: Query string for the retrieval\n:return: Formatted string of relevant documents\n",
+        "inputSchema": {
+          "properties": {
+            "query": {
+              "title": "Query",
+              "type": "string"
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "title": "eotdl_searchArguments",
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "sentinel2_discovery_calls": [
+    {
+      "server": "eodashboard",
+      "tool": "search_collections",
+      "arguments": {
+        "keyword": "Sentinel-2"
+      },
+      "is_error": false,
+      "content": [
+        "No collections found matching the criteria."
+      ]
+    },
+    {
+      "server": "eodashboard",
+      "tool": "search_collections",
+      "arguments": {
+        "code": "sentinel-2-l2a"
+      },
+      "is_error": false,
+      "content": [
+        "No collections found matching the criteria."
+      ]
+    }
+  ],
+  "imagery_access_note": "At this test time the enabled catalogue has no dedicated Sentinel-2 or CDSE imagery server. The eodashboard discovery results above record whether its catalogue exposed Sentinel-2. The planner acquires numeric Sentinel-2 pixels from public STAC itself; hosted EVE geocoding is tested separately in the agent chain."
+}

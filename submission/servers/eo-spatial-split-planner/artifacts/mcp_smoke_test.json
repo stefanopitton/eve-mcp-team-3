@@ -1,0 +1,6 @@
+{
+  "stdio_tools_list": "passed",
+  "raster_tool_call": "passed",
+  "georeferenced_split_artifact": "passed",
+  "actionable_invalid_path_error": "passed"
+}

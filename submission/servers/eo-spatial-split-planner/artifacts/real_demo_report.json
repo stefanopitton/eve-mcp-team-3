@@ -1,0 +1,1273 @@
+{
+  "method": "three contiguous geographic stripes with discarded separation gaps",
+  "seed": 42,
+  "pixel_size_m": 20.0,
+  "requested_split_ratios": {
+    "train": 0.6,
+    "validation": 0.2,
+    "test": 0.2
+  },
+  "requested_buffer_m": 1923.330444827409,
+  "recommended_buffer_m": 1923.330444827409,
+  "buffer_source": "measured_dependence",
+  "patch_radius_m": 0.0,
+  "discarded_gap_width_pixels": 97,
+  "stripe_axis": "rows",
+  "stripe_order": [
+    "test",
+    "validation",
+    "train"
+  ],
+  "mask_codes": {
+    "0": "invalid_or_discarded",
+    "1": "train",
+    "2": "validation",
+    "3": "test"
+  },
+  "autocorrelation": {
+    "estimator": "directional paired Pearson correlation and empirical semivariance",
+    "range_rule": "three consecutive lag bins with absolute Pearson correlation <= threshold in all four directions",
+    "correlation_threshold": 0.1,
+    "valid_pixel_count": 562947,
+    "global_mean": 0.10864860244392456,
+    "global_variance": 0.002183956239589114,
+    "max_pairs_per_direction_per_lag": 20000,
+    "seed": 42,
+    "lags": [
+      {
+        "nominal_lag_m": 20.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 20.0,
+            "offset_pixels": [
+              0,
+              1
+            ],
+            "pair_count": 20000,
+            "correlation": 0.8619492997378458,
+            "semivariance": 0.00029831426675
+          },
+          "north_south": {
+            "distance_m": 20.0,
+            "offset_pixels": [
+              1,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.8653328286953308,
+            "semivariance": 0.00030098237725
+          },
+          "northwest_southeast": {
+            "distance_m": 28.284271247461902,
+            "offset_pixels": [
+              1,
+              1
+            ],
+            "pair_count": 20000,
+            "correlation": 0.7728831253136389,
+            "semivariance": 0.00049404030525
+          },
+          "northeast_southwest": {
+            "distance_m": 28.284271247461902,
+            "offset_pixels": [
+              1,
+              -1
+            ],
+            "pair_count": 20000,
+            "correlation": 0.7868556078415443,
+            "semivariance": 0.0004727941195000001
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 220.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 220.0,
+            "offset_pixels": [
+              0,
+              11
+            ],
+            "pair_count": 20000,
+            "correlation": 0.3452867274869573,
+            "semivariance": 0.0014436805395000001
+          },
+          "north_south": {
+            "distance_m": 220.0,
+            "offset_pixels": [
+              11,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.35220710529071747,
+            "semivariance": 0.0013905923972500002
+          },
+          "northwest_southeast": {
+            "distance_m": 226.27416997969522,
+            "offset_pixels": [
+              8,
+              8
+            ],
+            "pair_count": 20000,
+            "correlation": 0.3147796879757238,
+            "semivariance": 0.0015585752082500003
+          },
+          "northeast_southwest": {
+            "distance_m": 226.27416997969522,
+            "offset_pixels": [
+              8,
+              -8
+            ],
+            "pair_count": 20000,
+            "correlation": 0.3265275474059476,
+            "semivariance": 0.0014520055705
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 400.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 400.0,
+            "offset_pixels": [
+              0,
+              20
+            ],
+            "pair_count": 20000,
+            "correlation": 0.2417518269215582,
+            "semivariance": 0.0016323052682500002
+          },
+          "north_south": {
+            "distance_m": 400.0,
+            "offset_pixels": [
+              20,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.24008943896441606,
+            "semivariance": 0.0016665173332500005
+          },
+          "northwest_southeast": {
+            "distance_m": 395.9797974644666,
+            "offset_pixels": [
+              14,
+              14
+            ],
+            "pair_count": 20000,
+            "correlation": 0.2467753561291003,
+            "semivariance": 0.00164267969825
+          },
+          "northeast_southwest": {
+            "distance_m": 395.9797974644666,
+            "offset_pixels": [
+              14,
+              -14
+            ],
+            "pair_count": 20000,
+            "correlation": 0.24763966084543906,
+            "semivariance": 0.0015601589212500002
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 600.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 600.0,
+            "offset_pixels": [
+              0,
+              30
+            ],
+            "pair_count": 20000,
+            "correlation": 0.18805703802541673,
+            "semivariance": 0.0017172157202500003
+          },
+          "north_south": {
+            "distance_m": 600.0,
+            "offset_pixels": [
+              30,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.18979703800475167,
+            "semivariance": 0.0017770272830000004
+          },
+          "northwest_southeast": {
+            "distance_m": 593.9696961966999,
+            "offset_pixels": [
+              21,
+              21
+            ],
+            "pair_count": 20000,
+            "correlation": 0.18952370647730388,
+            "semivariance": 0.0017484284085000003
+          },
+          "northeast_southwest": {
+            "distance_m": 593.9696961966999,
+            "offset_pixels": [
+              21,
+              -21
+            ],
+            "pair_count": 20000,
+            "correlation": 0.17883820391514005,
+            "semivariance": 0.0017581912912500001
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 780.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 780.0,
+            "offset_pixels": [
+              0,
+              39
+            ],
+            "pair_count": 20000,
+            "correlation": 0.13901510199415168,
+            "semivariance": 0.0017901597065000001
+          },
+          "north_south": {
+            "distance_m": 780.0,
+            "offset_pixels": [
+              39,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.15320716716270844,
+            "semivariance": 0.0017810200217500004
+          },
+          "northwest_southeast": {
+            "distance_m": 791.9595949289333,
+            "offset_pixels": [
+              28,
+              28
+            ],
+            "pair_count": 20000,
+            "correlation": 0.15580074373402075,
+            "semivariance": 0.001765599333
+          },
+          "northeast_southwest": {
+            "distance_m": 791.9595949289333,
+            "offset_pixels": [
+              28,
+              -28
+            ],
+            "pair_count": 20000,
+            "correlation": 0.13275246358842122,
+            "semivariance": 0.0018569717547500001
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 980.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 980.0,
+            "offset_pixels": [
+              0,
+              49
+            ],
+            "pair_count": 20000,
+            "correlation": 0.10117213882056723,
+            "semivariance": 0.0018945659075000002
+          },
+          "north_south": {
+            "distance_m": 980.0,
+            "offset_pixels": [
+              49,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.13250931958457426,
+            "semivariance": 0.0018478059787500002
+          },
+          "northwest_southeast": {
+            "distance_m": 989.9494936611666,
+            "offset_pixels": [
+              35,
+              35
+            ],
+            "pair_count": 20000,
+            "correlation": 0.12435893202847155,
+            "semivariance": 0.00193775977425
+          },
+          "northeast_southwest": {
+            "distance_m": 989.9494936611666,
+            "offset_pixels": [
+              35,
+              -35
+            ],
+            "pair_count": 20000,
+            "correlation": 0.11206396954234005,
+            "semivariance": 0.0018634405127500003
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 1160.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 1160.0,
+            "offset_pixels": [
+              0,
+              58
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0854031907009223,
+            "semivariance": 0.0018777269075
+          },
+          "north_south": {
+            "distance_m": 1160.0,
+            "offset_pixels": [
+              58,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.12088812641770541,
+            "semivariance": 0.00192084740125
+          },
+          "northwest_southeast": {
+            "distance_m": 1159.655121145938,
+            "offset_pixels": [
+              41,
+              41
+            ],
+            "pair_count": 20000,
+            "correlation": 0.1028897955358277,
+            "semivariance": 0.001906418008
+          },
+          "northeast_southwest": {
+            "distance_m": 1159.655121145938,
+            "offset_pixels": [
+              41,
+              -41
+            ],
+            "pair_count": 20000,
+            "correlation": 0.09309762889536527,
+            "semivariance": 0.0018813509840000001
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 1360.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 1360.0,
+            "offset_pixels": [
+              0,
+              68
+            ],
+            "pair_count": 20000,
+            "correlation": 0.07201947649032055,
+            "semivariance": 0.001954404397
+          },
+          "north_south": {
+            "distance_m": 1360.0,
+            "offset_pixels": [
+              68,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.1153170431341395,
+            "semivariance": 0.0019200771435000004
+          },
+          "northwest_southeast": {
+            "distance_m": 1357.645019878171,
+            "offset_pixels": [
+              48,
+              48
+            ],
+            "pair_count": 20000,
+            "correlation": 0.08817273134406392,
+            "semivariance": 0.0019317916875000003
+          },
+          "northeast_southwest": {
+            "distance_m": 1357.645019878171,
+            "offset_pixels": [
+              48,
+              -48
+            ],
+            "pair_count": 20000,
+            "correlation": 0.06345013273738015,
+            "semivariance": 0.0019686901060000004
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 1540.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 1540.0,
+            "offset_pixels": [
+              0,
+              77
+            ],
+            "pair_count": 20000,
+            "correlation": 0.05821935097406735,
+            "semivariance": 0.0019417747017500002
+          },
+          "north_south": {
+            "distance_m": 1540.0,
+            "offset_pixels": [
+              77,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.09312588565982977,
+            "semivariance": 0.00196096687875
+          },
+          "northwest_southeast": {
+            "distance_m": 1527.3506473629427,
+            "offset_pixels": [
+              54,
+              54
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0803655241681427,
+            "semivariance": 0.0020002228370000004
+          },
+          "northeast_southwest": {
+            "distance_m": 1527.3506473629427,
+            "offset_pixels": [
+              54,
+              -54
+            ],
+            "pair_count": 20000,
+            "correlation": 0.06308714862895493,
+            "semivariance": 0.0019217217107500002
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 1740.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 1740.0,
+            "offset_pixels": [
+              0,
+              87
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0402955488597054,
+            "semivariance": 0.0019779155175
+          },
+          "north_south": {
+            "distance_m": 1740.0,
+            "offset_pixels": [
+              87,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.08388013039133145,
+            "semivariance": 0.00199022514775
+          },
+          "northwest_southeast": {
+            "distance_m": 1753.624817342638,
+            "offset_pixels": [
+              62,
+              62
+            ],
+            "pair_count": 20000,
+            "correlation": 0.08233546384798897,
+            "semivariance": 0.001957368633
+          },
+          "northeast_southwest": {
+            "distance_m": 1753.624817342638,
+            "offset_pixels": [
+              62,
+              -62
+            ],
+            "pair_count": 20000,
+            "correlation": 0.04556774099977994,
+            "semivariance": 0.00198231112
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 1920.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 1920.0,
+            "offset_pixels": [
+              0,
+              96
+            ],
+            "pair_count": 20000,
+            "correlation": 0.023429596182963832,
+            "semivariance": 0.0020530214522500004
+          },
+          "north_south": {
+            "distance_m": 1920.0,
+            "offset_pixels": [
+              96,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.07584444181201255,
+            "semivariance": 0.0019990843437500006
+          },
+          "northwest_southeast": {
+            "distance_m": 1923.330444827409,
+            "offset_pixels": [
+              68,
+              68
+            ],
+            "pair_count": 20000,
+            "correlation": 0.07889916762981353,
+            "semivariance": 0.001960090881
+          },
+          "northeast_southwest": {
+            "distance_m": 1923.330444827409,
+            "offset_pixels": [
+              68,
+              -68
+            ],
+            "pair_count": 20000,
+            "correlation": 0.03937206939849105,
+            "semivariance": 0.0020161631675
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 2120.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 2120.0,
+            "offset_pixels": [
+              0,
+              106
+            ],
+            "pair_count": 20000,
+            "correlation": 0.021103427314201544,
+            "semivariance": 0.0020582762847500004
+          },
+          "north_south": {
+            "distance_m": 2120.0,
+            "offset_pixels": [
+              106,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0811828915147926,
+            "semivariance": 0.00202374044775
+          },
+          "northwest_southeast": {
+            "distance_m": 2121.3203435596424,
+            "offset_pixels": [
+              75,
+              75
+            ],
+            "pair_count": 20000,
+            "correlation": 0.06162530819750156,
+            "semivariance": 0.00204841947125
+          },
+          "northeast_southwest": {
+            "distance_m": 2121.3203435596424,
+            "offset_pixels": [
+              75,
+              -75
+            ],
+            "pair_count": 20000,
+            "correlation": 0.019229334280059473,
+            "semivariance": 0.0020501440475000003
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 2300.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 2300.0,
+            "offset_pixels": [
+              0,
+              115
+            ],
+            "pair_count": 20000,
+            "correlation": 0.011041281496847145,
+            "semivariance": 0.0020269910584999997
+          },
+          "north_south": {
+            "distance_m": 2300.0,
+            "offset_pixels": [
+              115,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.07684291761021003,
+            "semivariance": 0.0019230441800000002
+          },
+          "northwest_southeast": {
+            "distance_m": 2291.025971044414,
+            "offset_pixels": [
+              81,
+              81
+            ],
+            "pair_count": 20000,
+            "correlation": 0.06315420702012874,
+            "semivariance": 0.002015770096
+          },
+          "northeast_southwest": {
+            "distance_m": 2291.025971044414,
+            "offset_pixels": [
+              81,
+              -81
+            ],
+            "pair_count": 20000,
+            "correlation": 0.031149656535886493,
+            "semivariance": 0.0021730191055000002
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 2500.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 2500.0,
+            "offset_pixels": [
+              0,
+              125
+            ],
+            "pair_count": 20000,
+            "correlation": 0.03988810184580514,
+            "semivariance": 0.002117455998
+          },
+          "north_south": {
+            "distance_m": 2500.0,
+            "offset_pixels": [
+              125,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.052631515316840766,
+            "semivariance": 0.0020499335400000003
+          },
+          "northwest_southeast": {
+            "distance_m": 2489.0158697766474,
+            "offset_pixels": [
+              88,
+              88
+            ],
+            "pair_count": 20000,
+            "correlation": 0.036767441540332985,
+            "semivariance": 0.00204895274975
+          },
+          "northeast_southwest": {
+            "distance_m": 2489.0158697766474,
+            "offset_pixels": [
+              88,
+              -88
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0032087309444280314,
+            "semivariance": 0.0020837074702500006
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 2680.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 2680.0,
+            "offset_pixels": [
+              0,
+              134
+            ],
+            "pair_count": 20000,
+            "correlation": 0.053826665235784145,
+            "semivariance": 0.00202407721025
+          },
+          "north_south": {
+            "distance_m": 2680.0,
+            "offset_pixels": [
+              134,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.06462646393904803,
+            "semivariance": 0.0019907501305000005
+          },
+          "northwest_southeast": {
+            "distance_m": 2687.0057685088805,
+            "offset_pixels": [
+              95,
+              95
+            ],
+            "pair_count": 20000,
+            "correlation": 0.018997246796648173,
+            "semivariance": 0.0021532267585000005
+          },
+          "northeast_southwest": {
+            "distance_m": 2687.0057685088805,
+            "offset_pixels": [
+              95,
+              -95
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0077962223860227504,
+            "semivariance": 0.0021181285655000005
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 2880.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 2880.0,
+            "offset_pixels": [
+              0,
+              144
+            ],
+            "pair_count": 20000,
+            "correlation": 0.05515435175027589,
+            "semivariance": 0.0019824026962500002
+          },
+          "north_south": {
+            "distance_m": 2880.0,
+            "offset_pixels": [
+              144,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.060220202565098,
+            "semivariance": 0.0019689691137500004
+          },
+          "northwest_southeast": {
+            "distance_m": 2884.995667241114,
+            "offset_pixels": [
+              102,
+              102
+            ],
+            "pair_count": 20000,
+            "correlation": 0.015947562179123624,
+            "semivariance": 0.0020940117435
+          },
+          "northeast_southwest": {
+            "distance_m": 2884.995667241114,
+            "offset_pixels": [
+              102,
+              -102
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0260858214131037,
+            "semivariance": 0.0019988078045
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 3060.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 3060.0,
+            "offset_pixels": [
+              0,
+              153
+            ],
+            "pair_count": 20000,
+            "correlation": 0.06694063810027734,
+            "semivariance": 0.0019801814322500002
+          },
+          "north_south": {
+            "distance_m": 3060.0,
+            "offset_pixels": [
+              153,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.04230572023862821,
+            "semivariance": 0.002074602445
+          },
+          "northwest_southeast": {
+            "distance_m": 3054.7012947258854,
+            "offset_pixels": [
+              108,
+              108
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0195646070842129,
+            "semivariance": 0.002145752554
+          },
+          "northeast_southwest": {
+            "distance_m": 3054.7012947258854,
+            "offset_pixels": [
+              108,
+              -108
+            ],
+            "pair_count": 20000,
+            "correlation": 0.01577919192997587,
+            "semivariance": 0.00204500955625
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 3260.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 3260.0,
+            "offset_pixels": [
+              0,
+              163
+            ],
+            "pair_count": 20000,
+            "correlation": 0.05284303783597747,
+            "semivariance": 0.001955194384
+          },
+          "north_south": {
+            "distance_m": 3260.0,
+            "offset_pixels": [
+              163,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.03684817690824875,
+            "semivariance": 0.0020269856485
+          },
+          "northwest_southeast": {
+            "distance_m": 3252.6911934581185,
+            "offset_pixels": [
+              115,
+              115
+            ],
+            "pair_count": 20000,
+            "correlation": 0.028467213915765323,
+            "semivariance": 0.00213512400325
+          },
+          "northeast_southwest": {
+            "distance_m": 3252.6911934581185,
+            "offset_pixels": [
+              115,
+              -115
+            ],
+            "pair_count": 20000,
+            "correlation": 0.02828835995298944,
+            "semivariance": 0.0020461689867500004
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 3440.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 3440.0,
+            "offset_pixels": [
+              0,
+              172
+            ],
+            "pair_count": 20000,
+            "correlation": 0.048396119108030065,
+            "semivariance": 0.0020967551075000003
+          },
+          "north_south": {
+            "distance_m": 3440.0,
+            "offset_pixels": [
+              172,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.04363168285616066,
+            "semivariance": 0.0020357942532500005
+          },
+          "northwest_southeast": {
+            "distance_m": 3450.681092190352,
+            "offset_pixels": [
+              122,
+              122
+            ],
+            "pair_count": 20000,
+            "correlation": 0.01891124670813926,
+            "semivariance": 0.0021254566872500004
+          },
+          "northeast_southwest": {
+            "distance_m": 3450.681092190352,
+            "offset_pixels": [
+              122,
+              -122
+            ],
+            "pair_count": 20000,
+            "correlation": 0.01770232692163529,
+            "semivariance": 0.00207208219825
+          }
+        }
+      },
+      {
+        "nominal_lag_m": 3640.0,
+        "directions": {
+          "east_west": {
+            "distance_m": 3640.0,
+            "offset_pixels": [
+              0,
+              182
+            ],
+            "pair_count": 20000,
+            "correlation": 0.036494658596651006,
+            "semivariance": 0.0020760744640000005
+          },
+          "north_south": {
+            "distance_m": 3640.0,
+            "offset_pixels": [
+              182,
+              0
+            ],
+            "pair_count": 20000,
+            "correlation": 0.05415232050189007,
+            "semivariance": 0.00203441903175
+          },
+          "northwest_southeast": {
+            "distance_m": 3648.670990922585,
+            "offset_pixels": [
+              129,
+              129
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0060656171205529285,
+            "semivariance": 0.0022062084072500005
+          },
+          "northeast_southwest": {
+            "distance_m": 3648.670990922585,
+            "offset_pixels": [
+              129,
+              -129
+            ],
+            "pair_count": 20000,
+            "correlation": 0.0005860475976967934,
+            "semivariance": 0.002128630375
+          }
+        }
+      }
+    ],
+    "range_status": "observed",
+    "observed_range_m": 1923.330444827409,
+    "recommended_buffer_m": 1923.330444827409,
+    "warnings": [
+      "Spectral dependence in this scene is exploratory; labels, model features, season, and landscape can have longer ranges. No statistical independence guarantee is made."
+    ],
+    "max_tested_lag_m": 3648.670990922585
+  },
+  "splits": {
+    "valid_pixel_count": 562947,
+    "retained_pixel_count": 431857,
+    "discarded_valid_pixel_count": 131090,
+    "retention_fraction": 0.7671361602424385,
+    "counts": {
+      "train": 258623,
+      "validation": 86580,
+      "test": 86654
+    },
+    "fractions_of_retained": {
+      "train": 0.5988625864580174,
+      "validation": 0.20048303026233222,
+      "test": 0.20065438327965043
+    }
+  },
+  "spatial_diagnostics": {
+    "method": "exact Euclidean distance transform over every retained pixel",
+    "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+    "pairwise": [
+      {
+        "first_split": "train",
+        "second_split": "validation",
+        "minimum_center_distance_m": 1960.0,
+        "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+      },
+      {
+        "first_split": "train",
+        "second_split": "test",
+        "minimum_center_distance_m": 6460.0,
+        "minimum_footprint_gap_lower_bound_m": 6431.715728752538
+      },
+      {
+        "first_split": "validation",
+        "second_split": "test",
+        "minimum_center_distance_m": 1960.0,
+        "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+      }
+    ],
+    "minimum_center_distance_m": 1960.0,
+    "minimum_footprint_gap_lower_bound_m": 1931.715728752538,
+    "requested_buffer_met": true
+  },
+  "random_baseline": {
+    "description": "seeded random shuffle of the same retained pixels and exact split counts",
+    "valid_pixel_count": 562947,
+    "retained_pixel_count": 431857,
+    "discarded_valid_pixel_count": 131090,
+    "retention_fraction": 0.7671361602424385,
+    "counts": {
+      "train": 258623,
+      "validation": 86580,
+      "test": 86654
+    },
+    "fractions_of_retained": {
+      "train": 0.5988625864580174,
+      "validation": 0.20048303026233222,
+      "test": 0.20065438327965043
+    },
+    "separation": {
+      "method": "exact Euclidean distance transform over every retained pixel",
+      "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+      "pairwise": [
+        {
+          "first_split": "train",
+          "second_split": "validation",
+          "minimum_center_distance_m": 20.0,
+          "minimum_footprint_gap_lower_bound_m": 0.0
+        },
+        {
+          "first_split": "train",
+          "second_split": "test",
+          "minimum_center_distance_m": 20.0,
+          "minimum_footprint_gap_lower_bound_m": 0.0
+        },
+        {
+          "first_split": "validation",
+          "second_split": "test",
+          "minimum_center_distance_m": 20.0,
+          "minimum_footprint_gap_lower_bound_m": 0.0
+        }
+      ],
+      "minimum_center_distance_m": 20.0,
+      "minimum_footprint_gap_lower_bound_m": 0.0
+    }
+  },
+  "warnings": [
+    "Spectral dependence in this scene is exploratory; labels, model features, season, and landscape can have longer ranges. No statistical independence guarantee is made.",
+    "Partitions are three contiguous geographic stripes, without class stratification. Spatial holdout can expose geographic distribution shift; repeat across AOIs/seasons before model claims."
+  ],
+  "schema_version": "0.1.0",
+  "provenance": {
+    "source": "Microsoft Planetary Computer STAC + native Sentinel-2 L2A COG windows",
+    "catalog_url": "https://planetarycomputer.microsoft.com/api/stac/v1",
+    "collection": "sentinel-2-l2a",
+    "item_id": "S2A_MSIL2A_20240828T102021_R065_T32UQD_20240828T150452",
+    "item_url": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-2-l2a/items/S2A_MSIL2A_20240828T102021_R065_T32UQD_20240828T150452",
+    "datetime": "2024-08-28T10:20:21.024000Z",
+    "band": "B05",
+    "bbox_wgs84": [
+      13.3,
+      52.35,
+      13.5,
+      52.5
+    ],
+    "scene_cloud_cover_percent": 0.001135,
+    "processing_baseline": 5.11,
+    "reflectance_scale": 0.0001,
+    "reflectance_offset": -0.1,
+    "calibration_source": "Sentinel-2 L2A processing baseline convention",
+    "pixel_size_m": 20.0,
+    "crs": "EPSG:32632",
+    "shape": [
+      876,
+      731
+    ],
+    "valid_pixels": 562947,
+    "cloud_mask": "SCL classes 4 vegetation, 5 nonvegetated, 6 water; all other classes and nodata excluded",
+    "acquisition_path": "Public STAC directly; no Sentinel-2 downloader exposed by this EVE account at test time",
+    "selection": "Least scene cloud cover among first 100 covering catalog items, then item ID; pin item_id for replay"
+  },
+  "artifacts": {
+    "split_mask": "split_mask.tif",
+    "analysis_band": "analysis_band.tif",
+    "report_json": "real_demo_report.json",
+    "scope": "Files beside this report in artifacts/"
+  },
+  "run_fingerprint": "d81b8c7872d8e5a6",
+  "integration_test": {
+    "transport": "MCP stdio initialize + tools/list + tools/call",
+    "real_numeric_pixels": true,
+    "synthetic_fallback": false
+  },
+  "sensitivity": [
+    {
+      "buffer_m": 0,
+      "status": "ok",
+      "splits": {
+        "valid_pixel_count": 562947,
+        "retained_pixel_count": 562947,
+        "discarded_valid_pixel_count": 0,
+        "retention_fraction": 1.0,
+        "counts": {
+          "train": 337522,
+          "validation": 112561,
+          "test": 112864
+        },
+        "fractions_of_retained": {
+          "train": 0.5995626586517026,
+          "validation": 0.19994955120108998,
+          "test": 0.20048779014720747
+        }
+      },
+      "spatial_diagnostics": {
+        "method": "exact Euclidean distance transform over every retained pixel",
+        "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+        "pairwise": [
+          {
+            "first_split": "train",
+            "second_split": "validation",
+            "minimum_center_distance_m": 20.0,
+            "minimum_footprint_gap_lower_bound_m": 0.0
+          },
+          {
+            "first_split": "train",
+            "second_split": "test",
+            "minimum_center_distance_m": 3360.0,
+            "minimum_footprint_gap_lower_bound_m": 3331.715728752538
+          },
+          {
+            "first_split": "validation",
+            "second_split": "test",
+            "minimum_center_distance_m": 20.0,
+            "minimum_footprint_gap_lower_bound_m": 0.0
+          }
+        ],
+        "minimum_center_distance_m": 20.0,
+        "minimum_footprint_gap_lower_bound_m": 0.0,
+        "requested_buffer_met": true
+      },
+      "retention_fraction": 1.0
+    },
+    {
+      "buffer_m": 961.6652224137046,
+      "status": "ok",
+      "splits": {
+        "valid_pixel_count": 562947,
+        "retained_pixel_count": 496713,
+        "discarded_valid_pixel_count": 66234,
+        "retention_fraction": 0.8823441638378036,
+        "counts": {
+          "train": 298102,
+          "validation": 99198,
+          "test": 99413
+        },
+        "fractions_of_retained": {
+          "train": 0.6001493820375147,
+          "validation": 0.19970888621799712,
+          "test": 0.20014173174448827
+        }
+      },
+      "spatial_diagnostics": {
+        "method": "exact Euclidean distance transform over every retained pixel",
+        "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+        "pairwise": [
+          {
+            "first_split": "train",
+            "second_split": "validation",
+            "minimum_center_distance_m": 1000.0,
+            "minimum_footprint_gap_lower_bound_m": 971.7157287525381
+          },
+          {
+            "first_split": "train",
+            "second_split": "test",
+            "minimum_center_distance_m": 4920.0,
+            "minimum_footprint_gap_lower_bound_m": 4891.715728752538
+          },
+          {
+            "first_split": "validation",
+            "second_split": "test",
+            "minimum_center_distance_m": 1000.0,
+            "minimum_footprint_gap_lower_bound_m": 971.7157287525381
+          }
+        ],
+        "minimum_center_distance_m": 1000.0,
+        "minimum_footprint_gap_lower_bound_m": 971.7157287525381,
+        "requested_buffer_met": true
+      },
+      "retention_fraction": 0.8823441638378036
+    },
+    {
+      "buffer_m": 1923.330444827409,
+      "status": "ok",
+      "splits": {
+        "valid_pixel_count": 562947,
+        "retained_pixel_count": 431857,
+        "discarded_valid_pixel_count": 131090,
+        "retention_fraction": 0.7671361602424385,
+        "counts": {
+          "train": 258623,
+          "validation": 86580,
+          "test": 86654
+        },
+        "fractions_of_retained": {
+          "train": 0.5988625864580174,
+          "validation": 0.20048303026233222,
+          "test": 0.20065438327965043
+        }
+      },
+      "spatial_diagnostics": {
+        "method": "exact Euclidean distance transform over every retained pixel",
+        "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+        "pairwise": [
+          {
+            "first_split": "train",
+            "second_split": "validation",
+            "minimum_center_distance_m": 1960.0,
+            "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+          },
+          {
+            "first_split": "train",
+            "second_split": "test",
+            "minimum_center_distance_m": 6460.0,
+            "minimum_footprint_gap_lower_bound_m": 6431.715728752538
+          },
+          {
+            "first_split": "validation",
+            "second_split": "test",
+            "minimum_center_distance_m": 1960.0,
+            "minimum_footprint_gap_lower_bound_m": 1931.715728752538
+          }
+        ],
+        "minimum_center_distance_m": 1960.0,
+        "minimum_footprint_gap_lower_bound_m": 1931.715728752538,
+        "requested_buffer_met": true
+      },
+      "retention_fraction": 0.7671361602424385
+    },
+    {
+      "buffer_m": 3846.660889654818,
+      "status": "ok",
+      "splits": {
+        "valid_pixel_count": 562947,
+        "retained_pixel_count": 302149,
+        "discarded_valid_pixel_count": 260798,
+        "retention_fraction": 0.5367272585163435,
+        "counts": {
+          "train": 180908,
+          "validation": 60518,
+          "test": 60723
+        },
+        "fractions_of_retained": {
+          "train": 0.598737708878732,
+          "validation": 0.20029190895882495,
+          "test": 0.20097038216244303
+        }
+      },
+      "spatial_diagnostics": {
+        "method": "exact Euclidean distance transform over every retained pixel",
+        "footprint_gap_method": "max(0, center distance - pixel diagonal - 2 * patch radius)",
+        "pairwise": [
+          {
+            "first_split": "train",
+            "second_split": "validation",
+            "minimum_center_distance_m": 3880.0,
+            "minimum_footprint_gap_lower_bound_m": 3851.715728752538
+          },
+          {
+            "first_split": "train",
+            "second_split": "test",
+            "minimum_center_distance_m": 9520.0,
+            "minimum_footprint_gap_lower_bound_m": 9491.715728752539
+          },
+          {
+            "first_split": "validation",
+            "second_split": "test",
+            "minimum_center_distance_m": 3880.0,
+            "minimum_footprint_gap_lower_bound_m": 3851.715728752538
+          }
+        ],
+        "minimum_center_distance_m": 3880.0,
+        "minimum_footprint_gap_lower_bound_m": 3851.715728752538,
+        "requested_buffer_met": true
+      },
+      "retention_fraction": 0.5367272585163435
+    }
+  ]
+}

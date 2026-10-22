@@ -1,0 +1,96 @@
+{
+  "server": "eo-spatial-split-planner",
+  "schema_version": "0.1.0",
+  "files": [
+    {
+      "path": "servers/eo-spatial-split-planner/PR_DESCRIPTION.md",
+      "bytes": 3080,
+      "sha256": "947c092126ceb30fa531232899ec229a94441e3020a2fea06f822e1c2e38b31e"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/README.md",
+      "bytes": 6491,
+      "sha256": "ce15272168f0b5dd03db82a391eb4fa2cf7e1f2a52f2149c918114c6d463482c"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/analysis_band.tif",
+      "bytes": 1673636,
+      "sha256": "9256c379952cb2bed125bf46398a3b66155708bd057597e9f798bcd6ac4811ff"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/diagnostic.png",
+      "bytes": 1665320,
+      "sha256": "bd63fb5335adee2f48e77a4913dfda4e584dc93b73b21f5c1dc775b026b571d7"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_demo.json",
+      "bytes": 15200,
+      "sha256": "69d41b683f9650e67722a2669eec1e1b873202d53ddc68eb0de71d7043de761c"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/eve_gateway_discovery.json",
+      "bytes": 9763,
+      "sha256": "aab8338205bb6ead7e91bf775e2f2b1a11462ddcf5b1010bbc11c3c40c87330b"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/mcp_http_test.json",
+      "bytes": 245,
+      "sha256": "977df23672613bef9a64ce29391c12cd41c23eecc0b8c21e35c2317bea4d9614"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/mcp_smoke_test.json",
+      "bytes": 155,
+      "sha256": "66a32a2b1b44927e070980aaaf1fb6e9f9357823e040ac04d03725d6c2a70698"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/real_demo_report.json",
+      "bytes": 37901,
+      "sha256": "c54a769ae3628da0771d41046fd277ee8e80c1a9efa87500d12214c3a916a4bf"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/sensitivity.json",
+      "bytes": 6131,
+      "sha256": "b0203e176ab25f918f3a5ae6b9ce22a73a8b96f8ace856a44671d9dacc31e981"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/artifacts/split_mask.tif",
+      "bytes": 9898,
+      "sha256": "f8180e5bc824ca667a8905692fca61c8191a9863eacec3fcf11ee9b2310563ba"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/core.py",
+      "bytes": 18081,
+      "sha256": "e2e6726de27313ea07151998867a37863905688c327317d6be85821feb818209"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/imagery.py",
+      "bytes": 9610,
+      "sha256": "6e9e30782eae5d3f7af2c53c8fbe81aad4d3f90a43a9360a5e50de773867329d"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/requirements.txt",
+      "bytes": 134,
+      "sha256": "cd394b2256fc36607fc25b6d64afdf686c8797fa9096a14f16a976eb13477757"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/server.py",
+      "bytes": 6884,
+      "sha256": "d58a695000600488477a0de1b1ea5fd03910924ea0c4643227bd88061ba7070b"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/test.py",
+      "bytes": 8307,
+      "sha256": "96331ef84530ce90b7963a77353003d2c8001a04d159466a68fb7c664fb35f72"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/tests/test_core.py",
+      "bytes": 7212,
+      "sha256": "e3eaf4d5a967a91617263da020fede08f034350f6fe2bb44b3a043ac3fdf2bce"
+    },
+    {
+      "path": "servers/eo-spatial-split-planner/tests/test_imagery.py",
+      "bytes": 1723,
+      "sha256": "d70ca0300d0b6f31f5e3e4896977ffc840510c0d767a417ab160e6447996c00b"
+    }
+  ]
+}
