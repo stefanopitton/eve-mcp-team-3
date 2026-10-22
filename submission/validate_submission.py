@@ -19,7 +19,7 @@ print(result.stdout)
 if result.stderr:
     print(result.stderr, file=sys.stderr)
 recorded = SERVER / "artifacts" / "validation_summary.json"
-receipt = {"schema_version": "0.3.0",
+receipt = {"schema_version": "0.4.0",
            "official_registry_structural_checks_passed": result.returncode == 0,
            "stdout": result.stdout, "stderr": result.stderr,
            "recorded_validation": json.loads(recorded.read_text()) if recorded.is_file() else None,

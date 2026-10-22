@@ -229,7 +229,7 @@ def test_tool_contract_reports_rho_at_requested_lag_and_fit_context():
 def test_auto_buffer_passes_both_empirical_and_fitted_criteria():
     field = gaussian_filter(np.random.default_rng(8).normal(size=(192, 192)), sigma=5)
     result = core.create_spatial_split(field, pixel_size_m=20, max_lag_m=1000,
-                                       max_pairs_per_lag=5000, n_patches=12)
+                                       max_pairs_per_lag=5000, n_patches=12, split_ratios=(0.6, 0.2, 0.2))
     report = result["report"]
     diagnostic = report["autocorrelation"]
     assert report["buffer_source"] == "variogram_range_and_empirical_rho"
@@ -277,7 +277,7 @@ def test_unobserved_range_never_falls_back_to_largest_tested_lag():
     assert any("sampled" in warning for warning in analysis["warnings"])
     with pytest.raises(ValueError, match="No automatic buffer"):
         core.create_spatial_split(gradient, **args)
-    explicit = core.create_spatial_split(gradient, buffer_m=30, **args)
+    explicit = core.create_spatial_split(gradient, buffer_m=30, split_ratios=(0.6, 0.2, 0.2), **args)
     assert explicit["report"]["buffer_source"] == "user_supplied"
     assert any("not certified" in warning for warning in explicit["report"]["warnings"])
 

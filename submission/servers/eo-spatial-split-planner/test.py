@@ -16,6 +16,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import math
 import shutil
 import sys
 import tempfile
@@ -99,7 +100,7 @@ def verify_variogram(analysis: dict) -> dict:
 
 
 def verify_rectangles(report: dict, artifacts: dict | None = None) -> dict:
-    """Reconstruct complete patches and verify paired support and pixel budgets."""
+    """Reconstruct either patch layout and verify paired support and budgets."""
     paths = report["artifacts"] if artifacts is None else artifacts
     with rasterio.open(paths["analysis_band"]) as src:
         valid = np.isfinite(src.read(1, masked=True).filled(np.nan))
@@ -112,21 +113,28 @@ def verify_rectangles(report: dict, artifacts: dict | None = None) -> dict:
         assert (src.crs, src.transform, src.shape) == source_grid
     patches = json.loads(Path(paths["patch_manifest"]).read_text())
     assert patches == report["patches"]
-    assert report["schema_version"] == "0.3.0"
-    assert report["patch_size_pixels"] == PATCH_SIZE_PIXELS
-    assert len(patches) == report["n_candidate_patches"] == N_PATCHES
+    assert report["schema_version"] == "0.4.0"
+    dimensions = report["patch_size_pixels"]
+    assert len(dimensions) == 2 and min(dimensions) > 0
+    assert len(patches) == report["n_candidate_patches"]
     assert len({p["row_start"] for p in patches}) > 1
     assert len({p["col_start"] for p in patches}) > 1
     reconstructed = {"buffered_retained": np.zeros(valid.shape, dtype="uint8"),
                      "unbuffered_retained": np.zeros(valid.shape, dtype="uint8")}
     occupied = np.zeros(valid.shape, dtype=bool)
+    quality_occupied = np.zeros(valid.shape, dtype=bool)
     for patch in patches:
         r0, r1 = patch["row_start"], patch["row_stop"]
         c0, c1 = patch["col_start"], patch["col_stop"]
-        assert [r1 - r0, c1 - c0] == PATCH_SIZE_PIXELS
+        expected_dimensions = ([min(dimensions[0], valid.shape[0] - r0),
+                                min(dimensions[1], valid.shape[1] - c0)]
+                               if report.get("edge_policy") == "extend" else dimensions)
+        assert [r1 - r0, c1 - c0] == expected_dimensions
         assert 0 <= r0 < r1 <= valid.shape[0] and 0 <= c0 < c1 <= valid.shape[1]
         assert not occupied[r0:r1, c0:c1].any(), "Candidate rectangles overlap"
         occupied[r0:r1, c0:c1] = True
+        if patch.get("candidate_retained", True):
+            quality_occupied[r0:r1, c0:c1] = True
         assert patch["valid_pixel_count"] == int(valid[r0:r1, c0:c1].sum())
         for key, expected in reconstructed.items():
             if patch[key]:
@@ -140,7 +148,31 @@ def verify_rectangles(report: dict, artifacts: dict | None = None) -> dict:
     assert stats["candidate_pixel_count"] == int((occupied & valid).sum())
     assert stats["unselected_valid_pixel_count"] == int((~occupied & valid).sum())
     assert stats["buffer_discarded_training_pixel_count"] == int((unbuffered == 1).sum() - (buffered == 1).sum())
-    assert stats["retained_pixel_count"] + stats["buffer_discarded_candidate_pixel_count"] + stats["unselected_valid_pixel_count"] == stats["valid_pixel_count"]
+    quality_rejected = stats.get("quality_rejected_valid_pixel_count", 0)
+    assert stats["retained_pixel_count"] + stats["buffer_discarded_candidate_pixel_count"] + quality_rejected + stats["unselected_valid_pixel_count"] == stats["valid_pixel_count"]
+    if report.get("patch_layout") == "reference_blocks":
+        quality_count = int((quality_occupied & valid).sum())
+        assert report["quality_eligible_candidate_pixel_count"] == quality_count
+        assert report["quality_rejected_valid_pixel_count"] == int((occupied & ~quality_occupied & valid).sum())
+        assert report["buffer_discarded_quality_candidate_pixel_count"] == quality_count - int((buffered > 0).sum())
+        assert len(patches) == math.prod(report["patch_grid_shape"])
+        blocks = np.asarray(report["block_labels"], dtype=int)
+        assert list(blocks.shape) == report["block_grid_shape"]
+        requested = report["requested_block_split_ratios"]
+        count = blocks.size
+        expected_counts = {"validation": math.ceil(count * requested["validation"]),
+                           "test": math.ceil(count * requested["test"])}
+        expected_counts["train"] = count - sum(expected_counts.values())
+        for code, name in ((1, "train"), (2, "validation"), (3, "test")):
+            assert int((blocks == code).sum()) == expected_counts[name]
+            assert report["realized_block_split_ratios"][name] == expected_counts[name] / count
+        candidates = report["seed_search"]["candidates"]
+        eligible = [candidate for candidate in candidates if candidate["eligible"]]
+        selected = sorted(eligible, key=lambda candidate: (-candidate["minimum_retained_patch_count"], candidate["seed"]))[0]
+        assert report["selected_seed"] == selected["seed"] == report["seed"]
+        assert report["seed_search"]["selected_minimum_retained_patch_count"] == selected["minimum_retained_patch_count"]
+        assert not report["class_labels_provided"]
+        assert report["class_coverage_complete"] is None
     assert report["spatial_diagnostics"]["requested_buffer_met"]
     return {"two_axis_rectangle_placements": "passed", "whole_patch_exclusions": "passed",
             "identical_paired_validation_test_pixels": "passed",
@@ -167,6 +199,7 @@ def smoke() -> dict:
         result = asyncio.run(call_mcp("plan_spatial_split", {
             "raster_path": str(path), "buffer_m": 100, "seed": SEED, "lag_m": LAG_M,
             "patch_size_pixels": PATCH_SIZE_PIXELS, "n_patches": N_PATCHES,
+            "patch_layout": "random_rectangles", "split_ratios": [0.6, 0.2, 0.2],
         }))
         assert result["status"] == "ok", result
         with rasterio.open(result["artifacts"]["split_mask"]) as src:
@@ -181,6 +214,23 @@ def smoke() -> dict:
         np.testing.assert_array_equal(analysis["counts"], split["autocorrelation"]["counts"])
         np.testing.assert_array_equal(np.asarray(analysis["gamma"], dtype=float),
                                       np.asarray(split["autocorrelation"]["gamma"], dtype=float))
+        # Primary script04 protocol check. Omitting patch_layout and fractions
+        # verifies the MCP defaults, while explicit rectangular dimensions keep
+        # this bounded fixture large enough for a complete 3x4 block grid.
+        block_arguments = {
+            "raster_path": str(path), "buffer_m": 100, "lag_m": LAG_M,
+            "seed": SEED, "patch_size_pixels": [8, 10],
+            "block_size_pixels": [64, 80], "seed_candidates": 200,
+        }
+        default_blocks = full_report(asyncio.run(call_mcp("plan_spatial_split", block_arguments)))
+        assert default_blocks["patch_layout"] == "reference_blocks"
+        assert default_blocks["requested_split_ratios"] == {"train": 0.7, "validation": 0.1, "test": 0.2}
+        verify_rectangles(default_blocks)
+        custom_blocks = full_report(asyncio.run(call_mcp("plan_spatial_split", {
+            **block_arguments, "split_ratios": [0.5, 0.25, 0.25],
+        })))
+        assert custom_blocks["requested_split_ratios"] == {"train": 0.5, "validation": 0.25, "test": 0.25}
+        verify_rectangles(custom_blocks)
         failure = asyncio.run(call_mcp("evaluate_spatial_autocorrelation", {"raster_path": "/missing/science.tif"}))
         assert failure["status"] == "error"
         outside = asyncio.run(call_mcp("evaluate_spatial_autocorrelation", {"raster_path": str(path), "lag_m": 1}))
@@ -189,7 +239,9 @@ def smoke() -> dict:
                 "split_tool_call": "passed", "georeferenced_split_artifact": "passed",
                 "exact_split_and_random_counts": "passed", "seeded_estimator_replay": "passed",
                 "nan_exclusion_and_float64_variance": "passed", "actionable_invalid_path_error": "passed",
-                "out_of_sampled_range_lag_error": "passed", **checks}
+                "out_of_sampled_range_lag_error": "passed", "reference_block_stdio_call": "passed",
+                "default_70_10_20_block_fractions": "passed", "custom_block_fractions": "passed",
+                "ranked_seed_and_quality_accounting": "passed", **checks}
 
 
 def _copy(source: str | Path, destination: Path) -> None:
@@ -242,6 +294,7 @@ def real(raster_cache: Path | None = None) -> dict:
     result = asyncio.run(call_mcp("plan_spatial_split", {
         "raster_path": str(band_path.resolve()), "buffer_m": LAG_M, "seed": SEED, "lag_m": LAG_M,
         "patch_size_pixels": PATCH_SIZE_PIXELS, "n_patches": N_PATCHES,
+        "patch_layout": "random_rectangles", "split_ratios": [0.6, 0.2, 0.2],
     }))
     report = full_report(result)
     rectangle_checks = verify_rectangles(report)
@@ -269,7 +322,8 @@ def real(raster_cache: Path | None = None) -> dict:
         try:
             check = create_spatial_split(values, pixel_size_m=pixel_size, seed=SEED,
                                          buffer_m=buffer, lag_m=LAG_M,
-                                         patch_size_pixels=PATCH_SIZE_PIXELS, n_patches=N_PATCHES)
+                                         patch_size_pixels=PATCH_SIZE_PIXELS, n_patches=N_PATCHES,
+                                         patch_layout="random_rectangles", split_ratios=(0.6, 0.2, 0.2))
             check_report = check["report"]
             assert check_report["spatial_diagnostics"]["requested_buffer_met"]
             assert check_report["splits"]["counts"] == check_report["random_baseline"]["counts"]

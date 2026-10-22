@@ -97,7 +97,7 @@ def preserve_planner_artifacts(planner: dict, output_dir: Path,
     directory = output_dir / "eve_runs" / report["run_fingerprint"]
     directory.mkdir(parents=True, exist_ok=True)
     artifacts = {"scope": "Preserved workspace copies from the local MCP server"}
-    for key in ("analysis_band", "split_mask", "unbuffered_split_mask", "patch_manifest"):
+    for key in ("analysis_band", "split_mask", "unbuffered_split_mask", "candidate_split_mask", "patch_manifest"):
         if key not in original:
             continue
         source = Path(original[key])
@@ -178,11 +178,21 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
     expected_planner = "plan_spatial_split"
     planner_instruction = (
         "Then call plan_spatial_split with raster_path equal to the evaluator's "
-        "artifacts.analysis_band path, band_index=1, buffer_m=2560, lag_m=2560, "
-        "seed=3, patch_size_pixels=[48,64], and n_patches=12. Use seeded random "
-        "rectangles in both row and column directions. Report the paired "
+        "artifacts.analysis_band path, band_index=1, buffer_m=null (or omit buffer_m for automatic guard), lag_m=2560, "
+        "seed=3, patch_layout='reference_blocks', patch_size_pixels=[32,40], "
+        "block_size_pixels=[96,120], edge_policy='extend', seed_candidates=200, and "
+        "split_ratios=[0.7,0.1,0.2]. Omit n_patches. Randomize whole blocks "
+        "in both spatial directions and extract fixed rectangular patches, "
+        "following the checkpoint scripts/04_extract_patches.py workflow. "
+        "Report requested versus realized fractions and the ranked seed selection. "
+        "Class coverage remains unverified because no categorical labels are "
+        "provided to this MCP call; never claim all classes occur in every split. "
+        "Report the paired "
         "unbuffered mask with exactly the same validation/test rectangles and "
-        "restored training rectangles. This is a geometric demonstration of the requested gap, "
+        "restored training rectangles; the heldout side of the symmetric "
+        "buffer remains and this baseline may already meet the requested gap. "
+        "The candidate mask has every quality-eligible patch before buffering "
+        "and different heldout support. This is a geometric demonstration of the requested gap, "
         "including when the scientific lag decision rejects it. Report an "
         "infeasible split accurately if this AOI cannot support that guard. "
     )
@@ -199,7 +209,7 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
         "Report patch counts before/after the buffer, candidate coverage, "
         "unselected valid pixels, excluded training pixels, and geometric "
         "separation. Keep unselected coverage separate from pixels removed by "
-        "the buffer. This secondary 2024 test does not train a segmentation "
+        "the buffer. This live integration test does not train a segmentation "
         "model; do not invent model accuracy. Distinguish observed results from "
         "recommendations, identify tool failures, and cite each tool. "
         "Explain that this unsupervised image analysis cannot establish a "
@@ -212,20 +222,43 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
         "Use the exact AOI and dates requested, rather than a geocoder's larger "
         "bounding box. This chain uses geocoding, not a GIS viewer. Geometric "
         "separation and low single-band rho do not prove no data leakage. "
-        "If a tool fails, report its error accurately."
+        "If a tool fails, report its error accurately. Keep the final answer under 200 words."
     )
     agent = await create_agent([HERE / "server.py", "geocode"], prompt=prompt)
     try:
-        result = await asyncio.wait_for(agent.chat(question, echo=False), timeout=300)
+        trace, agent_turns = [], []
+        next_query = question
+        async with asyncio.timeout(300):
+            for _ in range(3):
+                result = await agent.chat(next_query, echo=False)
+                trace.extend(result.trace)
+                agent_turns.append({"query": next_query, "answer": result.answer})
+                outputs = {step["name"]: decoded_tool_output(step.get("content", ""))
+                           for step in trace if step.get("node") == "tools"}
+                pending = [name for name in ("reverse_geocode_place", expected_evaluator, expected_planner)
+                           if name not in outputs or not isinstance(outputs[name], dict)
+                           or (name != "reverse_geocode_place" and outputs[name].get("status") != "ok")]
+                if not pending:
+                    break
+                next_query = (
+                    "Continue the existing task by executing the missing calls now: "
+                    + ", ".join(pending) + ". Do not stop after announcing a plan. "
+                    + evaluation_instruction + planner_instruction
+                    + "Reuse successful tool results already in this conversation. Report actual errors; "
+                    "do not invent results or change requested scientific parameters."
+                )
         evidence = {
             "tested_at_utc": datetime.now(UTC).isoformat(),
             "model": settings.eve_llm_model,
             "configuration_source": "repository .env (overrides inherited EVE settings)",
             "servers": ["local eo-spatial-split-planner", "EVE hosted geocode"],
             "available_tool_names": agent.tool_names,
+            "system_prompt": prompt,
             "query": question,
             "answer": result.answer,
-            "trace": result.trace,
+            "trace": trace,
+            "agent_turns": agent_turns,
+            "maximum_agent_turns": 3,
         }
     finally:
         await agent.close()
@@ -265,6 +298,22 @@ async def run_agent(output_dir: Path, raster_path: str | None = None) -> dict:
     planner_report = json.loads((output_dir / "eve_planner_report.json").read_text())
     evidence["scientific_verification"] = verify_variogram(evaluation_report)
     evidence["rectangle_verification"] = verify_rectangles(planner_report)
+    assert planner_report["schema_version"] == "0.4.0"
+    assert planner_report["patch_layout"] == "reference_blocks"
+    assert planner_report["patch_size_pixels"] == [32, 40]
+    assert planner_report["block_size_pixels"] == [96, 120]
+    assert planner_report["requested_split_ratios"] == {"train": 0.7, "validation": 0.1, "test": 0.2}
+    assert planner_report["seed_search"]["stop_exclusive"] == 200
+    assert planner_report["requested_buffer_m"] == planner_report["recommended_buffer_m"]
+    assert planner_report["edge_policy"] == "extend"
+    assert planner_report["edge_discarded_pixel_count"] == 0
+    assert planner_report["class_labels_provided"] is False
+    assert planner_report["class_coverage_complete"] is None
+    evidence["verification"].update({
+        "planner_schema_0_4_0": True, "reference_block_geometry": True,
+        "requested_70_10_20_fractions": True, "full_aoi_no_edge_cropping": True,
+        "class_coverage_unverified_without_categorical_labels": True,
+    })
     write_evidence(output_dir / "eve_demo.json", evidence)
     print(sanitize(evidence["answer"]))
     return evidence

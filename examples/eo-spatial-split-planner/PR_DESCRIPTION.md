@@ -1,32 +1,23 @@
-## Draft demo: EO Spatial Split Planner with random patches
+## Draft demo: EO Spatial Split Planner — full-AOI submission
 
-Nearby EO training and evaluation patches can share spatial information. This draft MCP server measures a continuous band's variogram and samples random rectangular patches in both spatial axes, then removes whole rectangles to satisfy a measured guard. It exports paired buffered/unbuffered masks, patch coordinates and keep flags, retention and cross-split distances. Validation and test locations remain fixed when nearby training patches are restored for the unbuffered condition.
+This submission modifies `START_HERE.ipynb` into a runnable EO Spatial Split Planner demo, with the exact EVE system/user/follow-up prompts, raw agent responses, verification and corrections shown inline. A judging-evidence table maps usefulness (40%), agent readiness (30%), quality (20%) and demo (10%) to actual artifacts. Network replay uses the repository `.env` only when explicitly enabled; saved real-data/model evidence is the default submission path.
 
-Four MCP tools evaluate a local or Sentinel-2 raster at a requested lag and plan its patch split. Planning exposes `patch_size_pixels` and `n_patches`. The variogram follows `PROCEDURE.md` and frozen checkpoint `ac7dfc6`: 24 logarithmic bins, 200,000 offset draws per source bin, rounded-distance reassignment, finite-pair exclusion, seed 3, count-weighted spherical fit and log-lag interpolation. Acceptance requires `rho_at_lag < 0.1` and `lag_m >= practical_range_m`; the actual guard has a separate `buffer_autocorrelation` decision.
+Four MCP tools evaluate spatial autocorrelation in local/Sentinel-2 imagery and plan patch datasets. The variogram follows `PROCEDURE.md`: 24 logarithmic bins, 200,000 draws per source bin, seed 3, rounded-distance binning, finite pairs, weighted spherical fit and log-lag interpolation. Lag acceptance requires rho below 0.1 and a lag covering the fitted practical range.
 
-The executed notebook trains a 5,283-parameter CPU CNN on real 2021 Sentinel-2 B05/B03/B04/B08 reflectance with aligned ESA WorldCover 2021 weak labels. Forty 48 × 64-pixel rectangle candidates and a measured 1,298.24 m guard yield 24 training patches without the training filter versus 8 buffered, with identical 6 validation/8 test patches. All models start from the same weights and use 150 optimizer steps, training-only normalization and validation-selected checkpoints. Test evaluation occurs once per selected model.
+The patch workflow adapts checkpoint `scripts/04_extract_patches.py` with configurable **70%/10%/20%** split targets, 32 × 40-pixel model patches and nominal 96 × 120-pixel random assignment groups. **`edge_policy="extend"` covers the full AOI:** final groups extend to the image edge and terminal patches are clipped, eliminating bottom/right crop bands. The 2021 demo uses 40 groups and a 27 × 18 patch grid over all 850 × 699 pixels; the requested group allocation is 28 train/4 validation/8 test. Actual retained proportions and class-aware offline seed selection are reported.
 
-| Condition | Train patches | Test mIoU | Minimum train–test patch-edge gap |
-| --- | ---: | ---: | ---: |
-| Without training buffer | 24 | 0.5307 | 100 m |
-| With measured buffer | 8 | 0.4790 | 1,700 m |
-| Size-matched, without distance filter | 8 | 0.4785 | 220 m |
+Only different active train/validation/test splits trigger guards. Same-split seams, AOI edges, nodata and quality-rejected cells do not create buffers. The notebook distinguishes orange guard exclusions from grey nodata/quality exclusions, with patch/group lines. Extracted `.npy` arrays, metadata, train-only statistics and portable ZIP archives are inspected directly.
 
-The buffered condition retains 33.95% of labelled training pixels. It scores below the full unbuffered training pool, while the size-matched control is close. This demonstrates the separation/data-volume tradeoff; it does not attribute the score gap to leakage or show an accuracy benefit from buffering. Water is rare and all conditions score water IoU 0. WorldCover itself uses Sentinel imagery, so these scores measure agreement with a weak annual reference, not independent field accuracy.
+A small CPU CNN is trained in three conditions on actual matched-2021 Sentinel-2/WorldCover data: eligible training support, symmetric training exclusions and a size-matched control. Validation/test support is identical. Restoring training retains the held-out side of the symmetric guard, so the comparison is not presented as leaky versus independent. Test mIoU is 0.3527 for 306 training patches without training erosion, 0.3055 for 124 buffered patches and 0.3259 for the 124-patch size-matched control. All share 14 validation/10 test patches and 12,601 labelled test pixels, with only 11 water pixels. Refreshed reports show class counts and measured distances; no accuracy improvement is assumed. WorldCover is a weak annual classifier-derived reference.
 
-The notebook includes before/after rectangular patch maps, imagery/reference/prediction views, per-class metrics, class counts, confusion matrices and validation curves. Optional PyTorch training remains separate from the four-tool MCP server. Reports, masks, prediction arrays, model checkpoints and attribution are included in the demo artifacts.
-
-GIS MCP can provide a conditional numeric-raster handoff through its documented `download_satellite_imagery` tool, after EVE registers a deployed server and calibration, SCL masking, scene verification, grid alignment and shared storage/transfer are handled. The GIS source contract was reviewed; no GIS server was invoked or tested through this account. Actual demo imagery is acquired from public Planetary Computer STAC.
-
-Reproduce from `agentic-eo`:
+The current live EVE replay validates hosted geocoding, evaluation of the cached actual 2021 Sentinel-2 raster and local patch planning; it does not perform a new imagery download or train the CNN. GIS MCP is a reviewed conditional raster handoff, not an integration invoked through this account. Actual imagery uses public Planetary Computer STAC. Pinned-source parity, tests, protocol checks and complete reviewed traces are included.
 
 ```bash
 .venv/bin/python -m pip install -r examples/eo-spatial-split-planner/requirements-demo.txt
-.venv/bin/python examples/eo-spatial-split-planner/segmentation_data.py
-.venv/bin/python examples/eo-spatial-split-planner/run_segmentation.py --steps 150
+.venv/bin/python examples/eo-spatial-split-planner/run_segmentation.py --steps 150 --split-ratios 0.7 0.1 0.2 --edge-policy extend
 .venv/bin/python -m pytest examples/eo-spatial-split-planner/tests -q
 .venv/bin/python examples/eo-spatial-split-planner/test.py
 .venv/bin/python submission/validate_submission.py
 ```
 
-Stationarity and isotropy remain assumptions; pair differencing is not trend removal. One AOI/acquisition/seed and weak labels do not establish true accuracy, independence in all bands, or temporal transferability. This is a draft demo for review; Docker verification and publishing are separate steps.
+This is a draft demo for review. Approximate stationarity/isotropy, a selected split, weak reference labels and one acquisition limit the conclusions. Docker verification and registry publishing are separate steps.

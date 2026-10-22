@@ -1,20 +1,21 @@
 {
-  "schema_version": "0.3.0",
+  "schema_version": "0.4.0",
   "official_registry_structural_checks_passed": true,
-  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 46\n  Servers touched: eo-spatial-split-planner\n\n",
+  "stdout": "\n============================================================\n  PR VALIDATION PASSED\n============================================================\n  Changed files: 63\n  Servers touched: eo-spatial-split-planner\n\n",
   "stderr": "",
   "recorded_validation": {
-    "schema_version": "0.3.0",
+    "schema_version": "0.4.0",
     "reference_implementation": {
       "repository": "https://github.com/stefanopitton/lulc-classification",
       "branch": "stepit/eve-hackathon-checkpoint",
       "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
       "source": "src/lulc/validation/autocorrelation.py",
-      "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)"
+      "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)",
+      "patch_source": "scripts/04_extract_patches.py and src/lulc/data/patches.py"
     },
     "unit_tests": {
       "status": "passed",
-      "count": 90
+      "count": 140
     },
     "lint": {
       "status": "passed"
@@ -22,37 +23,45 @@
     "mcp_stdio": {
       "status": "passed",
       "evidence": "mcp_smoke_test.json",
-      "random_rectangles_and_paired_masks": true
+      "reference_block_default_and_custom_fractions": true,
+      "legacy_random_rectangles_explicitly_tested": true
     },
     "mcp_streamable_http": {
       "status": "passed",
-      "evidence": "mcp_http_test.json"
+      "schema_version": "0.4.0",
+      "evidence": "mcp_http_test.json",
+      "patch_layout": "reference_blocks"
     },
     "reference_parity": {
       "status": "passed",
       "evidence": "reference_validation.json",
-      "note": "Variogram estimator unchanged; geometry changed to two-dimensional rectangles."
+      "note": "Variogram estimator unchanged; exact counts/sums/rho/fit parity is recorded separately from patch geometry."
     },
     "live_eve": {
       "status": "passed",
       "configuration_source": "repository .env",
-      "api_url_model_key_match_env_file": true,
+      "schema_version": "0.4.0",
       "verification": {
-        "expected_evaluation_tool": "evaluate_sentinel2_autocorrelation",
+        "expected_evaluation_tool": "evaluate_spatial_autocorrelation",
         "evaluation_tool_returned": true,
         "evaluation_status_ok": true,
         "expected_planner_tool": "plan_spatial_split",
         "planner_tool_returned": true,
         "planner_status_ok": true,
         "hosted_geocode_tool_returned": true,
-        "hosted_geocode_success": true
+        "hosted_geocode_success": true,
+        "planner_schema_0_4_0": true,
+        "reference_block_geometry": true,
+        "requested_70_10_20_fractions": true,
+        "full_aoi_no_edge_cropping": true,
+        "class_coverage_unverified_without_categorical_labels": true
       },
-      "schema_version": "0.3.0",
-      "evidence": "eve_demo.json"
+      "evidence": "eve_demo.json",
+      "acquisition": "cached actual2021 Sentinel-2 imagery; no new remote acquisition in this trace",
+      "review_notes": "Four scope/interpretation notes; raw EVE output is preserved."
     },
     "segmentation_benchmark": {
       "status": "trained_and_evaluated",
-      "label_type": "WorldCover2021 weak reference",
       "model": {
         "architecture": "3 x Conv2d(3x3, 16 channels) + ReLU, then Conv2d(1x1, K classes)",
         "trainable_parameters": 5283,
@@ -60,25 +69,45 @@
         "device": "cpu",
         "torch_version": "2.14.1"
       },
+      "label_type": "WorldCover2021 weak reference",
       "same_test_pixels": true,
       "optimizer_steps_each": 150,
+      "training_crop_pixels": 16,
       "buffer_m": 1298.2387330451975,
-      "retained_training_fraction": 0.33949342938906846,
+      "patch_size_pixels": [
+        32,
+        40
+      ],
+      "block_size_pixels": [
+        96,
+        120
+      ],
+      "assignment_groups": 40,
+      "candidate_patches": 486,
+      "edge_policy": "extend",
+      "edge_discarded_pixel_count": 0,
+      "retained_training_fraction": 0.3916009685775425,
       "conditions": {
         "without_buffer": {
-          "training_patches": 24,
-          "test_mean_iou": 0.5306811236981029,
-          "minimum_train_test_patch_edge_distance_m": 100.0
+          "training_patches": 306,
+          "validation_patches": 14,
+          "test_patches": 10,
+          "test_mean_iou": 0.3527204111172011,
+          "minimum_train_test_patch_edge_distance_m": 1600.0
         },
         "with_buffer": {
-          "training_patches": 8,
-          "test_mean_iou": 0.47898616791963833,
-          "minimum_train_test_patch_edge_distance_m": 1700.0
+          "training_patches": 124,
+          "validation_patches": 14,
+          "test_patches": 10,
+          "test_mean_iou": 0.30548723546084394,
+          "minimum_train_test_patch_edge_distance_m": 3200.0
         },
         "size_matched_without_buffer": {
-          "training_patches": 8,
-          "test_mean_iou": 0.4785191618818076,
-          "minimum_train_test_patch_edge_distance_m": 220.0
+          "training_patches": 124,
+          "validation_patches": 14,
+          "test_patches": 10,
+          "test_mean_iou": 0.3258765609629884,
+          "minimum_train_test_patch_edge_distance_m": 1600.0
         }
       }
     },
@@ -88,11 +117,45 @@
     },
     "notebook_execution": {
       "status": "passed",
-      "code_cells": 11
+      "START_HERE_code_cells": 14,
+      "EO_SPATIAL_SPLIT_PLANNER_code_cells": 13
     },
     "docker_build": {
       "status": "not_run",
       "reason": "Docker daemon unavailable on this host"
+    },
+    "patch_reference_parity": {
+      "status": "passed",
+      "evidence": "patch_reference_validation.json",
+      "scope": "Actual pinned upstream functions: block assignment, patch grid, symmetric buffers, seed selection and class counts; rectangular and quality adaptations disclosed."
+    },
+    "patch_exports": {
+      "status": "roundtrip_and_pairing_verified",
+      "evidence": "segmentation_benchmark/patch_exports/patch_export_manifest.json",
+      "paired_heldout_identical": true,
+      "training_only_statistics": "seed3 Bernoulli25% samples; 1st/99th percentiles, median, mean, std",
+      "archives_below_5_mib": true
+    },
+    "buffer_scope": {
+      "rule": "Only nearby quality-eligible patches from different splits trigger buffers.",
+      "no_buffer_at": [
+        "same-split patch and block seams",
+        "AOI exterior",
+        "nodata boundaries",
+        "quality-rejected patches"
+      ],
+      "independent_oracle_tests": "passed",
+      "visualization": "Orange buffer removal is separate from grey missing/quality/edge exclusions."
+    },
+    "ci": {
+      "workflow": ".github/workflows/eo-spatial-split-planner.yml",
+      "status": "configured",
+      "checks": [
+        "pytest with CPU CNN tests",
+        "Ruff",
+        "notebook format and compilation",
+        "registry structure and secret checks"
+      ]
     }
   },
   "official_registry_submission_created": false

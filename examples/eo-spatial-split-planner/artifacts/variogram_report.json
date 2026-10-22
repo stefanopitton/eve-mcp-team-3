@@ -185,7 +185,7 @@
     "lag_at_least_practical_range": true,
     "correlation_threshold": 0.1
   },
-  "schema_version": "0.3.0",
+  "schema_version": "0.4.0",
   "provenance": {
     "source": "local_raster",
     "filename": "analysis_band.tif",
@@ -198,14 +198,15 @@
     "branch": "stepit/eve-hackathon-checkpoint",
     "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
     "source": "src/lulc/validation/autocorrelation.py",
-    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)"
+    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)",
+    "patch_source": "scripts/04_extract_patches.py and src/lulc/data/patches.py"
   },
   "artifacts": {
     "analysis_band": "analysis_band.tif",
     "report_json": "variogram_report.json",
     "scope": "Files beside this report in artifacts/"
   },
-  "run_fingerprint": "4b0c20d92e88dc55",
+  "run_fingerprint": "2635833a57cd2f73",
   "source_provenance": {
     "source": "Microsoft Planetary Computer STAC + native Sentinel-2 L2A COG windows",
     "catalog_url": "https://planetarycomputer.microsoft.com/api/stac/v1",

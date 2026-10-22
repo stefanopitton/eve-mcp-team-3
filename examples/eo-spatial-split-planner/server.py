@@ -15,7 +15,7 @@ from core import create_spatial_split, evaluate_autocorrelation
 from imagery import read_local, read_sentinel2
 from mcp.server.fastmcp import FastMCP
 
-SCHEMA_VERSION = "0.3.0"
+SCHEMA_VERSION = "0.4.0"
 REFERENCE_COMMIT_URL = "https://github.com/stefanopitton/lulc-classification/commit/ac7dfc6578c2c408c87398e15073354752bbd32b"
 REFERENCE_IMPLEMENTATION = {
     "repository": "https://github.com/stefanopitton/lulc-classification",
@@ -23,6 +23,7 @@ REFERENCE_IMPLEMENTATION = {
     "commit": REFERENCE_COMMIT_URL.rsplit("/", 1)[-1],
     "source": "src/lulc/validation/autocorrelation.py",
     "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)",
+    "patch_source": "scripts/04_extract_patches.py and src/lulc/data/patches.py",
 }
 mcp = FastMCP("EO Spatial Split Planner", host="0.0.0.0", port=8000, stateless_http=True)
 
@@ -47,7 +48,8 @@ def _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, co
 
 def _publish(values: np.ndarray, profile: dict, provenance: dict, report: dict,
              split_mask: np.ndarray | None = None,
-             unbuffered_split_mask: np.ndarray | None = None) -> dict:
+             unbuffered_split_mask: np.ndarray | None = None,
+             candidate_split_mask: np.ndarray | None = None) -> dict:
     """Persist the complete analysis; retain required per-bin counts in responses."""
     report.update(schema_version=SCHEMA_VERSION, provenance=provenance,
                   reference_implementation=REFERENCE_IMPLEMENTATION)
@@ -84,13 +86,23 @@ def _publish(values: np.ndarray, profile: dict, provenance: dict, report: dict,
             dst.update_tags(labels="0=outside_or_nodata,1=train,2=validation,3=test",
                             pairing="Same validation/test rectangles as buffered mask")
         artifacts["unbuffered_split_mask"] = str(unbuffered_path)
+    if candidate_split_mask is not None:
+        candidate_path = directory / "candidate_split_mask.tif"
+        output_profile.update(dtype="uint8", nodata=0)
+        with rasterio.open(candidate_path, "w", **output_profile) as dst:
+            dst.write(candidate_split_mask, 1)
+            dst.update_tags(labels="0=outside_or_invalid,1=train,2=validation,3=test",
+                            description="Quality-filtered candidates before any symmetric buffer; heldout support differs")
+        artifacts["candidate_split_mask"] = str(candidate_path)
     if "patches" in report:
         patch_path = directory / "patches.json"
         patch_path.write_text(json.dumps(report["patches"], indent=2))
         artifacts["patch_manifest"] = str(patch_path)
     report.update(artifacts=artifacts, run_fingerprint=run_id)
     report_path.write_text(json.dumps(report, indent=2, allow_nan=False))
-    compact = {k: v for k, v in report.items() if k not in {"sq_diff_sum", "patches"}}
+    compact = {k: v for k, v in report.items() if k not in {"sq_diff_sum", "patches", "patch_label_grid", "keep_mask", "seed_diagnostics", "buffer_keep_mask", "quality_keep_mask", "candidate_keep_mask", "buffer_removed_mask"}}
+    if "seed_search" in compact:
+        compact["seed_search"] = {key: value for key, value in compact["seed_search"].items() if key != "candidates"}
     if "autocorrelation" in compact:
         compact["autocorrelation"] = {k: v for k, v in compact["autocorrelation"].items() if k != "sq_diff_sum"}
     return {"status": "ok", **compact}
@@ -103,17 +115,20 @@ def _evaluate(values, profile, provenance, lag_m, parameters, band=None):
 
 
 def _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
-          patch_size_pixels=None, n_patches=None):
+          patch_size_pixels=None, n_patches=None, patch_layout="reference_blocks",
+          block_size_pixels=None, seed_candidates=200, max_nan_fraction=0.5, edge_policy="extend"):
     params = parameters.copy()
     params["n_lags"] = params.pop("n_bins")
     params["max_pairs_per_lag"] = params.pop("n_pairs_per_lag")
     result = create_spatial_split(values, pixel_size_m=abs(profile["transform"].a),
-                                  split_ratios=[0.6, 0.2, 0.2] if split_ratios is None else split_ratios,
+                                  split_ratios=[0.7, 0.1, 0.2] if split_ratios is None else split_ratios,
                                   buffer_m=buffer_m, patch_radius_m=patch_radius_m,
                                   lag_m=lag_m, patch_size_pixels=patch_size_pixels,
-                                  n_patches=n_patches, **params)
+                                  n_patches=n_patches, patch_layout=patch_layout,
+                                  block_size_pixels=block_size_pixels, seed_candidates=seed_candidates,
+                                  max_nan_fraction=max_nan_fraction, edge_policy=edge_policy, **params)
     return _publish(values, profile, provenance, result["report"], result["split_mask"],
-                    result["unbuffered_split_mask"])
+                    result["unbuffered_split_mask"], result.get("candidate_split_mask"))
 
 
 def _error(exc: Exception) -> dict:
@@ -190,27 +205,42 @@ def plan_sentinel2_split(
     min_lag_m: float | None = None, max_lag_m: float = 12_800,
     correlation_threshold: float = 0.1,
     patch_size_pixels: int | list[int] | None = None, n_patches: int | None = None,
+    patch_layout: str = "reference_blocks", block_size_pixels: int | list[int] | None = None,
+    seed_candidates: int = 200, max_nan_fraction: float = 0.5, edge_policy: str = "extend",
 ) -> dict:
-    """Create random two-dimensional rectangular Sentinel-2 train/validation/test patches.
+    """Plan two-dimensional train/validation/test patches using the checkpoint workflow.
 
-    Imagery inputs match evaluate_sentinel2_autocorrelation. buffer_m=None
-    recommends a sampled guard satisfying both empirical rho<threshold and the
-    fitted spherical practical range; unresolved recommendations return an error.
-    An explicit buffer still creates a geometric partition when feasible, but
-    its dependence decision can fail. lag_m optionally evaluates a separate lag
-    of interest. split_ratios defaults to [0.6,0.2,0.2]; patch_radius_m reserves
-    additional footprint space. patch_size_pixels is a side length or [height,
-    width]; n_patches controls sparse, seeded rectangular placements in BOTH
-    axes. Buffers exclude whole patches; retained validation/test rectangles are
-    identical in the exported buffered and paired unbuffered masks. Reports
-    distinguish sampled coverage from buffer loss. Large infeasible guards
-    return errors. Returns masks, patch manifest, variogram evidence and checks.
+    Imagery inputs match evaluate_sentinel2_autocorrelation. split_ratios is
+    [train,validation,test], defaults to [0.7,0.1,0.2], must be positive and sum
+    to one. Requested fractions allocate whole blocks; report realized counts
+    after rounding, quality filtering and buffers. patch_layout='reference_blocks'
+    follows scripts/04_extract_patches.py: shuffle 2D block labels, tile each
+    block into patch_size_pixels [height,width] rectangles, and erode every
+    split interface symmetrically by ceil(buffer / patch span) patches per axis.
+    Only a nearby quality-eligible patch from a DIFFERENT split triggers removal;
+    same-split seams, AOI edges, nodata and quality-rejected regions do not.
+    block_size_pixels must be a multiple of patch size. edge_policy='extend'
+    keeps the full AOI by extending the last blocks and clipping terminal patches.
+    There is no exterior buffer or cropped bottom/right strip. 'crop' is an explicit
+    reference-compatibility option only. seed_candidates ranks seeds 0..N-1 by minimum
+    retained split count, without labels or accuracy-based selection. Class
+    coverage is unverified because this tool receives a continuous raster.
+    max_nan_fraction filters patch validity. n_patches must be omitted for this
+    dense mode. patch_layout='random_rectangles' retains the sparse jittered
+    alternative with n_patches and priority-based whole-patch removal.
+    buffer_m=None measures a guard using the variogram; an explicit guard has
+    its own dependence decision. Symmetric erosion can exceed the requested
+    gap. Paired masks restore training patches only and fix buffered heldouts,
+    so the baseline can already have a one-sided guard. candidate_split_mask
+    shows all quality-filtered patches without any buffer, with other heldouts.
+    Returns requested/realized fractions, masks, records and measured distances.
     """
     try:
         parameters = _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold)
         values, profile, provenance = read_sentinel2(bbox, start_date, end_date, band, item_id, max_cloud_cover)
         return _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
-                     patch_size_pixels, n_patches)
+                     patch_size_pixels, n_patches, patch_layout, block_size_pixels,
+                     seed_candidates, max_nan_fraction, edge_policy)
     except Exception as exc:
         return _error(exc)
 
@@ -223,24 +253,31 @@ def plan_spatial_split(
     min_lag_m: float | None = None, max_lag_m: float = 12_800,
     correlation_threshold: float = 0.1,
     patch_size_pixels: int | list[int] | None = None, n_patches: int | None = None,
+    patch_layout: str = "reference_blocks", block_size_pixels: int | list[int] | None = None,
+    seed_candidates: int = 200, max_nan_fraction: float = 0.5, edge_policy: str = "extend",
 ) -> dict:
-    """Create reproducible spatial partitions for a local continuous EO GeoTIFF.
+    """Plan local EO patches with configurable fractions, default [0.7,0.1,0.2].
 
-    Raster requirements match evaluate_spatial_autocorrelation. Uses only the
-    empirical isotropic variogram and spherical fit for dependence, with the
-    same options as plan_sentinel2_split. Dataset masks/nodata are honored;
-    callers supply the cloud mask. Explicit buffer_m permits a geometry-only
-    split even if the separately reported dependence decision does not pass.
-    patch_size_pixels is a side or [height,width] and n_patches controls seeded
-    sparse random rectangles in both axes. Whole-patch exclusions produce paired
-    buffered/unbuffered masks sharing the same validation/test rectangles.
-    Returns compact JSON and server-local GeoTIFF/JSON artifact paths.
+    Raster requirements match evaluate_spatial_autocorrelation. patch_layout
+    defaults to 'reference_blocks': randomized blocks in both axes, fixed
+    rectangular patch tiles and symmetric whole-patch erosion only near OTHER
+    active splits, following checkpoint script04. Same-split seams, AOI edges,
+    nodata and quality-rejected regions do not trigger buffering. block_size_pixels must be divisible by patch_size_pixels.
+    edge_policy='extend' keeps full AOI coverage, extends terminal blocks and
+    clips terminal patches; it creates no outside buffer. 'crop' is opt-in. seed_candidates ranks
+    seeds0..N-1 by minimum retained patch count, without class labels; report
+    class coverage remains unverified. max_nan_fraction excludes poor patches.
+    See plan_sentinel2_split for full semantics, including rounded block counts,
+    requested versus realized fractions, paired fixed heldouts and the raw
+    candidate mask. 'random_rectangles' enables sparse jittered rectangles and
+    n_patches. Dataset nodata is honored; callers provide cloud-masked values.
     """
     try:
         parameters = _sampling_parameters(seed, n_bins, n_pairs_per_lag, min_lag_m, max_lag_m, correlation_threshold)
         values, profile, provenance = read_local(raster_path, band_index)
         return _plan(values, profile, provenance, buffer_m, split_ratios, patch_radius_m, lag_m, parameters,
-                     patch_size_pixels, n_patches)
+                     patch_size_pixels, n_patches, patch_layout, block_size_pixels,
+                     seed_candidates, max_nan_fraction, edge_policy)
     except Exception as exc:
         return _error(exc)
 

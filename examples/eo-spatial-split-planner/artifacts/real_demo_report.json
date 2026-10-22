@@ -20,16 +20,19 @@
   "patch_counts": {
     "train": {
       "candidate": 7,
+      "quality_candidate": 7,
       "buffered": 4,
       "unbuffered": 7
     },
     "validation": {
       "candidate": 3,
+      "quality_candidate": 3,
       "buffered": 2,
       "unbuffered": 2
     },
     "test": {
       "candidate": 2,
+      "quality_candidate": 2,
       "buffered": 2,
       "unbuffered": 2
     }
@@ -52,6 +55,8 @@
       "split": "validation",
       "retained": false,
       "keep": false,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": false,
       "unbuffered_retained": false,
       "drop_reason": "within_buffer_of_higher_priority_split",
@@ -69,6 +74,8 @@
       "split": "train",
       "retained": false,
       "keep": false,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": false,
       "unbuffered_retained": true,
       "drop_reason": "within_buffer_of_higher_priority_split",
@@ -86,6 +93,8 @@
       "split": "test",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -103,6 +112,8 @@
       "split": "train",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -120,6 +131,8 @@
       "split": "train",
       "retained": false,
       "keep": false,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": false,
       "unbuffered_retained": true,
       "drop_reason": "within_buffer_of_higher_priority_split",
@@ -137,6 +150,8 @@
       "split": "train",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -154,6 +169,8 @@
       "split": "train",
       "retained": false,
       "keep": false,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": false,
       "unbuffered_retained": true,
       "drop_reason": "within_buffer_of_higher_priority_split",
@@ -171,6 +188,8 @@
       "split": "validation",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -188,6 +207,8 @@
       "split": "validation",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -205,6 +226,8 @@
       "split": "train",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -222,6 +245,8 @@
       "split": "train",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -239,6 +264,8 @@
       "split": "test",
       "retained": true,
       "keep": true,
+      "candidate_retained": true,
+      "quality_retained": true,
       "buffered_retained": true,
       "unbuffered_retained": true,
       "drop_reason": null,
@@ -590,7 +617,18 @@
     "Whole-rectangle buffer exclusions and nodata change the retained split ratios; requested ratios apply to the initial candidate patch assignment.",
     "Rectangles are sampled randomly in both spatial directions without class stratification. Repeat across seeds, AOIs, and seasons before model claims; buffer exclusions reduce training support."
   ],
-  "schema_version": "0.3.0",
+  "patch_layout": "random_rectangles",
+  "realized_buffered_patch_split_ratios": {
+    "train": 0.5,
+    "validation": 0.25,
+    "test": 0.25
+  },
+  "realized_paired_unbuffered_patch_split_ratios": {
+    "train": 0.6363636363636364,
+    "validation": 0.18181818181818182,
+    "test": 0.18181818181818182
+  },
+  "schema_version": "0.4.0",
   "provenance": {
     "source": "local_raster",
     "filename": "analysis_band.tif",
@@ -603,7 +641,8 @@
     "branch": "stepit/eve-hackathon-checkpoint",
     "commit": "ac7dfc6578c2c408c87398e15073354752bbd32b",
     "source": "src/lulc/validation/autocorrelation.py",
-    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)"
+    "procedure": "PROCEDURE.md (variogram and spherical-model POC subset)",
+    "patch_source": "scripts/04_extract_patches.py and src/lulc/data/patches.py"
   },
   "artifacts": {
     "split_mask": "split_mask.tif",
@@ -614,7 +653,7 @@
     "variogram_report": "variogram_report.json",
     "scope": "Files beside this report in artifacts/"
   },
-  "run_fingerprint": "d1d8cefe63bfb8de",
+  "run_fingerprint": "d0ce29a3a4deee89",
   "source_provenance": {
     "source": "Microsoft Planetary Computer STAC + native Sentinel-2 L2A COG windows",
     "catalog_url": "https://planetarycomputer.microsoft.com/api/stac/v1",
@@ -697,16 +736,19 @@
       "patch_counts": {
         "train": {
           "candidate": 7,
+          "quality_candidate": 7,
           "buffered": 7,
           "unbuffered": 7
         },
         "validation": {
           "candidate": 3,
+          "quality_candidate": 3,
           "buffered": 3,
           "unbuffered": 3
         },
         "test": {
           "candidate": 2,
+          "quality_candidate": 2,
           "buffered": 2,
           "unbuffered": 2
         }
@@ -770,16 +812,19 @@
       "patch_counts": {
         "train": {
           "candidate": 7,
+          "quality_candidate": 7,
           "buffered": 5,
           "unbuffered": 7
         },
         "validation": {
           "candidate": 3,
+          "quality_candidate": 3,
           "buffered": 3,
           "unbuffered": 3
         },
         "test": {
           "candidate": 2,
+          "quality_candidate": 2,
           "buffered": 2,
           "unbuffered": 2
         }
@@ -843,16 +888,19 @@
       "patch_counts": {
         "train": {
           "candidate": 7,
+          "quality_candidate": 7,
           "buffered": 4,
           "unbuffered": 7
         },
         "validation": {
           "candidate": 3,
+          "quality_candidate": 3,
           "buffered": 2,
           "unbuffered": 2
         },
         "test": {
           "candidate": 2,
+          "quality_candidate": 2,
           "buffered": 2,
           "unbuffered": 2
         }
@@ -916,16 +964,19 @@
       "patch_counts": {
         "train": {
           "candidate": 7,
+          "quality_candidate": 7,
           "buffered": 1,
           "unbuffered": 7
         },
         "validation": {
           "candidate": 3,
+          "quality_candidate": 3,
           "buffered": 1,
           "unbuffered": 1
         },
         "test": {
           "candidate": 2,
+          "quality_candidate": 2,
           "buffered": 2,
           "unbuffered": 2
         }

@@ -405,7 +405,7 @@ def _plot_comparison(values, labels, valid, unbuffered, buffered, predictions, r
     removed = (unbuffered == 1) & (buffered == 0)
     if np.any(removed) and not np.all(removed):
         axes[0, 2].contour(removed, levels=[0.5], colors="#ce4b42", linewidths=0.5)
-    axes[0, 2].set_title(f"Random rectangles; {report['buffer_m']:,.0f} m guard")
+    axes[0, 2].set_title(f"Retained rectangle patches; {report['buffer_m']:,.0f} m requested guard")
     for axis, condition in zip(axes[1, :2], ("without_buffer", "with_buffer"), strict=True):
         prediction = predictions[condition]
         axis.imshow(np.ma.masked_where(prediction < 0, prediction), cmap=palette,
@@ -436,18 +436,24 @@ def _plot_comparison(values, labels, valid, unbuffered, buffered, predictions, r
 
 
 def _plot_test_patch_montage(values, labels, valid, records, buffered, predictions, report, path):
-    """Show every test rectangle, preserving a fixed, sorted and complete sample."""
+    """Show up to 16 deterministic, evenly spaced test rectangles, without score selection."""
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
 
     patches = sorted(_active_patches(records, buffered, valid, "test"), key=lambda patch: patch["patch_id"])
+    total_test_patches = len(patches)
+    if total_test_patches > 16:
+        patches = [patches[int(index)] for index in np.linspace(0, total_test_patches - 1, 16, dtype=int)]
+    report["montage_sampling"] = {"total_test_patches": total_test_patches,
+                                  "displayed_patch_ids": [patch["patch_id"] for patch in patches],
+                                  "selection": "up to 16 evenly spaced indices in sorted test patch IDs; no score selection"}
     conditions = ["without_buffer", "with_buffer"]
     if "size_matched_without_buffer" in predictions:
         conditions.append("size_matched_without_buffer")
     headers = ["Sentinel-2\nNIR / red / green", "WorldCover 2021\nreference",
-               "No buffer\nprediction", f"{report['buffer_m'] / 1000:.2f} km buffer\nprediction"]
+               "No TRAIN erosion\nprediction", f"{report['buffer_m'] / 1000:.2f} km buffer\nprediction"]
     if len(conditions) == 3:
-        headers.append("Size matched, no buffer\nprediction")
+        headers.append("Size matched, no TRAIN erosion\nprediction")
     colors = ["#57a345", "#d16b52", "#3888c2"]
     if len(report["class_names"]) > len(colors):
         colors = list(plt.get_cmap("turbo")(np.linspace(0, 1, len(report["class_names"]))))
@@ -476,7 +482,7 @@ def _plot_test_patch_montage(values, labels, valid, records, buffered, predictio
         for axis in axes[row]:
             axis.set_xticks([])
             axis.set_yticks([])
-    figure.suptitle(f"All {len(patches)} fixed held-out test rectangles, sorted by patch ID", fontsize=15)
+    figure.suptitle(f"{len(patches)} of {total_test_patches} fixed test rectangles; deterministic sample, metrics use all", fontsize=15)
     figure.supxlabel("Reference and prediction colors: vegetation = green; built-up = terracotta; water = blue. Excluded pixels = grey.", fontsize=10)
     figure.savefig(path, dpi=140)
     plt.close(figure)
